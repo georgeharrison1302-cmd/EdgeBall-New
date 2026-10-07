@@ -32,6 +32,20 @@ export type GradedTip = {
   profit: number | null;
 };
 
+export type ModelMarketLedger = {
+  family: string;
+  label: string;
+  tips: number;
+  settled: number;
+  pending: number;
+  wins: number;
+  losses: number;
+  hitRate: number | null;
+  profit: number;
+  roi: number | null;
+  avgEdge: number | null;
+};
+
 export type ModelGradingSummary = {
   tipCount: number;
   settledCount: number;
@@ -42,6 +56,7 @@ export type ModelGradingSummary = {
   unitStake: number;
   totalProfit: number;
   roi: number | null;
+  markets: ModelMarketLedger[];
   tips: GradedTip[];
 };
 
@@ -263,8 +278,79 @@ export async function loadModelGrading(): Promise<ModelGradingSummary> {
     unitStake: UNIT_STAKE,
     totalProfit,
     roi: stake > 0 ? totalProfit / stake : null,
+    markets: buildMarketLedgers(tips),
     tips: tips.slice(0, 80),
   };
+}
+
+const FAMILY_ORDER = [
+  "match_winner",
+  "goals_ou",
+  "btts",
+  "team_cards",
+  "player_cards",
+  "fouls",
+  "corners",
+  "other",
+] as const;
+
+const FAMILY_LABELS: Record<string, string> = {
+  match_winner: "Match Selection",
+  goals_ou: "Over/Under Goals",
+  btts: "BTTS",
+  team_cards: "Team Cards",
+  player_cards: "Player Cards",
+  fouls: "Fouls",
+  corners: "Corners",
+  other: "Other",
+};
+
+function marketFamily(tip: GradedTip): string {
+  const name = tip.market.toLowerCase();
+  if (tip.source === "card_poisson" || /booked|player.*card/.test(name)) return "player_cards";
+  if (/match winner|1x2/.test(name)) return "match_winner";
+  if (/over|under|goals|total/.test(name)) return "goals_ou";
+  if (/btts|both teams/.test(name)) return "btts";
+  if (/team card|cards/.test(name)) return "team_cards";
+  if (/foul/.test(name)) return "fouls";
+  if (/corner/.test(name)) return "corners";
+  return "other";
+}
+
+function buildMarketLedgers(tips: GradedTip[]): ModelMarketLedger[] {
+  const buckets = new Map<string, GradedTip[]>();
+  for (const tip of tips) {
+    const family = marketFamily(tip);
+    const list = buckets.get(family) ?? [];
+    list.push(tip);
+    buckets.set(family, list);
+  }
+  const ledgers: ModelMarketLedger[] = [];
+  for (const [family, list] of buckets) {
+    const settled = list.filter((tip) => tip.status === "won" || tip.status === "lost");
+    const wins = settled.filter((tip) => tip.status === "won").length;
+    const profit = settled.reduce((sum, tip) => sum + (tip.profit ?? 0), 0);
+    const edgeSum = list.reduce((sum, tip) => sum + tip.edgePct, 0);
+    ledgers.push({
+      family,
+      label: FAMILY_LABELS[family] ?? family,
+      tips: list.length,
+      settled: settled.length,
+      pending: list.length - settled.length,
+      wins,
+      losses: settled.length - wins,
+      hitRate: settled.length ? wins / settled.length : null,
+      profit,
+      roi: settled.length ? profit / settled.length : null,
+      avgEdge: list.length ? edgeSum / list.length : null,
+    });
+  }
+  ledgers.sort(
+    (a, b) =>
+      FAMILY_ORDER.indexOf(a.family as (typeof FAMILY_ORDER)[number]) -
+      FAMILY_ORDER.indexOf(b.family as (typeof FAMILY_ORDER)[number]),
+  );
+  return ledgers;
 }
 
 function percentToUnit(value: string | null): number | null {

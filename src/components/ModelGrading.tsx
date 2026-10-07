@@ -37,6 +37,78 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
         tab.
       </p>
 
+      {data.markets.length > 0 ? (
+        <section>
+          <h3 className="text-sm font-bold tracking-wide text-[#0f172a] uppercase">
+            Per-market ledger
+          </h3>
+          <div className="mt-3 overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
+            <table className="w-full min-w-[40rem] text-left text-sm">
+              <thead>
+                <tr className="border-b border-[#e2e8f0] text-[#64748b]">
+                  <th className="px-3 py-2 font-medium">Market</th>
+                  <th className="px-3 py-2 font-medium">Tips</th>
+                  <th className="px-3 py-2 font-medium">Settled</th>
+                  <th className="px-3 py-2 font-medium">W-L</th>
+                  <th className="px-3 py-2 font-medium">Hit rate</th>
+                  <th className="px-3 py-2 font-medium">Avg edge</th>
+                  <th className="px-3 py-2 font-medium">P/L</th>
+                  <th className="px-3 py-2 font-medium">ROI</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.markets.map((market) => (
+                  <tr key={market.family} className="border-b border-[#f1f5f9]">
+                    <td className="px-3 py-2 font-semibold text-[#0f172a]">{market.label}</td>
+                    <td className="px-3 py-2 tabular-nums text-[#0f172a]">{market.tips}</td>
+                    <td className="px-3 py-2 tabular-nums text-[#64748b]">
+                      {market.settled}
+                      {market.pending > 0 ? ` · ${market.pending} pending` : ""}
+                    </td>
+                    <td className="px-3 py-2 tabular-nums text-[#0f172a]">
+                      {market.settled === 0 ? "—" : `${market.wins}-${market.losses}`}
+                    </td>
+                    <td className="px-3 py-2 tabular-nums text-[#0f172a]">
+                      {market.hitRate == null ? "—" : `${(market.hitRate * 100).toFixed(0)}%`}
+                    </td>
+                    <td className="px-3 py-2 tabular-nums text-[#64748b]">
+                      {market.avgEdge == null ? "—" : `+${market.avgEdge.toFixed(1)}%`}
+                    </td>
+                    <td
+                      className={`px-3 py-2 font-semibold tabular-nums ${
+                        market.settled === 0
+                          ? "text-[#64748b]"
+                          : market.profit >= 0
+                            ? "text-[#2563eb]"
+                            : "text-red-600"
+                      }`}
+                    >
+                      {market.settled === 0 ? "—" : formatMoney(market.profit, "GBP")}
+                    </td>
+                    <td
+                      className={`px-3 py-2 font-semibold tabular-nums ${
+                        market.roi == null
+                          ? "text-[#64748b]"
+                          : market.roi >= 0
+                            ? "text-[#2563eb]"
+                            : "text-red-600"
+                      }`}
+                    >
+                      {market.roi == null ? "—" : `${(market.roi * 100).toFixed(1)}%`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-[#94a3b8]">
+            Markets that stay negative over a meaningful sample get re-priced or retired — this table
+            is the tuning board. Goals, BTTS, team cards and fouls columns populate as those tip
+            generators come online.
+          </p>
+        </section>
+      ) : null}
+
       {data.tips.length === 0 ? (
         <EmptyReason
           variant="panel"
