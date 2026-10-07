@@ -1,0 +1,44 @@
+# API-Football Error & Pagination Rules
+A 200 can still have `results: 0` or `response: []`. That is success with no data. Log `Data Not Yet Available` and do not overwrite stored rows.
+429 is a rate limit. Back off. Do not tight-loop.
+499 and 500: retry once after a short wait. Do not retry a daily-limit error.
+In development, log the full `errors` array.
+Follow `paging.total` from page 1. Do not request later pages when page 1 is empty.
+`/players` returns 20 per page. `/odds` returns 10 per page.
+
+# API-Football Timezone & Database Rule
+CRITICAL: We are using Supabase as our backend. Therefore, we MUST NEVER pass dynamic user timezones to the API-Football endpoints.
+1. The backend API wrapper must always request data in UTC (by explicitly omitting the `timezone` parameter).
+2. Supabase must store all dates (like `fixture.date`) as `timestamptz` in UTC.
+3. Timezone conversion must ONLY happen on the frontend (client-side in Framer/Wix) using the user's local timezone.
+
+# API-Football Reference Data & Caching Rules
+1. Reference endpoints (`/timezone`, `/countries`, `/leagues`, `/teams`) MUST NEVER be called dynamically by the frontend or continuously in daily syncs.
+2. We must build dedicated "Seed Scripts" to fetch this data ONCE and store it permanently in Supabase.
+3. All future API calls for fixtures, odds, and statistics must query our local Supabase database to retrieve the necessary `league_id` or `team_id` rather than searching the API by string names.
+
+# API-Football Seasons & Formatting Rule
+1. API-Football represents a season strictly by its STARTING year (e.g., the 2026/2027 European season is passed as the 4-digit integer `2026`).
+2. We MUST NEVER pass strings like "2026/2027" or "26/27" to API-Football endpoints.
+3. Because summer leagues (MLS) and winter leagues (EPL) have different start dates, the season year must be taken from the stored season for that league. Do not calculate it from today's date.
+
+# API-Football Teams & Relational Integrity Rule
+1. Team IDs are permanent and cross-competition. The backend MUST use an `upsert` (insert or update on conflict) operation on the Supabase `teams` table to prevent duplicating teams that qualify for multiple leagues.
+2. The API returns Venue data nested inside the Team response. The backend MUST separate this into a standalone `venues` table, and use a `venue_id` foreign key in the `teams` table. (Multiple teams can share the same venue ID).
+3. Teams must be mapped to Leagues using a many-to-many junction table (`league_teams`) because a single team ID participates in multiple leagues simultaneously.
+
+# API-Football Pre-Match Odds & Schema Rule
+1. The `/odds` response is deeply nested. The backend MUST NOT create a separate row for every single bet value (e.g., Home, Draw, Away).
+2. The Supabase `odds` table must use this structure: `fixture_id`, `bookmaker_id`, `market_id`, `market_name`, `values` JSONB, and `update_at` timestamptz. Do not create a separate row for every betting value.
+3. The Odds Sync script MUST check the `leagues.coverage.odds` flag in our database before fetching odds for any fixture. If false, skip the fixture.
+4. Pre-match odds change frequently. The script must only fetch odds for fixtures occurring within the next 48 hours to preserve API quota.
+
+# Referee Tracking & Aggregation Rules
+1. Referee names in `fixtures.referee` often contain country suffixes (e.g., "A. Taylor, England"). The backend MUST sanitize and normalize the referee name before upserting or joining.
+2. Maintain a `referee_stats` summary table in Supabase rather than calculating raw sums on runtime reads.
+3. Only tag an active card edge if the referee has officiated at least 10 matches in the current sample to avoid small-sample bias.
+
+# Referee Edge Alert Rule
+1. When fetching upcoming fixtures, the backend MUST join the `referee_stats` table.
+2. A fixture should be flagged with `card_edge: true` ONLY IF the assigned referee has `matches_officiated >= 10` AND `avg_yellow_cards >= 5.50`.
+3. The API payload must append a `betting_insights` JSON object containing the referee's exact average to justify the flag to the user.

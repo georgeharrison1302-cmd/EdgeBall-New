@@ -1,0 +1,19 @@
+---
+description: Strict data architecture and API fetching rules for EdgeBall
+alwaysApply: true
+---
+
+# Data Architecture & API Constraints
+
+You are working on EdgeBall, a football betting analysis platform. You must strictly adhere to the following data architecture rules:
+
+## Strict Separation of Concerns
+
+- Odds-API.io is the ONLY permitted source for betting odds, prices, and market lines (Match Winner, BTTS, Totals, Player Props, Cards).
+- API-Football is strictly reserved for historical statistics, fixture schedules, team profiles, and referee data required for the Poisson distribution model.
+
+## Hard Constraints
+
+- NEVER write fetch requests or backend workers that pull betting odds from API-Football.
+- NEVER generate, mock, or hallucinate synthetic odds for testing. If odds are missing, gracefully handle the empty state (e.g., "No Book Odds").
+- Any script, component, or worker dealing with betting odds must strictly query our Supabase `prematch_odds` and `live_odds` tables, which are populated exclusively by the Odds-API.io workers.

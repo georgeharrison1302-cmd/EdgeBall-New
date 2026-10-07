@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f8fafc;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --cobalt: #2563eb;
+  --cobalt-dark: #1d4ed8;
+  --neon: #22d3ee;
+  --neon-edge: #34d399;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+}
+
+tbody tr:hover td {
+  background: #f8fafc;
+}
+
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

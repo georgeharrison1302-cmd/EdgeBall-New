@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EdgeBall Prop Desk Preview</title>
+<style>body{margin:0;background:#eef3f9;}</style>
+</head>
+<body>
+<style>
+  #prop-desk-preview {
+    --bg: #eef3f9;
+    --card: #ffffff;
+    --line: #e2e8f0;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --blue: #2563eb;
+    --blue-soft: #eff6ff;
+    --hit: #10b981;
+    --miss: #f87171;
+    font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  #prop-desk-preview * { box-sizing: border-box; }
+  #prop-desk-preview .shell {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    min-height: 620px;
+  }
+  @media (max-width: 820px) {
+    #prop-desk-preview .shell { grid-template-columns: 1fr; }
+  }
+  #prop-desk-preview .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+  }
+  #prop-desk-preview .brand {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  #prop-desk-preview .brand span { color: var(--blue); }
+  #prop-desk-preview .top-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  #prop-desk-preview .top-tabs span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 6px 10px;
+    border-radius: 999px;
+  }
+  #prop-desk-preview .top-tabs .on {
+    background: var(--blue-soft);
+    color: var(--blue);
+  }
+  #prop-desk-preview .side {
+    background: var(--card);
+    border-right: 1px solid var(--line);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  @media (max-width: 820px) {
+    #prop-desk-preview .side { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+  #prop-desk-preview .side h3 {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  #prop-desk-preview .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #prop-desk-preview .chip {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #prop-desk-preview .chip[aria-pressed="true"] {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+    color: var(--blue);
+  }
+  #prop-desk-preview .date-row {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  #prop-desk-preview .date {
+    flex: 0 0 auto;
+    min-width: 72px;
+    text-align: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: #fff;
+  }
+  #prop-desk-preview .date.on {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: #fff;
+  }
+  #prop-desk-preview .date small {
+    display: block;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  #prop-desk-preview .comp {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #prop-desk-preview .comp label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  #prop-desk-preview .comp .meta {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--faint);
+  }
+  #prop-desk-preview .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  #prop-desk-preview .stat-btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+  }
+  #prop-desk-preview .stat-btn[aria-pressed="true"] {
+    border-color: var(--blue);
+    box-shadow: inset 0 0 0 1px var(--blue);
+    background: var(--blue-soft);
+    color: var(--blue);
+  }
+  #prop-desk-preview .stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #prop-desk-preview .stepper button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  #prop-desk-preview .stepper output {
+    min-width: 28px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  #prop-desk-preview .range-wrap label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  #prop-desk-preview .range-wrap input[type="range"] { width: 100%; }
+  #prop-desk-preview .toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  #prop-desk-preview .main {
+    padding: 16px 18px 20px;
+    min-width: 0;
+  }
+  #prop-desk-preview .main-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  #prop-desk-preview .main-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  #prop-desk-preview .linkish {
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+  }
+  #prop-desk-preview .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  #prop-desk-preview .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  #prop-desk-preview .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  #prop-desk-preview .hint {
+    border-radius: 10px;
+    background: var(--blue-soft);
+    color: #1e40af;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  #prop-desk-preview .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card);
+  }
+  #prop-desk-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+  }
+  #prop-desk-preview th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 12px 12px 10px;
+    border-bottom: 1px solid var(--line);
+    background: #f8fafc;
+  }
+  #prop-desk-preview th.num, #prop-desk-preview td.num { text-align: right; }
+  #prop-desk-preview td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  #prop-desk-preview tr:last-child td { border-bottom: 0; }
+  #prop-desk-preview .player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  #prop-desk-preview .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: var(--blue);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex: 0 0 auto;
+  }
+  #prop-desk-preview .pname {
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  #prop-desk-preview .pos {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--muted);
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 1px 5px;
+    vertical-align: middle;
+  }
+  #prop-desk-preview .pmatch {
+    margin-top: 3px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  #prop-desk-preview .hit {
+    display: grid;
+    gap: 4px;
+    min-width: 88px;
+  }
+  #prop-desk-preview .hit strong { font-size: 13px; font-weight: 800; }
+  #prop-desk-preview .bar {
+    height: 6px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+  }
+  #prop-desk-preview .bar > i {
+    display: block;
+    height: 100%;
+    background: var(--hit);
+    border-radius: inherit;
+  }
+  #prop-desk-preview .form {
+    display: flex;
+    gap: 4px;
+  }
+  #prop-desk-preview .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+  }
+  #prop-desk-preview .dot.hit { background: var(--hit); }
+  #prop-desk-preview .dot.miss { background: var(--miss); }
+  #prop-desk-preview .odds {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    border-radius: 999px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 7px 12px;
+    border: 0;
+    cursor: pointer;
+  }
+  #prop-desk-preview .odds:disabled,
+  #prop-desk-preview .odds.none {
+    background: #fff;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    cursor: default;
+  }
+  #prop-desk-preview .empty {
+    display: none;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  #prop-desk-preview .empty.show { display: block; }
+  #prop-desk-preview .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>
+
+<div id="prop-desk-preview">
+  <p class="sr-only">EdgeBall player props desk preview with sidebar filters and a results table. Change stat, threshold, and hit rate to filter illustrative rows.</p>
+
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">Edge<span>Ball</span> · Prop Desk</div>
+      <div class="top-tabs" aria-hidden="true">
+        <span>Lines</span>
+        <span class="on">Player Props</span>
+        <span>Collisions</span>
+      </div>
+    </div>
+
+    <aside class="side" aria-label="Filters">
+      <div>
+        <h3>Best picks today</h3>
+        <div class="chip-row" id="best-picks">
+          <button type="button" class="chip" data-stat="fouls" aria-pressed="true">Fouls</button>
+          <button type="button" class="chip" data-stat="sot" aria-pressed="false">Shots on Target</button>
+          <button type="button" class="chip" data-stat="shots" aria-pressed="false">Shots</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>Select dates</h3>
+        <div class="date-row" aria-hidden="true">
+          <div class="date on">Today<small>06 Oct</small></div>
+          <div class="date">Wed<small>07 Oct</small></div>
+          <div class="date">Thu<small>08 Oct</small></div>
+          <div class="date">Fri<small>09 Oct</small></div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Competitions</h3>
+        <div class="comp">
+          <label><input type="checkbox" checked data-comp="Premier League" /> Premier League <span class="meta">Fixtures 8/8</span></label>
+          <label><input type="checkbox" checked data-comp="La Liga" /> La Liga <span class="meta">Fixtures 4/4</span></label>
+          <label><input type="checkbox" data-comp="Serie A" /> Serie A <span class="meta">Fixtures 0/6</span></label>
+        </div>
+      </div>
+
+      <div>
+        <h3>Pick a stat</h3>
+        <div class="stat-grid" id="stat-grid">
+          <button type="button" class="stat-btn" data-stat="cards" aria-pressed="false">Yellow Cards</button>
+          <button type="button" class="stat-btn" data-stat="sot" aria-pressed="false">Shots On Target</button>
+          <button type="button" class="stat-btn" data-stat="shots" aria-pressed="false">Shots</button>
+          <button type="button" class="stat-btn" data-stat="fouls" aria-pressed="true">Fouls</button>
+          <button type="button" class="stat-btn" data-stat="tackles" aria-pressed="false">Tackles</button>
+          <button type="button" class="stat-btn" data-stat="drawn" aria-pressed="false">Fouls Drawn</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>At least</h3>
+        <div class="stepper">
+          <button type="button" id="thr-down" aria-label="Decrease threshold">−</button>
+          <output id="threshold" for="thr-down thr-up">2</output>
+          <button type="button" id="thr-up" aria-label="Increase threshold">+</button>
+        </div>
+      </div>
+
+      <div class="range-wrap">
+        <label>
+          <span>Min hit rate · <span id="hitrate-label">60%</span></span>
+          <input id="hitrate" type="range" min="40" max="100" step="10" value="60" />
+        </label>
+      </div>
+
+      <label class="toggle">
+        <input id="oddsonly" type="checkbox" checked />
+        Odds only
+      </label>
+    </aside>
+
+    <section class="main" aria-label="Results">
+      <div class="main-head">
+        <div>
+          <h2>Results</h2>
+        </div>
+        <button type="button" class="linkish">Copy link</button>
+      </div>
+
+      <div class="filters" id="chips"></div>
+
+      <div class="actions">
+        <label><input id="add-all" type="checkbox" /> Add all to Bet Slip (<span id="priced-count">0</span>)</label>
+      </div>
+
+      <div class="hint">Tap an odds pill to add a priced selection. Unpriced thresholds show No Book Odds.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Hit Rate</th>
+              <th class="num">Total</th>
+              <th class="num">Avg</th>
+              <th>Form</th>
+              <th class="num">Odds</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty">No players clear this stat, threshold, and hit-rate filter.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById("prop-desk-preview");
+  if (!root) return;
+
+  var STATS = {
+    fouls: { label: "Fouls", market: "Fouls Committed", pricedLine: 2 },
+    sot: { label: "Shots on Target", market: "Shots on Target", pricedLine: 1 },
+    shots: { label: "Shots", market: "Total Shots", pricedLine: 2 },
+    cards: { label: "Yellow Cards", market: "To Be Carded", pricedLine: 1 },
+    tackles: { label: "Tackles", market: "Tackles", pricedLine: 2 },
+    drawn: { label: "Fouls Drawn", market: "Fouls Drawn", pricedLine: 2 }
+  };
+
+  var PLAYERS = [
+    { id: 1, name: "Bruno Fernandes", pos: "MID", match: "Man United vs Brentford · 20:00", comp: "Premier League", initials: "BF",
+      forms: { fouls: [3, 2, 4, 1, 3], sot: [1, 0, 2, 1, 1], shots: [3, 2, 4, 1, 3], cards: [1, 0, 0, 1, 0], tackles: [2, 3, 1, 2, 2], drawn: [2, 1, 3, 2, 1] },
+      odds: { fouls: 1.72, sot: 1.91, shots: 1.80, cards: 2.40, tackles: 1.95, drawn: 2.10 } },
+    { id: 2, name: "João Palhinha", pos: "MID", match: "Bayern vs Leverkusen · 17:30", comp: "La Liga", initials: "JP",
+      forms: { fouls: [4, 3, 2, 4, 3], sot: [0, 1, 0, 0, 1], shots: [1, 2, 1, 0, 2], cards: [1, 1, 0, 1, 1], tackles: [4, 3, 5, 2, 3], drawn: [1, 0, 1, 2, 1] },
+      odds: { fouls: 1.57, sot: null, shots: null, cards: 1.95, tackles: 1.66, drawn: null } },
+    { id: 3, name: "Bukayo Saka", pos: "FWD", match: "Arsenal vs Fulham · 15:00", comp: "Premier League", initials: "BS",
+      forms: { fouls: [1, 2, 0, 1, 2], sot: [2, 1, 2, 1, 1], shots: [4, 3, 5, 2, 3], cards: [0, 0, 1, 0, 0], tackles: [1, 0, 1, 2, 1], drawn: [3, 2, 2, 4, 3] },
+      odds: { fouls: 2.20, sot: 1.66, shots: 1.74, cards: null, tackles: null, drawn: 1.83 } },
+    { id: 4, name: "Casemiro", pos: "MID", match: "Man United vs Brentford · 20:00", comp: "Premier League", initials: "CA",
+      forms: { fouls: [2, 3, 2, 1, 2], sot: [0, 0, 1, 0, 0], shots: [1, 0, 2, 1, 0], cards: [1, 0, 1, 1, 0], tackles: [3, 2, 4, 3, 2], drawn: [1, 1, 0, 1, 2] },
+      odds: { fouls: 1.83, sot: null, shots: null, cards: 2.10, tackles: 1.70, drawn: null } },
+    { id: 5, name: "Alexis Mac Allister", pos: "MID", match: "Liverpool vs Crystal Palace · 12:30", comp: "Premier League", initials: "AM",
+      forms: { fouls: [2, 1, 3, 2, 0], sot: [1, 1, 0, 2, 1], shots: [2, 3, 1, 2, 2], cards: [0, 1, 0, 0, 1], tackles: [2, 1, 2, 3, 1], drawn: [2, 2, 1, 3, 2] },
+      odds: { fouls: 1.95, sot: 1.80, shots: 1.88, cards: 3.40, tackles: 2.05, drawn: 1.91 } },
+    { id: 6, name: "Federico Valverde", pos: "MID", match: "Real Madrid vs Villarreal · 18:00", comp: "La Liga", initials: "FV",
+      forms: { fouls: [1, 0, 2, 1, 1], sot: [1, 2, 1, 0, 2], shots: [3, 2, 4, 2, 3], cards: [0, 0, 0, 1, 0], tackles: [2, 1, 3, 2, 2], drawn: [1, 2, 1, 0, 1] },
+      odds: { fouls: null, sot: 1.74, shots: 1.66, cards: null, tackles: 1.91, drawn: 2.30 } }
+  ];
+
+  var state = { stat: "fouls", threshold: 2, hitrate: 60, oddsonly: true };
+
+  var thresholdEl = root.querySelector("#threshold");
+  var hitrateEl = root.querySelector("#hitrate");
+  var hitrateLabel = root.querySelector("#hitrate-label");
+  var oddsonlyEl = root.querySelector("#oddsonly");
+  var chipsEl = root.querySelector("#chips");
+  var rowsEl = root.querySelector("#rows");
+  var emptyEl = root.querySelector("#empty");
+  var pricedCountEl = root.querySelector("#priced-count");
+  var addAllEl = root.querySelector("#add-all");
+
+  function selectedComps() {
+    return Array.prototype.map.call(
+      root.querySelectorAll('.comp input[type="checkbox"]:checked'),
+      function (input) { return input.getAttribute("data-comp"); }
+    );
+  }
+
+  function setStat(stat) {
+    state.stat = stat;
+    Array.prototype.forEach.call(root.querySelectorAll("[data-stat]"), function (btn) {
+      btn.setAttribute("aria-pressed", btn.getAttribute("data-stat") === stat ? "true" : "false");
+    });
+    var meta = STATS[stat];
+    if (meta && (stat === "sot" || stat === "cards")) {
+      state.threshold = meta.pricedLine;
+      thresholdEl.textContent = String(state.threshold);
+    }
+    render();
+  }
+
+  function deskForm(counts, threshold) {
+    var hits = 0;
+    var total = 0;
+    for (var i = 0; i < counts.length; i++) {
+      total += counts[i];
+      if (counts[i] >= threshold) hits += 1;
+    }
+    var n = counts.length || 1;
+    return {
+      counts: counts,
+      hits: hits,
+      hitPct: Math.round((hits / n) * 100),
+      total: total,
+      avg: total / n
+    };
+  }
+
+  function renderChips() {
+    var meta = STATS[state.stat];
+    var parts = [
+      state.threshold + "+ " + meta.label,
+      "Last 5 games",
+      state.hitrate + "% Hit Rate"
+    ];
+    if (state.oddsonly) parts.push("Odds only");
+    chipsEl.innerHTML = parts.map(function (part) {
+      return '<span class="tag">' + part + "</span>";
+    }).join("");
+  }
+
+  function renderRows() {
+    var comps = selectedComps();
+    var meta = STATS[state.stat];
+    var visible = [];
+    var priced = 0;
+
+    PLAYERS.forEach(function (player) {
+      if (comps.indexOf(player.comp) === -1) return;
+      var counts = player.forms[state.stat] || [];
+      var form = deskForm(counts, state.threshold);
+      if (form.hitPct < state.hitrate) return;
+      var odd = player.odds[state.stat];
+      var pricedForThreshold = odd != null && state.threshold === meta.pricedLine;
+      if (state.oddsonly && !pricedForThreshold) return;
+      visible.push({ player: player, form: form, odd: pricedForThreshold ? odd : null });
+      if (pricedForThreshold) priced += 1;
+    });
+
+    visible.sort(function (a, b) {
+      return b.form.hitPct - a.form.hitPct || b.form.avg - a.form.avg;
+    });
+
+    pricedCountEl.textContent = String(priced);
+    addAllEl.disabled = priced === 0;
+    if (priced === 0) addAllEl.checked = false;
+
+    if (visible.length === 0) {
+      rowsEl.innerHTML = "";
+      emptyEl.classList.add("show");
+      return;
+    }
+    emptyEl.classList.remove("show");
+
+    rowsEl.innerHTML = visible.map(function (row) {
+      var formHtml = row.form.counts.map(function (count) {
+        var klass = count >= state.threshold ? "hit" : "miss";
+        return '<span class="dot ' + klass + '">' + count + "</span>";
+      }).join("");
+      var oddsHtml = row.odd != null
+        ? '<button type="button" class="odds">@ ' + row.odd.toFixed(2) + "</button>"
+        : '<button type="button" class="odds none" disabled>No Book Odds</button>';
+      return (
+        "<tr>" +
+          '<td><div class="player"><div class="avatar">' + row.player.initials + '</div><div>' +
+            '<div class="pname">' + row.player.name + '<span class="pos">' + row.player.pos + "</span></div>" +
+            '<div class="pmatch">' + row.player.match + "</div>" +
+          "</div></div></td>" +
+          '<td><div class="hit"><strong>' + row.form.hitPct + '%</strong><div class="bar"><i style="width:' + row.form.hitPct + '%"></i></div></div></td>' +
+          '<td class="num">' + row.form.total + "</td>" +
+          '<td class="num">' + row.form.avg.toFixed(2) + "</td>" +
+          '<td><div class="form">' + formHtml + "</div></td>" +
+          '<td class="num">' + oddsHtml + "</td>" +
+        "</tr>"
+      );
+    }).join("");
+  }
+
+  function render() {
+    renderChips();
+    renderRows();
+  }
+
+  Array.prototype.forEach.call(root.querySelectorAll("[data-stat]"), function (btn) {
+    btn.addEventListener("click", function () {
+      setStat(btn.getAttribute("data-stat"));
+    });
+  });
+
+  root.querySelector("#thr-down").addEventListener("click", function () {
+    state.threshold = Math.max(1, state.threshold - 1);
+    thresholdEl.textContent = String(state.threshold);
+    render();
+  });
+  root.querySelector("#thr-up").addEventListener("click", function () {
+    state.threshold = Math.min(5, state.threshold + 1);
+    thresholdEl.textContent = String(state.threshold);
+    render();
+  });
+
+  hitrateEl.addEventListener("input", function () {
+    state.hitrate = Number(hitrateEl.value);
+    hitrateLabel.textContent = state.hitrate + "%";
+    render();
+  });
+
+  oddsonlyEl.addEventListener("change", function () {
+    state.oddsonly = oddsonlyEl.checked;
+    render();
+  });
+
+  Array.prototype.forEach.call(root.querySelectorAll(".comp input"), function (input) {
+    input.addEventListener("change", render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

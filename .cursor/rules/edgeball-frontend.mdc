@@ -1,0 +1,74 @@
+---
+description: EdgeBall A* Design & UX — sportsbook patterns, no naked stats, light theme, graceful empties
+alwaysApply: true
+---
+
+# EdgeBall A* Design & UX Rules
+
+Product is a statistical betting engine, not a data-table SaaS. Prefer real stored data; never invent mocks or synthetic prices.
+
+## 1. Never show naked numbers
+
+Every raw stat must carry betting context.
+
+```tsx
+// ❌ BAD — rate with no bet framing
+<span>{foulsPer90.toFixed(1)} fouls/90</span>
+
+// ✅ GOOD — proof beside selection / model / form
+<span>{foulsPer90.toFixed(1)} fouls/90</span>
+<HitRateStrip values={form} thresholdLabel="Carded" />
+<PoissonVsBook modelProb={modelProb} decimalOdds={odds} edgePct={edgePct} />
+```
+
+- Odds → show model true probability next to them (`PoissonVsBook` or equivalent).
+- Fouls / SOT / cards rates → pair with hit-rate streak, clash/ref narrative, or model vs book.
+- Show `+Edge` only when `edge_pct > 0` **and** both model + priced odds exist.
+
+## 2. Sportsbook UI patterns
+
+- Odds are **always** interactive pill-shaped buttons (pressable `@2.40` / disabled `No Book Odds`).
+- Use compact rows and collapsible market accordions (Cards / SOT / Fouls / Goals / match lines).
+- Prefer shared slip (`BetSlipProvider` / `AddToSlipButton`) over page-local dark slips.
+
+## 3. Light mode strict
+
+| Surface | Color |
+|---------|--------|
+| Page background | `#eef3f9` |
+| Cards | `#ffffff` |
+| Borders | `#e2e8f0` |
+
+No dark-mode chrome for primary product surfaces.
+
+## 4. The value accent
+
+Use `#2563eb` (vibrant blue) for:
+
+- Positive mathematical edges (`edge_pct > 0`)
+- Successful hit-rate pills (e.g. `4/5` streak)
+
+Do not invent edge from hit-rate alone.
+
+## 5. Honest empty states
+
+If backend data is missing, say **what is missing** and **which store/source** when that is the real reason. Keep muted slate styling; never invent rows/odds/edge.
+
+```tsx
+// ✅ GOOD — section-level empties name the gap + source
+<EmptyReason
+  title="No Book Odds"
+  detail="No player prop prices stored for this fixture"
+  source="prematch_odds"
+/>
+// → "No player prop prices stored for this fixture (prematch_odds)."
+
+// ✅ GOOD — Match Hub style
+Referee assigned, but card averages not stored yet (fixture_statistics empty).
+
+// ❌ BAD — silent dash, blank section, vague "not available", or fake rows/odds
+```
+
+Use `EmptyReason` / `formatEmptyReason` for section empties and key betting chrome. Do **not** spam table names on every cell dash.
+
+Never invent mock data. Never render empty gray layout boxes as placeholders.
