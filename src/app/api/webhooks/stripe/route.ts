@@ -78,7 +78,8 @@ async function handleCheckoutCompleted(
       ? session.subscription
       : session.subscription?.id ?? null;
 
-  let status = mapStripeStatus(session.status === "complete" ? "active" : null);
+  const paymentSettled = session.mode !== "payment" || session.payment_status === "paid";
+  let status = mapStripeStatus(session.status === "complete" && paymentSettled ? "active" : null);
   let priceId: string | null = null;
   let periodEnd: string | null = null;
 
@@ -87,6 +88,9 @@ async function handleCheckoutCompleted(
     status = mapStripeStatus(subscription.status);
     priceId = subscription.items.data[0]?.price.id ?? null;
     periodEnd = periodEndIso(subscription);
+  } else if (session.mode === "payment") {
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+    priceId = lineItems.data[0]?.price?.id ?? null;
   }
 
   if (userId) {

@@ -21,7 +21,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppShell showUpgrade={!access.unlocked}>{children}</AppShell>
+        <AppShell
+          showUpgrade={!access.unlocked}
+          showFounders={!access.unlocked || access.status !== "active"}
+          pro={access.status === "active"}
+        >
+          {children}
+        </AppShell>
       </body>
     </html>
   );

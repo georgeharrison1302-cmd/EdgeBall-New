@@ -3,14 +3,13 @@ import type { ReactNode } from "react";
 
 import { getSubscriptionAccess } from "@/utils/subscription";
 
-import { startProCheckout } from "./actions";
 import { loadPricingFactorSamples, type PricingFactorSample } from "./load";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Pricing · EdgeBall",
-  description: "EdgeBall Free vs EdgeBall Pro monthly subscription.",
+  description: "Compare EdgeBall Free, Pro, and Founders Club Premium.",
 };
 
 const FREE_FEATURES = [
@@ -29,17 +28,25 @@ const PRO_FEATURES = [
   "Model accuracy tracker",
 ];
 
+const FOUNDERS_FEATURES = [
+  "Everything in EdgeBall Pro",
+  "Lifetime access — no renewals",
+  "Founders Club badge on your account",
+  "Priority input on the product roadmap",
+  "Early access to new model tools",
+];
+
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; plan?: string }>;
 }) {
   const params = await searchParams;
   const [access, samples] = await Promise.all([
     getSubscriptionAccess(),
     loadPricingFactorSamples(),
   ]);
-  const note = checkoutNote(params.checkout);
+  const note = checkoutNote(params.checkout, params.plan);
   const lead = samples[0] ?? null;
 
   return (
@@ -58,8 +65,8 @@ export default async function PricingPage({
           Bet with stored edge — not vibes
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-[#64748b] sm:text-base">
-          Free covers the Match Hub board. Pro unlocks factors, backtests, Poisson edges, and
-          deep match logs.
+          Free covers the fixture board. Pro unlocks factors, backtests, Poisson edges, and
+          deep match logs. Founders Club makes Pro access lifetime.
         </p>
 
         {note ? (
@@ -68,7 +75,7 @@ export default async function PricingPage({
           </p>
         ) : null}
 
-        {access.unlocked ? (
+        {access.status === "active" ? (
           <p className="mx-auto mt-4 max-w-lg text-center text-sm font-semibold text-emerald-700">
             You are on EdgeBall Pro.
           </p>
@@ -76,7 +83,7 @@ export default async function PricingPage({
 
         {lead ? <LiveProofBanner sample={lead} samples={samples} /> : null}
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
+        <div className="mt-10 grid gap-5 lg:grid-cols-3">
           <TierCard
             eyebrow="Free"
             title="Match Hub"
@@ -102,7 +109,7 @@ export default async function PricingPage({
             features={PRO_FEATURES}
             proof={lead}
             cta={
-              access.unlocked ? (
+              access.status === "active" ? (
                 <Link
                   href="/"
                   className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#2563eb] px-4 py-3 text-sm font-bold text-white hover:bg-[#1d4ed8]"
@@ -110,12 +117,40 @@ export default async function PricingPage({
                   Open Match Hub
                 </Link>
               ) : (
-                <form action={startProCheckout} className="mt-6">
+                <form action="/api/checkout" method="post" className="mt-6">
                   <button
                     type="submit"
                     className="inline-flex w-full items-center justify-center rounded-full bg-[#2563eb] px-4 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 hover:bg-[#1d4ed8]"
                   >
                     Subscribe to Pro
+                  </button>
+                </form>
+              )
+            }
+          />
+
+          <TierCard
+            eyebrow="Founders Club"
+            title="Founders Club Premium"
+            price="30% off"
+            period="lifetime access"
+            features={FOUNDERS_FEATURES}
+            note="38 of 50 spots remaining"
+            cta={
+              access.status === "active" ? (
+                <Link
+                  href="/account"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#0f172a] px-4 py-3 text-sm font-bold text-white hover:bg-[#1e293b]"
+                >
+                  View membership
+                </Link>
+              ) : (
+                <form action="/api/checkout?plan=founders" method="post" className="mt-6">
+                  <button
+                    type="submit"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-[#0f172a] px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#1e293b]"
+                  >
+                    Claim Founders spot
                   </button>
                 </form>
               )
@@ -184,6 +219,7 @@ function TierCard({
   cta,
   featured = false,
   proof = null,
+  note = null,
 }: {
   eyebrow: string;
   title: string;
@@ -193,6 +229,7 @@ function TierCard({
   cta: ReactNode;
   featured?: boolean;
   proof?: PricingFactorSample | null;
+  note?: string | null;
 }) {
   return (
     <section
@@ -208,6 +245,11 @@ function TierCard({
         <span className="text-4xl font-black tracking-tight text-[#0f172a]">{price}</span>
         <span className="text-sm font-semibold text-[#64748b]">{period}</span>
       </p>
+      {note ? (
+        <p className="mt-3 rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1.5 text-center text-xs font-extrabold text-[#1d4ed8]">
+          {note}
+        </p>
+      ) : null}
       {proof ? (
         <div className="mt-4 rounded-xl border border-[#dbeafe] bg-[#eff6ff] px-3.5 py-3">
           <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
@@ -236,14 +278,22 @@ function TierCard({
   );
 }
 
-function checkoutNote(value: string | undefined) {
+function checkoutNote(value: string | undefined, plan: string | undefined) {
   switch (value) {
     case "success":
-      return "Payment received — Pro unlocks as soon as Stripe confirms the webhook.";
+      return plan === "founders"
+        ? "Founders Club payment received — lifetime Pro unlocks as soon as Stripe confirms the webhook."
+        : "Payment received — Pro unlocks as soon as Stripe confirms the webhook.";
     case "cancelled":
       return "Checkout cancelled. No charge was made.";
     case "unconfigured":
       return "Stripe is not configured yet (missing STRIPE_SECRET_KEY or STRIPE_PRICE_ID).";
+    case "founders-unconfigured":
+      return "Founders Club checkout needs STRIPE_FOUNDERS_PRICE_ID before it can open.";
+    case "incomplete":
+      return "Stripe did not confirm a completed payment for that checkout.";
+    case "signin":
+      return "Sign in before opening checkout.";
     case "unavailable":
       return "Checkout could not start. Try again in a moment.";
     default:

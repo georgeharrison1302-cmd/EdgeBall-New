@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import BrandMark from "@/components/BrandMark";
+import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { useBetSlip } from "@/components/stats/BetSlipContext";
 
 const popularCompetitions = [
@@ -33,9 +34,11 @@ export type HeaderSection =
 export function Header({
   current = null,
   showUpgrade = false,
+  pro = false,
 }: {
   current?: HeaderSection;
   showUpgrade?: boolean;
+  pro?: boolean;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const slip = useBetSlip();
@@ -81,13 +84,7 @@ export function Header({
             </button>
           ) : null}
 
-          <Link
-            href="/auth/login"
-            className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e2e8f0] bg-white text-[#0f172a] hover:border-[#2563eb] sm:inline-flex"
-            aria-label="Login"
-          >
-            <UserIcon />
-          </Link>
+          <HeaderAuth pro={pro} />
 
           <button
             type="button"
@@ -114,6 +111,7 @@ export function Header({
                 Upgrade to Pro
               </Link>
             ) : null}
+            <HeaderAuth mobile pro={pro} onNavigate={() => setMobileOpen(false)} />
           </div>
         </nav>
       ) : null}
@@ -251,20 +249,6 @@ function SlipIcon() {
         strokeLinejoin="round"
       />
       <path d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3H16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M5 19.5c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }
