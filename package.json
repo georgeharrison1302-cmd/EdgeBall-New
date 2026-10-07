@@ -79,7 +79,8 @@
     "worker:live": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/worker.ts --once --lane live",
     "worker:minute": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/worker.ts --once --lane minute",
     "worker:all": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/worker.ts --once --lane all",
-    "worker:loop": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/worker.ts --loop"
+    "worker:loop": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/worker.ts --loop",
+    "auth:email-templates": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/update-auth-email-templates.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^10.0.0",

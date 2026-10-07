@@ -34,13 +34,13 @@ const PREMIUM_PRICES: Record<BillingInterval, { price: string; period: string; n
     price: "£14.99",
     period: "/mo",
     note: "Billed monthly",
-    founders: "Founders price: £10.49/mo with FOUNDERS30",
+    founders: "Founders price: £10.49/mo with FOUNDERS",
   },
   year: {
     price: "£179.88",
     period: "/yr",
     note: "Billed annually",
-    founders: "Founders price: £125.92/yr with FOUNDERS30",
+    founders: "Founders price: £125.92/yr with FOUNDERS",
   },
 };
 
@@ -104,7 +104,7 @@ export function PricingPlans({
           price={PREMIUM_PRICES[interval].price}
           period={PREMIUM_PRICES[interval].period}
           badge="Recommended"
-          note="Founders Club: First 50 members get 30% off for life with code FOUNDERS30"
+          note="Founders Club: First 50 members get 30% off for life with code FOUNDERS"
           detail={`${PREMIUM_PRICES[interval].note} · ${PREMIUM_PRICES[interval].founders}`}
           features={PREMIUM_FEATURES}
           proof={proof}

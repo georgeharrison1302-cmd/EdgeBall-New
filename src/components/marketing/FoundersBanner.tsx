@@ -21,7 +21,7 @@ export function FoundersBanner() {
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="min-w-0">
           <p className="text-sm font-bold text-[#0f172a]">
-            Founders Club: First 50 members get 30% off for life with code FOUNDERS30
+            Founders Club: First 50 members get 30% off for life with code FOUNDERS
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
