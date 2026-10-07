@@ -25,6 +25,7 @@ const tools = [
   { href: "/", label: "Match Hub" },
   { href: "/props", label: "Player Props" },
   { href: "/match-props", label: "Match Props" },
+  { href: "/referees", label: "Referee Desk" },
   { href: "/generator", label: "Bet Builder" },
   { href: "/ladder", label: "Ladder Challenge" },
   { href: "/portfolio", label: "Portfolio" },
