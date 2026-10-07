@@ -1,3 +1,5 @@
+import type { MatchMarketPrices } from "@/lib/odds/match-markets";
+
 export type FixtureSide = {
   id: number | null;
   name: string;
@@ -21,19 +23,7 @@ export type FixtureMatch = {
   goalsHome: number | null;
   goalsAway: number | null;
   minute: number | null;
-  homePct: number | null;
-  drawPct: number | null;
-  awayPct: number | null;
-  underOver: string | null;
-  goalsLine: { home: string; away: string } | null;
-  homeOdd: number | null;
-  drawOdd: number | null;
-  awayOdd: number | null;
-  lock: { referee: string; cards: number; player: string; fouls: number } | null;
-  homeYellowsPerGame: number | null;
-  awayYellowsPerGame: number | null;
-  strictRef: { name: string; avg: number; vsLeaguePct: number | null } | null;
-  gameScript: { label: string; detail: string } | null;
+  prices: MatchMarketPrices;
 };
 
 export type DayLoad = {

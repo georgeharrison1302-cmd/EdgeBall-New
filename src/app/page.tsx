@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { featuredCompetitions } from "@/app/competitions/data";
+import { fixtureDateOptions, hasFixtureOdds } from "@/app/fixtures/board-utils";
 import { loadFixtureDay } from "@/app/fixtures/load";
 import type { FixtureMatch } from "@/app/fixtures/types";
 import { MatchHubHomeDesk } from "@/app/match-hub/home-desk";
@@ -12,14 +13,15 @@ import { getSubscriptionAccess } from "@/utils/subscription";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Match Hub · EdgeBall",
-  description: "Today's fixtures by competition, date, and status.",
+  title: "Fixtures · EdgeBall",
+  description: "Football fixtures by date and competition, with stored bookmaker prices.",
 };
 
 type Search = {
   date?: string;
   league?: string;
   status?: string;
+  priced?: string;
   view?: string;
 };
 
@@ -31,10 +33,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   if (params.view === "collisions") redirect("/factors");
   if (params.view === "match-props") redirect("/match-props");
 
-  const date = validDate(params.date) ?? londonToday();
+  const today = londonToday();
+  const date = validDate(params.date) ?? today;
   const league = Number(params.league);
   const leagueId = isTargetLeagueId(league) ? league : null;
   const status = validStatus(params.status);
+  const pricedOnly = params.priced === "1";
   const view = params.view === "surebets" ? "surebets" : "fixtures";
 
   const [day, rail, access, arbResult] = await Promise.all([
@@ -45,15 +49,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   ]);
 
   const counts = countBuckets(day.matches);
-  const shown =
-    status === "all" ? day.matches : day.matches.filter((match) => match.bucket === status);
-  const days = Array.from({ length: 7 }, (_, index) => shiftDate(londonToday(), index));
+  const shown = day.matches.filter((match) => {
+    if (status !== "all" && match.bucket !== status) return false;
+    if (pricedOnly && !hasFixtureOdds(match)) return false;
+    return true;
+  });
+  const days = fixtureDateOptions(today);
 
   return (
     <MatchHubHomeDesk
       date={date}
+      today={today}
       leagueId={leagueId}
       status={status}
+      pricedOnly={pricedOnly}
       view={view}
       day={day}
       shown={shown}
@@ -86,6 +95,7 @@ function countBuckets(matches: FixtureMatch[]) {
     upcoming: matches.filter((match) => match.bucket === "upcoming").length,
     finished: matches.filter((match) => match.bucket === "finished").length,
     live: matches.filter((match) => match.bucket === "live").length,
+    priced: matches.filter(hasFixtureOdds).length,
   };
 }
 
@@ -106,9 +116,4 @@ function londonToday() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
-}
-
-function shiftDate(date: string, days: number) {
-  const [year, month, day] = date.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }

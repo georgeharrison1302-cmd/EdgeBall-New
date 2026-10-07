@@ -7,6 +7,7 @@ import type {
   TapeLeader,
 } from "@/components/MatchHub/TaleOfTheTape";
 import { buildKeyMatchups } from "@/lib/matchups/collisions";
+import { matchMarketPrices } from "@/lib/odds/match-markets";
 import { isSupportedPlayerPropLine } from "@/lib/odds/prop-line-policy";
 import { evaluateFixtureFactors } from "@/lib/factors/evaluator";
 import { loadFixtureFactorInput } from "@/lib/factors/load-input";
@@ -27,8 +28,6 @@ import { cachedLogo } from "@/utils/logos";
 import {
   betsFromOddsData,
   latestOddsSnapshots,
-  oddFor,
-  type StoredBet,
   type StoredOddsRow,
 } from "@/utils/odds-api-io/stored";
 import {
@@ -188,16 +187,7 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
   const oddsRow = latestOddsSnapshots((oddsRows ?? []) as StoredOddsRow[])[0] as
     | (StoredOddsRow & { model_prob?: number | null; edge_pct?: number | null })
     | undefined;
-  const bets = betsFromOddsData(oddsRow?.odds_data);
-  const odds: MatchHubOdds = {
-    home: bets ? oddFor(bets, prematchBets.matchWinner, ["Home", "1"]) : null,
-    draw: bets ? oddFor(bets, prematchBets.matchWinner, ["Draw", "X"]) : null,
-    away: bets ? oddFor(bets, prematchBets.matchWinner, ["Away", "2"]) : null,
-    bttsYes: bets ? oddFor(bets, prematchBets.bothTeamsToScore, ["Yes"]) : null,
-    bttsNo: bets ? oddFor(bets, prematchBets.bothTeamsToScore, ["No"]) : null,
-    over25: bets ? ouOdd(bets, "over") : null,
-    under25: bets ? ouOdd(bets, "under") : null,
-  };
+  const odds: MatchHubOdds = matchMarketPrices(oddsRow?.odds_data);
 
   const yellowScopes = [
     { teamId: homeId, leagueId, season },
@@ -745,21 +735,6 @@ function propValues(
     }
   }
   return out;
-}
-
-function ouOdd(bets: Map<number, StoredBet>, side: "over" | "under") {
-  const values = bets.get(prematchBets.goalsOverUnder)?.values ?? [];
-  for (const value of values) {
-    const odd = Number(value.odd);
-    if (!Number.isFinite(odd) || odd <= 1) continue;
-    const text = String(value.value ?? "").toLowerCase();
-    const handicap = String(value.handicap ?? "").toLowerCase();
-    const line25 = /\b2\.5\b/.test(text) || handicap === "2.5" || handicap === "2.50";
-    if (!line25) continue;
-    if (side === "over" && text.includes("over")) return odd;
-    if (side === "under" && text.includes("under")) return odd;
-  }
-  return null;
 }
 
 function formatKickoff(value: string | null) {

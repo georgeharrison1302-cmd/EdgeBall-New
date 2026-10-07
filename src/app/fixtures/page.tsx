@@ -4,6 +4,7 @@ type Search = {
   date?: string;
   league?: string;
   status?: string;
+  priced?: string;
   view?: string;
 };
 
@@ -18,6 +19,7 @@ export default async function FixturesRedirect({
   if (params.date) query.set("date", params.date);
   if (params.league) query.set("league", params.league);
   if (params.status) query.set("status", params.status);
+  if (params.priced) query.set("priced", params.priced);
   if (params.view) query.set("view", params.view);
   const qs = query.toString();
   redirect(qs ? `/?${qs}` : "/");
