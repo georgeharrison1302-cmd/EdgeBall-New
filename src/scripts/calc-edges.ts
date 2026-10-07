@@ -22,8 +22,13 @@
  *     ADD COLUMN IF NOT EXISTS model_prob numeric,
  *     ADD COLUMN IF NOT EXISTS edge_pct numeric;
  */
+import { normalizeReferee } from "@/utils/stats/referee-name";
 import { createIngestClient } from "@/utils/supabase/admin";
 import { asNumber, asRecord, isMissingRelation, nestNumber } from "@/utils/pyth";
+
+const FINISHED = ["FT", "AET", "PEN", "AWD", "WO"] as const;
+const MIN_PLAYER_MATCHES = 5;
+const MIN_REF_MATCHES = 3;
 
 const PAGE = 1000;
 const IN_CHUNK = 200;
@@ -107,17 +112,13 @@ async function main() {
     [...fixtures.values()].flatMap((fixture) => [fixture.home_team_id, fixture.away_team_id]),
   );
 
-  const [playerTeam, playerRates, refAvg, leagueRefAvg, teamFouls, leagueFouls] = await Promise.all([
+  const [playerTeam, playerRates, refRates, teamFouls] = await Promise.all([
     loadPlayerTeams(supabase, playerIds, teamIds),
     loadPlayerRates(supabase, playerIds, fixtures),
-    loadRefereeAverages(supabase),
-    loadLeagueCardAverages(supabase, [...fixtures.values()]),
+    loadRefereeAverages(supabase, [...fixtures.values()]),
     loadTeamFoulsDrawn(supabase, teamIds, [...fixtures.values()]),
-    Promise.resolve(new Map<string, number>()),
   ]);
-
-  const leagueFoulAvg = leagueFoulAverages(teamFouls, [...fixtures.values()]);
-  for (const [key, value] of leagueFoulAvg) leagueFouls.set(key, value);
+  const leagueFouls = leagueFoulAverages(teamFouls, [...fixtures.values()]);
 
   let priced = 0;
   let skipped = 0;
@@ -130,8 +131,8 @@ async function main() {
       fixture,
       playerTeam,
       playerRates,
-      refAvg,
-      leagueRefAvg,
+      refRates.refAvg,
+      refRates.leagueAvg,
       teamFouls,
       leagueFouls,
     );
@@ -259,58 +260,90 @@ function playerRateFor(index: PlayerRateIndex, playerId: number, fixture: Fixtur
   return index.any.get(playerId) ?? null;
 }
 
-async function loadRefereeAverages(supabase: Ingest) {
-  const map = new Map<string, number>();
-  const { data, error } = await supabase
-    .from("referee_stats")
-    .select("referee_name, avg_yellow_cards, matches_officiated");
-  if (error) {
-    if (isMissingRelation(error)) return map;
-    throw error;
-  }
-  for (const row of data ?? []) {
-    const name = String(row.referee_name ?? "").trim();
-    const avg = asNumber(row.avg_yellow_cards);
-    const matches = Number(row.matches_officiated) || 0;
-    if (!name || avg == null || avg < 0 || matches <= 0) continue;
-    map.set(name.toLowerCase(), avg);
-  }
-  return map;
-}
-
-async function loadLeagueCardAverages(supabase: Ingest, fixtures: FixtureCtx[]) {
-  const map = new Map<string, number>();
-  const keys = uniqueStrings(
-    fixtures.filter((fixture) => fixture.league_id > 0 && fixture.season > 0).map(leagueSeasonKey),
-  );
-  if (keys.length === 0) return map;
-
+/**
+ * Per-match card rates by referee and by league:season, computed from
+ * fixtures + fixture_statistics. The referee_stats table is not populated
+ * on hosted Supabase, so we aggregate the same inputs the refresh
+ * function would use. Units are match totals (both teams), keeping
+ * refereeModifier() on the same scale as leagueRefAvg.
+ */
+async function loadRefereeAverages(
+  supabase: Ingest,
+  fixtures: FixtureCtx[],
+): Promise<{ refAvg: Map<string, number>; leagueAvg: Map<string, number> }> {
+  const refAvg = new Map<string, number>();
+  const leagueAvg = new Map<string, number>();
   const leagueIds = uniqueInts(fixtures.map((fixture) => fixture.league_id));
   const seasons = uniqueInts(fixtures.map((fixture) => fixture.season));
-  const totals = new Map<string, { cards: number; matches: number }>();
+  if (leagueIds.length === 0 || seasons.length === 0) return { refAvg, leagueAvg };
 
+  const pool: { id: number; referee: string; league: string }[] = [];
   for (const leagueChunk of chunks(leagueIds, IN_CHUNK)) {
+    for (const seasonChunk of chunks(seasons, 10)) {
+      const { data, error } = await supabase
+        .from("fixtures")
+        .select("id, referee, league_id, season")
+        .not("referee", "is", null)
+        .in("league_id", leagueChunk)
+        .in("season", seasonChunk)
+        .in("status_short", [...FINISHED])
+        .limit(3000);
+      if (error) throw error;
+      for (const row of data ?? []) {
+        const name = normalizeReferee(row.referee);
+        if (!name) continue;
+        pool.push({
+          id: Number(row.id),
+          referee: name,
+          league: `${Number(row.league_id)}:${Number(row.season)}`,
+        });
+      }
+    }
+  }
+  if (pool.length === 0) return { refAvg, leagueAvg };
+
+  const yellowsByFixture = new Map<number, number>();
+  const ids = pool.map((row) => row.id);
+  for (const chunk of chunks(ids, IN_CHUNK)) {
     const { data, error } = await supabase
-      .from("player_season_stats")
-      .select("league_id, season, appearances, yellow_cards, red_cards")
-      .in("league_id", leagueChunk)
-      .in("season", seasons);
-    if (error) throw error;
+      .from("fixture_statistics")
+      .select("fixture_id, statistics")
+      .in("fixture_id", chunk);
+    if (error) {
+      if (isMissingRelation(error)) return { refAvg, leagueAvg };
+      throw error;
+    }
     for (const row of data ?? []) {
-      const key = `${Number(row.league_id)}:${Number(row.season)}`;
-      const matches = Number(row.appearances) || 0;
-      if (matches <= 0) continue;
-      const bucket = totals.get(key) ?? { cards: 0, matches: 0 };
-      bucket.cards += (Number(row.yellow_cards) || 0) + (Number(row.red_cards) || 0);
-      bucket.matches += matches;
-      totals.set(key, bucket);
+      const stats = asRecord(row.statistics);
+      const yellows =
+        asNumber(stats?.["Yellow Cards"]) ?? asNumber(stats?.["yellow cards"]);
+      if (yellows == null) continue;
+      const fixtureId = Number(row.fixture_id);
+      yellowsByFixture.set(fixtureId, (yellowsByFixture.get(fixtureId) ?? 0) + yellows);
     }
   }
 
-  for (const [key, bucket] of totals) {
-    if (bucket.matches > 0) map.set(key, bucket.cards / bucket.matches);
+  const refBuckets = new Map<string, { sum: number; n: number }>();
+  const leagueBuckets = new Map<string, { sum: number; n: number }>();
+  for (const row of pool) {
+    const yellows = yellowsByFixture.get(row.id);
+    if (yellows == null) continue;
+    const ref = refBuckets.get(row.referee.toLowerCase()) ?? { sum: 0, n: 0 };
+    ref.sum += yellows;
+    ref.n += 1;
+    refBuckets.set(row.referee.toLowerCase(), ref);
+    const league = leagueBuckets.get(row.league) ?? { sum: 0, n: 0 };
+    league.sum += yellows;
+    league.n += 1;
+    leagueBuckets.set(row.league, league);
   }
-  return map;
+  for (const [key, bucket] of refBuckets) {
+    if (bucket.n >= MIN_REF_MATCHES) refAvg.set(key, bucket.sum / bucket.n);
+  }
+  for (const [key, bucket] of leagueBuckets) {
+    if (bucket.n > 0) leagueAvg.set(key, bucket.sum / bucket.n);
+  }
+  return { refAvg, leagueAvg };
 }
 
 async function loadTeamFoulsDrawn(supabase: Ingest, teamIds: number[], fixtures: FixtureCtx[]) {
@@ -397,7 +430,7 @@ function patchRow(
         continue;
       }
       const rate = playerRateFor(playerRates, playerId, fixture);
-      if (!rate || rate.matches <= 0) {
+      if (!rate || rate.matches < MIN_PLAYER_MATCHES) {
         skipped += 1;
         continue;
       }
@@ -438,10 +471,13 @@ function refereeModifier(
   leagueRefAvg: Map<string, number>,
 ) {
   if (!fixture?.referee) return 1;
-  const ref = refAvg.get(fixture.referee.toLowerCase());
+  const name = normalizeReferee(fixture.referee);
+  if (!name) return 1;
+  const ref = refAvg.get(name.toLowerCase());
   const league = leagueRefAvg.get(leagueSeasonKey(fixture));
   if (ref == null || league == null || league <= 0) return 1;
-  return ref / league;
+  // Clamp so one outlier referee cannot explode the edge estimate.
+  return Math.min(1.6, Math.max(0.6, ref / league));
 }
 
 function opponentFoulModifier(
@@ -461,7 +497,7 @@ function opponentFoulModifier(
   const opp = teamFouls.get(`${opponentId}:${fixture.league_id}:${fixture.season}`);
   const league = leagueFouls.get(leagueSeasonKey(fixture));
   if (opp == null || league == null || league <= 0) return 1;
-  return opp / league;
+  return Math.min(1.6, Math.max(0.6, opp / league));
 }
 
 async function writeUpdates(
@@ -519,10 +555,6 @@ function chunks<T>(items: T[], size: number) {
 
 function uniqueInts(values: Array<number | null | undefined>) {
   return [...new Set(values.filter((value): value is number => Number.isInteger(value) && (value as number) > 0))];
-}
-
-function uniqueStrings(values: string[]) {
-  return [...new Set(values.filter((value) => value.trim() !== ""))];
 }
 
 function round(value: number, digits: number) {

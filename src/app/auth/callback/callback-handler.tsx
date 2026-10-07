@@ -35,6 +35,7 @@ export function CallbackHandler() {
         | "recovery"
         | "invite"
         | "email"
+        | "email_change"
         | null;
 
       if (code) {
