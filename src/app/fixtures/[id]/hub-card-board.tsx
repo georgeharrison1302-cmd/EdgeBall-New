@@ -8,6 +8,7 @@ import { EmptyReason } from "@/components/stats/EmptyReason";
 import { MarketAccordion } from "@/components/stats/MarketAccordion";
 import { PremiumPaywall } from "@/components/ui/PremiumPaywall";
 import type { FactorEvaluation, FixtureFactorId } from "@/lib/factors/types";
+import { hasActivePropModel } from "@/lib/odds/prop-line-policy";
 
 import type { PropBoardRow, PropMarketKey } from "./hub-load";
 
@@ -29,8 +30,13 @@ const FACTORS_BY_MARKET: Partial<Record<PropMarketKey, FixtureFactorId[]>> = {
 function byEdge(left: PropBoardRow, right: PropBoardRow) {
   return (
     (right.edgePct ?? Number.NEGATIVE_INFINITY) - (left.edgePct ?? Number.NEGATIVE_INFINITY) ||
+    (right.modelProb ?? 0) - (left.modelProb ?? 0) ||
     (right.odd ?? 0) - (left.odd ?? 0)
   );
+}
+
+function propRowKey(fixtureId: number, row: PropBoardRow) {
+  return `${fixtureId}:${row.marketKey}:${row.playerId}:${row.line ?? "na"}:${row.market}:${row.odd ?? "null"}`;
 }
 
 /**
@@ -51,14 +57,16 @@ export function HubCardBoard({
   factors?: FactorEvaluation[];
   unlocked?: boolean;
 }) {
-  const [boardMode, setBoardMode] = useState<"edge" | "market">("edge");
+  const [boardMode, setBoardMode] = useState<"edge" | "market" | "no-model">("edge");
 
-  const byEdgeRows = useMemo(() => [...rows].sort(byEdge), [rows]);
+  const modeledRows = useMemo(() => rows.filter((row) => hasActivePropModel(row.modelProb)), [rows]);
+  const noModelRows = useMemo(() => rows.filter((row) => !hasActivePropModel(row.modelProb)), [rows]);
+  const byEdgeRows = useMemo(() => [...modeledRows].sort(byEdge), [modeledRows]);
 
   const grouped = useMemo(() => {
     const map = new Map<PropMarketKey, PropBoardRow[]>();
     for (const section of MARKET_SECTIONS) map.set(section.key, []);
-    for (const row of rows) {
+    for (const row of modeledRows) {
       const bucket = map.get(row.marketKey) ?? map.get("other")!;
       bucket.push(row);
     }
@@ -68,7 +76,7 @@ export function HubCardBoard({
       ...section,
       rows: map.get(section.key) ?? [],
     })).filter((section) => section.rows.length > 0);
-  }, [rows]);
+  }, [modeledRows]);
 
   const triggeredById = useMemo(() => {
     const map = new Map<FixtureFactorId, FactorEvaluation>();
@@ -85,9 +93,9 @@ export function HubCardBoard({
           <p className="text-[11px] font-extrabold tracking-wide text-[var(--neon)] uppercase">
             Full board · edge radar
           </p>
-          <h2 className="mt-1 text-lg font-bold text-[var(--ink)]">All props by +Edge%</h2>
+          <h2 className="mt-1 text-lg font-bold text-[var(--ink)]">Model-backed player props</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {home} vs {away} · highest mathematical edge first
+            {home} vs {away} · standard Bet365 lines only · {modeledRows.length} modeled / {noModelRows.length} unmodeled
           </p>
         </div>
         <div className="flex rounded-full border border-[var(--line)] bg-white p-0.5">
@@ -109,6 +117,17 @@ export function HubCardBoard({
           >
             By market
           </button>
+          {noModelRows.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setBoardMode("no-model")}
+              className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                boardMode === "no-model" ? "bg-[#64748b] text-white" : "text-[var(--muted)]"
+              }`}
+            >
+              No model ({noModelRows.length})
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -116,20 +135,38 @@ export function HubCardBoard({
         <EmptyReason
           variant="center"
           title="No Book Odds"
-          detail="No player prop prices stored for this fixture"
+          detail="No standard player prop lines are stored for this fixture"
           source="prematch_odds"
+        />
+      ) : boardMode === "edge" && byEdgeRows.length === 0 ? (
+        <EmptyReason
+          variant="center"
+          title="No Model-Backed Props"
+          detail="Book prices exist, but no active Poisson probabilities are stored; use the No model filter to inspect them"
+          source="prematch_odds.model_prob"
         />
       ) : boardMode === "edge" ? (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {byEdgeRows.map((row) => (
             <PropCard
-              key={`${fixtureId}:${row.marketKey}:${row.playerId}:${row.market}:${row.odd ?? "null"}`}
+              key={propRowKey(fixtureId, row)}
               row={row}
               fixtureId={fixtureId}
               unlocked={unlocked}
             />
           ))}
         </ul>
+      ) : boardMode === "no-model" ? (
+        <div>
+          <p className="mb-3 rounded-xl border border-[#e2e8f0] bg-[#eef3f9] px-3 py-2 text-xs font-semibold text-[#64748b]">
+            Book prices only — these selections have no active Poisson model and are excluded from the edge board.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {noModelRows.map((row) => (
+              <PropCard key={propRowKey(fixtureId, row)} row={row} fixtureId={fixtureId} unlocked={unlocked} />
+            ))}
+          </ul>
+        </div>
       ) : (
         grouped.map((section) => {
           const factorIds = FACTORS_BY_MARKET[section.key] ?? [];
@@ -162,7 +199,7 @@ export function HubCardBoard({
               <ul className="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3">
                 {section.rows.map((row) => (
                   <PropCard
-                    key={`${fixtureId}:${row.marketKey}:${row.playerId}:${row.market}:${row.odd ?? "null"}`}
+                    key={propRowKey(fixtureId, row)}
                     row={row}
                     fixtureId={fixtureId}
                     unlocked={unlocked}

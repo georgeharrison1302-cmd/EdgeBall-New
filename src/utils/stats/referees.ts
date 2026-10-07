@@ -1,7 +1,10 @@
 import "server-only";
 
 import { asNumber, asRecord, isMissingRelation } from "@/utils/pyth";
+import { normalizeReferee } from "@/utils/stats/referee-name";
 import { createIngestClient } from "@/utils/supabase/admin";
+
+export { normalizeReferee } from "@/utils/stats/referee-name";
 
 export type StrictRef = {
   name: string;
@@ -34,22 +37,35 @@ export function fixtureYellows(stats: unknown) {
   return fixtureStatNumber(stats, "Yellow Cards") ?? fixtureStatNumber(stats, "yellow cards");
 }
 
-export async function loadRefereeRates(names: string[]) {
+export async function loadRefereeRates(
+  names: string[],
+  scope: { leagueId?: number; season?: number } = {},
+) {
   const map = new Map<string, StrictRef>();
   const wanted = [...new Set(names.map(normalizeReferee).filter((name): name is string => name != null))];
   if (wanted.length === 0) return map;
   const supabase = createIngestClient();
-  const { data: fixtures, error } = await supabase
+  // Stored API-Football values include a country suffix ("Name, England").
+  // Query the scoped referee pool, then compare normalized names in memory;
+  // exact `.in(referee, wanted)` silently misses those rows.
+  let query = supabase
     .from("fixtures")
-    .select("id, referee, status_short")
-    .in("referee", wanted)
+    .select("id, referee, status_short, date")
+    .not("referee", "is", null)
     .in("status_short", [...FINISHED])
-    .limit(2000);
+    .order("date", { ascending: false });
+  if (scope.leagueId != null) query = query.eq("league_id", scope.leagueId);
+  if (scope.season != null) query = query.eq("season", scope.season);
+  const { data: fixtures, error } = await query.limit(2000);
   if (error) {
     if (isMissingRelation(error)) return map;
     throw error;
   }
-  const rows = fixtures ?? [];
+  const wantedSet = new Set(wanted.map((name) => name.toLowerCase()));
+  const rows = (fixtures ?? []).filter((fixture) => {
+    const name = normalizeReferee(fixture.referee);
+    return name != null && wantedSet.has(name.toLowerCase());
+  });
   if (rows.length === 0) return map;
   const ids = rows.map((row) => Number(row.id));
   const yellowsByFixture = new Map<number, number>();
@@ -102,9 +118,4 @@ export async function loadRefereeRates(names: string[]) {
 export function lookupReferee(map: Map<string, StrictRef>, name: string | null | undefined) {
   const key = normalizeReferee(name);
   return key ? map.get(key.toLowerCase()) ?? null : null;
-}
-
-export function normalizeReferee(value: string | null | undefined) {
-  const name = value?.split(",")[0]?.trim() ?? "";
-  return name === "" ? null : name;
 }

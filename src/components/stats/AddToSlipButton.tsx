@@ -24,6 +24,7 @@ export function AddToSlipButton({
   onAdd,
   added: addedOverride,
   size = "md",
+  variant = "pill",
 }: {
   selectionId: string | number;
   marketName: string;
@@ -37,6 +38,7 @@ export function AddToSlipButton({
   onAdd?: () => void;
   added?: boolean;
   size?: "sm" | "md" | "lg";
+  variant?: "pill" | "card";
 }) {
   const slip = useBetSlip();
   const priced = isPriced(decimalOdds);
@@ -74,6 +76,7 @@ export function AddToSlipButton({
       added={added}
       disabled={!onAdd && !slip}
       size={size}
+      variant={variant}
     />
   );
 }

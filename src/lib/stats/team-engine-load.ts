@@ -36,6 +36,23 @@ export async function loadTeamMatchesForTeams(teamIds: number[], scope: Scope = 
   return matches.filter((match) => wanted.has(match.teamId));
 }
 
+/** Every finished meeting between two teams in any competition (both perspectives, newest first). */
+export async function loadHeadToHeadMatches(teamA: number, teamB: number, limit = 20): Promise<TeamMatch[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("fixtures")
+    .select(FIXTURE_COLUMNS)
+    .in("status_short", [...FINISHED_STATUSES])
+    .or(
+      `and(home_team_id.eq.${teamA},away_team_id.eq.${teamB}),and(home_team_id.eq.${teamB},away_team_id.eq.${teamA})`,
+    )
+    .order("date", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  const fixtures = (data ?? []) as FixtureInput[];
+  return buildTeamMatches(fixtures, await loadSheets(fixtures.map((fixture) => fixture.id)));
+}
+
 async function loadTeamMatches(scope: Scope, teamIds?: number[]): Promise<TeamMatch[]> {
   const fixtures = await loadFinishedFixtures(scope, teamIds);
   const sheets = await loadSheets(fixtures.map((fixture) => fixture.id));

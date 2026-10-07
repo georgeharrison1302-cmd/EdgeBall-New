@@ -15,6 +15,7 @@ export function OddsPill({
   added = false,
   disabled = false,
   size = "md",
+  variant = "pill",
   className = "",
 }: {
   label?: string;
@@ -23,6 +24,7 @@ export function OddsPill({
   added?: boolean;
   disabled?: boolean;
   size?: "sm" | "md" | "lg";
+  variant?: "pill" | "card";
   className?: string;
 }) {
   const { formatOddsLabel } = useDisplayPrefs();
@@ -64,16 +66,20 @@ export function OddsPill({
           ? `${label ? `${label} ` : ""}${priceLabel} already on slip`
           : `Add ${label ? `${label} ` : ""}${priceLabel} to slip`
       }
-      className={`inline-flex w-full shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full font-bold tabular-nums transition-shadow ${pad} ${
+      className={`inline-flex w-full shrink-0 items-center justify-center gap-1.5 whitespace-nowrap font-bold tabular-nums transition-colors ${pad} ${
+        variant === "card" ? "rounded-xl" : "rounded-full"
+      } ${
         added
-          ? "border-2 border-[var(--cobalt)] bg-blue-50 text-[var(--cobalt)] ring-2 ring-[var(--cobalt)]/25"
-          : interactive
-            ? "bg-[var(--cobalt)] text-white shadow-sm shadow-blue-600/20 hover:bg-[var(--cobalt-dark)]"
-            : "border border-[var(--line)] bg-white text-[var(--muted)]"
+          ? "border-2 border-[var(--cobalt)] bg-blue-50 text-[var(--cobalt)] ring-2 ring-[var(--cobalt)]/20"
+          : interactive && variant === "card"
+            ? "border border-[#e2e8f0] bg-white text-[#0f172a] shadow-sm hover:border-[#2563eb] hover:bg-[#eff6ff]"
+            : interactive
+              ? "bg-[var(--cobalt)] text-white shadow-sm shadow-blue-600/20 hover:bg-[var(--cobalt-dark)]"
+              : "border border-[var(--line)] bg-white text-[var(--muted)]"
       } ${className}`.trim()}
     >
       {label ? (
-        <span className={`font-medium ${added || !interactive ? "text-inherit" : "text-white/85"}`}>
+        <span className={`font-medium ${added || !interactive || variant === "card" ? "text-inherit" : "text-white/85"}`}>
           {label}
         </span>
       ) : null}

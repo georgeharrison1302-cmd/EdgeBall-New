@@ -65,7 +65,7 @@ export const FACTOR_CATALOG: Record<FixtureFactorId, FixtureFactor> = {
     id: "disciplinary_storm",
     name: "Disciplinary Storm",
     description:
-      "Strict referee plus high-foul players, or both teams averaging ≥2.0 cards/game when ref/lineups are missing.",
+      "Assigned strict referee plus high-foul players, or both teams averaging ≥2.0 cards/game when that referee has no stored average.",
     category: "discipline",
     badgeLabel: "Disciplinary Storm",
     triggeredMarkets: ["Player Cards", "Team Cards", "Fouls Committed"],

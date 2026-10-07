@@ -3,7 +3,7 @@ import "server-only";
 import { nestNumber, standingSide } from "@/utils/pyth";
 import { createIngestClient } from "@/utils/supabase/admin";
 import { loadTeamYellowRates } from "@/utils/stats/discipline";
-import { loadRefereeRates, lookupReferee } from "@/utils/stats/referees";
+import { loadRefereeRates, lookupReferee, normalizeReferee } from "@/utils/stats/referees";
 
 import type { FixtureFactorInput, TeamFactorStats } from "./types";
 
@@ -30,6 +30,7 @@ export async function loadFixtureFactorInput(
   const leagueId = fixture.league_id == null ? null : Number(fixture.league_id);
   const season = fixture.season == null ? null : Number(fixture.season);
   const kickoff = fixture.date ? String(fixture.date) : null;
+  const referee = normalizeReferee(fixture.referee);
 
   const teamIds = [homeId, awayId].filter((id): id is number => id != null && id > 0);
 
@@ -40,7 +41,7 @@ export async function loadFixtureFactorInput(
 
   const [refs, homePrev, awayPrev, standings, playerStats, leagueSize, cardRates] =
     await Promise.all([
-      loadRefereeRates(fixture.referee ? [fixture.referee] : []),
+      loadRefereeRates(referee ? [referee] : [], { leagueId: leagueId ?? undefined, season: season ?? undefined }),
       homeId != null && kickoff
         ? previousKickoff(homeId, kickoff, fixtureId)
         : Promise.resolve(null),
@@ -79,7 +80,7 @@ export async function loadFixtureFactorInput(
   const homeStanding = standingRows.find((row) => Number(row.team_id) === homeId);
   const awayStanding = standingRows.find((row) => Number(row.team_id) === awayId);
 
-  const ref = lookupReferee(refs, fixture.referee);
+  const ref = lookupReferee(refs, referee);
   const homeCards =
     homeId != null && leagueId != null && season != null
       ? (cardRates.get(`${homeId}:${leagueId}:${season}`) ?? null)
@@ -104,8 +105,8 @@ export async function loadFixtureFactorInput(
           avgCardsPerMatch: ref.avg,
           matches: ref.matches,
         }
-      : fixture.referee
-        ? { name: fixture.referee, avgCardsPerMatch: null, matches: null }
+      : referee
+        ? { name: referee, avgCardsPerMatch: null, matches: null }
         : null,
     playerStats: playerRows.flatMap((row) => {
       const apps = Number(row.appearances) || 0;

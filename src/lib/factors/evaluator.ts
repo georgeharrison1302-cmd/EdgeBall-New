@@ -36,7 +36,7 @@ export function evaluateFixtureFactors(
 function evaluateDisciplinaryStorm(data: FixtureFactorInput): FactorEvaluation {
   const factor = FACTOR_CATALOG.disciplinary_storm;
   const avgCards = data.refStats?.avgCardsPerMatch ?? null;
-  const refName = data.refStats?.name ?? null;
+  const refName = assignedRefName(data.refStats?.name);
   const refMatches = data.refStats?.matches ?? null;
   const hotPlayers = data.playerStats.filter(
     (player) => player.foulsPer90 != null && player.foulsPer90 >= FOUL_LINE,
@@ -52,8 +52,12 @@ function evaluateDisciplinaryStorm(data: FixtureFactorInput): FactorEvaluation {
 
   const primaryMatched =
     avgCards != null && avgCards > REF_CARD_LINE && hotPlayers.length > 0;
+  // Never raise a disciplinary warning without an assigned referee. Team-card
+  // evidence can supplement a named referee with no stored average, but cannot
+  // stand in for a null/TBC assignment.
   const teamFallbackMatched =
-    (refUnassigned || lineupsOrFoulsMissing) &&
+    Boolean(refName) &&
+    (avgCards == null || lineupsOrFoulsMissing) &&
     homeCards != null &&
     awayCards != null &&
     homeCards >= TEAM_CARDS_LINE &&
@@ -194,6 +198,11 @@ function evaluateRelegationFight(data: FixtureFactorInput): FactorEvaluation {
   }
 
   return { factor, matched, evidence, summary };
+}
+
+function assignedRefName(value: string | null | undefined) {
+  const name = value?.trim() ?? "";
+  return !name || /^(tbc|tbd|to be (confirmed|decided)|unknown|n\/a|none)$/i.test(name) ? null : name;
 }
 
 function leagueSizeFrom(

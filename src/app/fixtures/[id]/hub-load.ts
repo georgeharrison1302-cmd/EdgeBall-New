@@ -7,6 +7,7 @@ import type {
   TapeLeader,
 } from "@/components/MatchHub/TaleOfTheTape";
 import { buildKeyMatchups } from "@/lib/matchups/collisions";
+import { isSupportedPlayerPropLine } from "@/lib/odds/prop-line-policy";
 import { evaluateFixtureFactors } from "@/lib/factors/evaluator";
 import { loadFixtureFactorInput } from "@/lib/factors/load-input";
 import type { FactorEvaluation } from "@/lib/factors/types";
@@ -46,7 +47,7 @@ import {
   loadTeamSheetContext,
   loadTeamYellowRates,
 } from "@/utils/stats/discipline";
-import { loadRefereeRates, lookupReferee, type StrictRef } from "@/utils/stats/referees";
+import { loadRefereeRates, lookupReferee, normalizeReferee, type StrictRef } from "@/utils/stats/referees";
 
 export type MatchHubTeam = {
   id: number;
@@ -82,6 +83,8 @@ export type PropBoardRow = {
   matchup: string;
   market: string;
   marketKey: PropMarketKey;
+  /** Integer clear-line from the book (1 => Over 0.5); null for cards/goalscorers. */
+  line: number | null;
   odd: number | null;
   modelProb: number | null;
   edgePct: number | null;
@@ -145,6 +148,9 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
 
   const homeId = Number(data.home_team_id);
   const awayId = Number(data.away_team_id);
+  const leagueId = Number(data.league_id);
+  const season = Number(data.season);
+  const referee = normalizeReferee(data.referee);
   if (!Number.isInteger(homeId) || !Number.isInteger(awayId)) notFound();
 
   const [{ data: teams }, venueResult, { data: league }, { data: oddsRows }, refs] = await Promise.all([
@@ -160,7 +166,7 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
       .eq("bookmaker_id", BET365_BOOKMAKER_ID)
       .order("updated_at", { ascending: false })
       .limit(1),
-    loadRefereeRates(data.referee ? [data.referee] : []),
+    loadRefereeRates(referee ? [referee] : [], { leagueId, season }),
   ]);
   if (venueResult.error) throw venueResult.error;
 
@@ -193,8 +199,6 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
     under25: bets ? ouOdd(bets, "under") : null,
   };
 
-  const leagueId = Number(data.league_id);
-  const season = Number(data.season);
   const yellowScopes = [
     { teamId: homeId, leagueId, season },
     { teamId: awayId, leagueId, season },
@@ -240,11 +244,11 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
     kickoffAt: Number.isFinite(kickoffMs) ? new Date(kickoffMs).toISOString() : null,
     status: data.status_short,
     venue: venue ? [venue.name, venue.city].filter(Boolean).join(", ") : null,
-    referee: data.referee,
+    referee,
     home,
     away,
     odds,
-    refereeProfile: lookupReferee(refs, data.referee),
+    refereeProfile: lookupReferee(refs, referee),
     foulCollision,
     homeYellowsPerGame: homeYellows,
     awayYellowsPerGame: awayYellows,
@@ -355,6 +359,7 @@ async function loadPropBoard(
       matchup,
       market,
       marketKey: value.marketKey,
+      line: value.line,
       odd: value.odd,
       modelProb,
       edgePct,
@@ -657,6 +662,7 @@ type ParsedPropValue = {
   playerId: number;
   playerName: string;
   selection: string;
+  line: number | null;
   marketKey: PropMarketKey;
   marketLabel: string;
   odd: number | null;
@@ -701,9 +707,7 @@ function propValues(
       // SOT / shots / fouls MUST carry a line (handicap or "Name - N").
       // Name-only rows on "… Shots On Target Total" are race / most-SOT outrights
       // (odds like 41–67) — never treat those as Over 0.5.
-      const isLineMarket =
-        classified.key === "sot" || classified.key === "fouls" || classified.key === "other";
-      if (isLineMarket && parsed.line == null) continue;
+      if (!isSupportedPlayerPropLine(classified.key, classified.label, parsed.line)) continue;
 
       const selection =
         classified.key === "cards"
@@ -731,6 +735,7 @@ function propValues(
         playerId,
         playerName: parsed.playerName,
         selection,
+        line: parsed.line,
         marketKey: classified.key,
         marketLabel: classified.label,
         odd: parsed.odd,

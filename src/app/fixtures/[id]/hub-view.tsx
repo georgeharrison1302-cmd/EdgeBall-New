@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { FactorBadge } from "@/components/factors/FactorBadge";
+import { HeadToHeadPanel } from "@/components/match/HeadToHeadPanel";
+import { MatchGlance } from "@/components/match/MatchGlance";
+import { MatchTabs } from "@/components/match/MatchTabs";
+import { StreaksPanel } from "@/components/match/StreaksPanel";
+import { TeamStatsComparison } from "@/components/match/TeamStatsComparison";
 import { TaleOfTheTape } from "@/components/MatchHub/TaleOfTheTape";
 import { TopValueAngles } from "@/components/MatchHub/TopValueAngles";
 import { CardMeter } from "@/components/stats/CardMeter";
@@ -9,6 +14,7 @@ import { GameScriptBadge } from "@/components/stats/GameScriptBadge";
 import { MatchupClashBadgeFromClash } from "@/components/stats/MatchupClashBadge";
 import { StrictRefBadgeFromProfile } from "@/components/stats/StrictRefBadge";
 import { PremiumPaywall } from "@/components/ui/PremiumPaywall";
+import { loadMatchStats } from "@/lib/stats/match-stats-load";
 import { getSubscriptionAccess } from "@/utils/subscription";
 
 import { HubCardBoard } from "./hub-card-board";
@@ -16,7 +22,22 @@ import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
 export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
-  const access = await getSubscriptionAccess();
+  const [access, stats] = await Promise.all([
+    getSubscriptionAccess(),
+    loadMatchStats({ leagueId: hub.leagueId, season: hub.season, home: hub.home, away: hub.away }).catch(
+      (cause: unknown) => {
+        console.error(`[match-stats] fixture ${hub.id}:`, cause);
+        return null;
+      },
+    ),
+  ]);
+  const statsMissing = (
+    <EmptyReason
+      variant="panel"
+      detail="Team stats could not be loaded for this fixture"
+      source="fixtures / fixture_statistics"
+    />
+  );
 
   return (
     <div className="space-y-6">
@@ -33,26 +54,61 @@ export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
         </Link>
       </p>
 
-      <PremiumPaywall unlocked={access.unlocked}>
-        <TopValueAngles
-          rows={hub.propBoard}
-          fixtureId={hub.id}
-          unlocked={access.unlocked}
-        />
-      </PremiumPaywall>
       <Hero hub={hub} unlocked={access.unlocked} />
-      <ContextStrip hub={hub} />
-      <DisciplineGauge hub={hub} />
-      <PremiumPaywall unlocked={access.unlocked}>
-        <TaleOfTheTape data={hub.taleOfTheTape} />
-      </PremiumPaywall>
-      <HubCardBoard
-        rows={hub.propBoard}
-        home={hub.home.name}
-        away={hub.away.name}
-        fixtureId={hub.id}
-        factors={hub.factors}
-        unlocked={access.unlocked}
+
+      <MatchTabs
+        tabs={[
+          {
+            id: "overview",
+            label: "Overview",
+            content: (
+              <>
+                {stats ? <MatchGlance home={stats.home} away={stats.away} competition={hub.competition} /> : statsMissing}
+                <ContextStrip hub={hub} />
+                <DisciplineGauge hub={hub} />
+              </>
+            ),
+          },
+          {
+            id: "stats",
+            label: "Team stats",
+            content: stats ? (
+              <>
+                <TeamStatsComparison home={stats.home} away={stats.away} competition={hub.competition} />
+                <StreaksPanel home={stats.home} away={stats.away} competition={hub.competition} />
+              </>
+            ) : (
+              statsMissing
+            ),
+          },
+          {
+            id: "h2h",
+            label: "H2H",
+            content: stats ? <HeadToHeadPanel h2h={stats.h2h} home={hub.home} away={hub.away} /> : statsMissing,
+          },
+          {
+            id: "props",
+            label: "Player props",
+            content: (
+              <>
+                <PremiumPaywall unlocked={access.unlocked}>
+                  <TopValueAngles rows={hub.propBoard} fixtureId={hub.id} unlocked={access.unlocked} />
+                </PremiumPaywall>
+                <PremiumPaywall unlocked={access.unlocked}>
+                  <TaleOfTheTape data={hub.taleOfTheTape} />
+                </PremiumPaywall>
+                <HubCardBoard
+                  rows={hub.propBoard}
+                  home={hub.home.name}
+                  away={hub.away.name}
+                  fixtureId={hub.id}
+                  factors={hub.factors}
+                  unlocked={access.unlocked}
+                />
+              </>
+            ),
+          },
+        ]}
       />
     </div>
   );

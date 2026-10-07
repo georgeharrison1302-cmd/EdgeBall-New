@@ -23,7 +23,7 @@ export function PropCard({
   unlocked: boolean;
 }) {
   const slip = useBetSlip();
-  const selectionId = `prop:${row.marketKey}:${row.playerId}:${row.market}`;
+  const selectionId = `prop:${fixtureId}:${row.marketKey}:${row.playerId}:${row.line ?? "na"}:${row.market}`;
   const selectionLabel = `${row.player} ${row.market}`;
   const added = slip?.hasLeg(selectionId) ?? false;
   const classified = classifySlipMarket(row.market, { marketKey: row.marketKey });

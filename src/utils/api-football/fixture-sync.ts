@@ -10,6 +10,8 @@ export const LIVE_FIXTURE_GAP_MS = 20_000;
 
 /** Keep each `live=` value short enough for the request URL. */
 const LIVE_PARAM_LIMIT = 1_800;
+/** Refresh upcoming fixtures twice daily so late referee assignments are persisted. */
+const SCHEDULE_REFRESH_MS = 12 * 60 * 60 * 1000;
 
 export function utcDay(offsetDays = 0) {
   const date = new Date();
@@ -66,11 +68,13 @@ export async function syncFixtureSchedule() {
     const checkpointId = `fixtures:schedule:${from}:${leagueId}`;
     const { data: checkpoint, error: checkpointError } = await supabase
       .from("ingest_checkpoints")
-      .select("last_status")
+      .select("last_status, last_run_at")
       .eq("id", checkpointId)
       .maybeSingle();
     if (checkpointError) throw checkpointError;
-    if (String(checkpoint?.last_status ?? "").startsWith("ok")) {
+    const checkpointAt = checkpoint?.last_run_at ? Date.parse(String(checkpoint.last_run_at)) : Number.NaN;
+    const fresh = Number.isFinite(checkpointAt) && Date.now() - checkpointAt < SCHEDULE_REFRESH_MS;
+    if (String(checkpoint?.last_status ?? "").startsWith("ok") && fresh) {
       skipped += 1;
       continue;
     }
