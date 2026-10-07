@@ -90,9 +90,20 @@ export default function SiteFooter() {
           <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
             Company
           </p>
-          <p className="mt-3 text-sm text-gray-500">
-            Legal pages are not published yet.
-          </p>
+          <ul className="mt-3 space-y-2 text-sm">
+            {[
+              { href: "/terms", label: "Terms of Service" },
+              { href: "/privacy", label: "Privacy Policy" },
+              { href: "/responsible-gambling", label: "Responsible Gambling" },
+              { href: "/affiliate-disclosure", label: "Affiliate Disclosure" },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="text-slate-900 hover:text-blue-600">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
           <form
             className="mt-4"
             onSubmit={(event) => {

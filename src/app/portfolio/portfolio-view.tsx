@@ -6,7 +6,8 @@ import { useDisplayPrefs } from "@/components/display/DisplayPrefsProvider";
 import { EmptyReason } from "@/components/stats/EmptyReason";
 
 import type { PerformanceInsight } from "./insights";
-import type { PortfolioSummary } from "./load";
+import type { MonthlyPnl, PortfolioAlert, PortfolioSummary } from "./load";
+import type { MarketBreakdownRow } from "./insights";
 
 export function PortfolioView({ data }: { data: PortfolioSummary }) {
   const { formatMoney, formatOdds } = useDisplayPrefs();
@@ -33,6 +34,8 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
   return (
     <div className="space-y-8">
       <p className="text-sm text-[#64748b]">Signed in as {data.email ?? "user"}</p>
+
+      <SlipAlerts alerts={data.alerts} />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Open stake" value={formatMoney(data.openStake)} />
@@ -77,6 +80,9 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
       </section>
 
       <PerformanceInsights insights={data.insights} />
+
+      <MarketBreakdownTable rows={data.marketBreakdown} formatMoney={formatMoney} />
+      <MonthlyPnlTable rows={data.monthly} formatMoney={formatMoney} />
 
       <SlipList
         title="Active slips"
@@ -160,6 +166,160 @@ function PerformanceInsights({ insights }: { insights: PerformanceInsight[] }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+function SlipAlerts({ alerts }: { alerts: PortfolioAlert[] }) {
+  if (alerts.length === 0) return null;
+  return (
+    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        Slip alerts
+      </p>
+      <ul className="mt-3 space-y-2">
+        {alerts.map((alert) => (
+          <li
+            key={alert.id}
+            className={`flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm ${
+              alert.kind === "won"
+                ? "border-emerald-200 bg-emerald-50/70"
+                : alert.kind === "lost"
+                  ? "border-red-200 bg-red-50/70"
+                  : alert.kind === "in_play"
+                    ? "border-blue-200 bg-blue-50/70"
+                    : "border-[#e2e8f0] bg-[#eef3f9]/60"
+            }`}
+          >
+            <span className="font-semibold text-[#0f172a]">{alert.text}</span>
+            <span className="shrink-0 text-xs text-[#64748b]">{alert.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function MarketBreakdownTable({
+  rows,
+  formatMoney,
+}: {
+  rows: MarketBreakdownRow[];
+  formatMoney: (n: number | null | undefined) => string;
+}) {
+  return (
+    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        Market breakdown
+      </p>
+      <h2 className="mt-1 text-lg font-bold text-[#0f172a]">Record by market</h2>
+      {rows.length === 0 ? (
+        <EmptyReason
+          className="mt-4"
+          detail="No decided slips yet — the breakdown fills in once slips settle"
+          source="user_bets"
+        />
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead>
+              <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+                <th className="py-2 pr-3">Market</th>
+                <th className="px-3 py-2 text-right">Slips</th>
+                <th className="px-3 py-2 text-right">Won</th>
+                <th className="px-3 py-2 text-right">Hit</th>
+                <th className="px-3 py-2 text-right">Avg odds</th>
+                <th className="px-3 py-2 text-right">Staked</th>
+                <th className="px-3 py-2 text-right">P/L</th>
+                <th className="py-2 pl-3 text-right">ROI</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.key} className="border-t border-[#f1f5f9]">
+                  <td className="py-2.5 pr-3 font-semibold text-[#0f172a]">{row.label}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{row.bets}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{row.wins}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{row.hitRatePct}%</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    {row.avgOdds == null ? "—" : row.avgOdds.toFixed(2)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{formatMoney(row.stake)}</td>
+                  <td
+                    className={`px-3 py-2.5 text-right font-bold tabular-nums ${
+                      row.profit >= 0 ? "text-emerald-700" : "text-red-700"
+                    }`}
+                  >
+                    {formatMoney(row.profit)}
+                  </td>
+                  <td
+                    className={`py-2.5 pl-3 text-right font-bold tabular-nums ${
+                      row.roiPct >= 0 ? "text-emerald-700" : "text-amber-700"
+                    }`}
+                  >
+                    {row.roiPct >= 0 ? "+" : ""}
+                    {row.roiPct}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MonthlyPnlTable({
+  rows,
+  formatMoney,
+}: {
+  rows: MonthlyPnl[];
+  formatMoney: (n: number | null | undefined) => string;
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+        Monthly P/L
+      </p>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[480px] text-left text-sm">
+          <thead>
+            <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+              <th className="py-2 pr-3">Month</th>
+              <th className="px-3 py-2 text-right">Slips</th>
+              <th className="px-3 py-2 text-right">Staked</th>
+              <th className="px-3 py-2 text-right">P/L</th>
+              <th className="py-2 pl-3 text-right">ROI</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.month} className="border-t border-[#f1f5f9]">
+                <td className="py-2.5 pr-3 font-semibold text-[#0f172a]">{row.month}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums">{row.bets}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums">{formatMoney(row.stake)}</td>
+                <td
+                  className={`px-3 py-2.5 text-right font-bold tabular-nums ${
+                    row.profit >= 0 ? "text-emerald-700" : "text-red-700"
+                  }`}
+                >
+                  {formatMoney(row.profit)}
+                </td>
+                <td
+                  className={`py-2.5 pl-3 text-right font-bold tabular-nums ${
+                    row.roiPct >= 0 ? "text-emerald-700" : "text-amber-700"
+                  }`}
+                >
+                  {row.roiPct >= 0 ? "+" : ""}
+                  {row.roiPct}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

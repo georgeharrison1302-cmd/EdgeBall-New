@@ -48,7 +48,7 @@ export function buildPerformanceInsights(settled: UserBetRow[]): PerformanceInsi
   }
 
   const insights: PerformanceInsight[] = [];
-  for (const [key, bucket] of buckets) {
+  for (const bucket of buckets.values()) {
     if (bucket.bets < MIN_SAMPLE || bucket.stake <= 0) continue;
     const hitRatePct = Math.round((bucket.wins / bucket.bets) * 100);
     const roiPct = Math.round((bucket.profit / bucket.stake) * 1000) / 10;
@@ -100,6 +100,62 @@ function insightDetail(
     return `You have a ${hitRatePct}% hit rate on ${label}, but ${roiText} across ${n} slips. Cut volume or wait for clearer +Edge%.`;
   }
   return `${hitRatePct}% hit rate and ${roiText} on ${label} (${n} slips). Neutral so far — keep tracking.`;
+}
+
+export type MarketBreakdownRow = {
+  key: string;
+  label: string;
+  bets: number;
+  wins: number;
+  hitRatePct: number;
+  stake: number;
+  profit: number;
+  roiPct: number;
+  avgOdds: number | null;
+};
+
+/** Per-market-bucket record across decided slips — the depth table behind the coach. */
+export function buildMarketBreakdown(settled: UserBetRow[]): MarketBreakdownRow[] {
+  const buckets = new Map<
+    string,
+    { label: string; bets: number; wins: number; stake: number; profit: number; odds: number[] }
+  >();
+  for (const bet of settled) {
+    if (bet.status !== "won" && bet.status !== "lost") continue;
+    const key = bucketKeyForBet(bet);
+    const bucket = buckets.get(key) ?? {
+      label: bucketLabel(key),
+      bets: 0,
+      wins: 0,
+      stake: 0,
+      profit: 0,
+      odds: [],
+    };
+    bucket.bets += 1;
+    if (bet.status === "won") bucket.wins += 1;
+    bucket.stake += bet.stake;
+    bucket.profit += bet.profit ?? 0;
+    if (Number.isFinite(bet.combined_odds) && bet.combined_odds > 1) {
+      bucket.odds.push(bet.combined_odds);
+    }
+    buckets.set(key, bucket);
+  }
+  return [...buckets.entries()]
+    .map(([key, bucket]) => ({
+      key,
+      label: bucket.label,
+      bets: bucket.bets,
+      wins: bucket.wins,
+      hitRatePct: Math.round((bucket.wins / bucket.bets) * 100),
+      stake: bucket.stake,
+      profit: bucket.profit,
+      roiPct: bucket.stake > 0 ? Math.round((bucket.profit / bucket.stake) * 1000) / 10 : 0,
+      avgOdds:
+        bucket.odds.length === 0
+          ? null
+          : bucket.odds.reduce((sum, odd) => sum + odd, 0) / bucket.odds.length,
+    }))
+    .sort((left, right) => right.stake - left.stake || right.bets - left.bets);
 }
 
 function bucketKeyForBet(bet: UserBetRow): string {
