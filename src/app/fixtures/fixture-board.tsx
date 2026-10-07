@@ -21,12 +21,14 @@ import type { FixtureMatch } from "./types";
 
 export default function FixtureBoard({ matches }: { matches: FixtureMatch[] }) {
   const [liveMatches, setLiveMatches] = useState(matches);
+  const [seenMatches, setSeenMatches] = useState(matches);
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<"league" | "time">("league");
 
-  useEffect(() => {
+  if (seenMatches !== matches) {
+    setSeenMatches(matches);
     setLiveMatches(matches);
-  }, [matches]);
+  }
 
   useEffect(() => {
     return subscribeFixtureUpdates((row) => {
@@ -116,7 +118,7 @@ function MatchCard({ match, open }: { match: FixtureMatch; open: boolean }) {
         <TeamSide side={match.away} align="right" />
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
-        <StrictRefBadgeFromProfile ref={match.strictRef} />
+        <StrictRefBadgeFromProfile profile={match.strictRef} />
         <GameScriptBadge script={match.gameScript} />
       </div>
       <div className="mt-3">

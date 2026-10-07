@@ -62,6 +62,8 @@ export function BetSlipProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // localStorage is browser-only; load after hydration so SSR markup matches.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLegs(readStoredLegs());
     setHydrated(true);
   }, []);

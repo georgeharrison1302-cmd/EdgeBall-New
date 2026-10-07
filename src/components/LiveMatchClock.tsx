@@ -29,13 +29,16 @@ export function LiveMatchClock({
     match_minute: initialMinute,
   });
 
-  useEffect(() => {
+  const initialKey = `${fixtureId}|${initialStatus}|${initialScore}|${initialMinute}`;
+  const [seenKey, setSeenKey] = useState(initialKey);
+  if (seenKey !== initialKey) {
+    setSeenKey(initialKey);
     setLive({
       status: initialStatus,
       current_score: parseScoreLabel(initialScore),
       match_minute: initialMinute,
     });
-  }, [fixtureId, initialStatus, initialScore, initialMinute]);
+  }
 
   useEffect(() => {
     return subscribeFixtureUpdates((row) => {

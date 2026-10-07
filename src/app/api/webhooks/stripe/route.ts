@@ -73,7 +73,7 @@ async function handleCheckoutCompleted(
       : session.customer?.id ?? null;
   if (!customerId) return;
 
-  let subscriptionId =
+  const subscriptionId =
     typeof session.subscription === "string"
       ? session.subscription
       : session.subscription?.id ?? null;

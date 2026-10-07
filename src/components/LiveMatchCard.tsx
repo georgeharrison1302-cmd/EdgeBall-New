@@ -74,10 +74,12 @@ export default function LiveMatchCard({
   className = "",
 }: LiveMatchCardProps) {
   const [live, setLive] = useState(fixture);
+  const [seenFixture, setSeenFixture] = useState(fixture);
 
-  useEffect(() => {
+  if (seenFixture !== fixture) {
+    setSeenFixture(fixture);
     setLive(fixture);
-  }, [fixture]);
+  }
 
   useEffect(() => {
     const fixtureId = fixture.id;

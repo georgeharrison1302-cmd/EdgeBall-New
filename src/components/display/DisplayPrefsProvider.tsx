@@ -43,6 +43,8 @@ export function DisplayPrefsProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Browser-only values (timezone, localStorage) must load after hydration to match SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBrowserZone(Intl.DateTimeFormat().resolvedOptions().timeZone || null);
     setPrefsState(readStoredDisplayPrefs());
     setHydrated(true);

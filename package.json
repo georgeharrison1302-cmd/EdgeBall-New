@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "npx --yes tsx --test \"src/**/*.test.ts\"",
     "ingest:top-cards": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/ingest-top-cards.ts",
     "ingest:rest": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/ingest-rest.ts",
     "refresh:odds": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-odds-api-io.ts",

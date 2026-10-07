@@ -56,7 +56,7 @@ export function GeneratorSlip({ slip, shortfall, legs, copied, onCopy }: Props) 
               {prop.marketType === "To Be Carded" ? (
                 <div className="mt-2 space-y-1.5">
                   <div className="flex flex-wrap gap-1">
-                    <StrictRefBadgeFromProfile ref={prop.strictRef} />
+                    <StrictRefBadgeFromProfile profile={prop.strictRef} />
                     <MatchupClashBadgeFromClash clash={prop.clash} />
                   </div>
                   <HitRateStrip

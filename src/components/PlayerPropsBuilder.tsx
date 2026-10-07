@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { PlayerHeadshot } from "@/components/assets";
@@ -151,8 +151,7 @@ export default function PlayerPropsBuilder({
 
   const competitions = useMemo(() => buildCompetitions(pool), [pool]);
 
-  useEffect(() => {
-    if (filtersReady) return;
+  if (!filtersReady) {
     const fromUrl = (searchParams.get("comp") ?? "")
       .split(",")
       .map((part) => part.trim())
@@ -170,13 +169,11 @@ export default function PlayerPropsBuilder({
     setEnabledComps(comps);
     setEnabledMatches(matches);
     setFiltersReady(true);
-  }, [competitions, filtersReady, searchParams]);
+  }
 
-  useEffect(() => {
-    if (!thresholdOptions.includes(threshold)) {
-      setThreshold(defaultThresholdForStat(stat));
-    }
-  }, [stat, threshold, thresholdOptions]);
+  if (!thresholdOptions.includes(threshold)) {
+    setThreshold(defaultThresholdForStat(stat));
+  }
 
   const syncUrl = useCallback(
     (next: {
@@ -880,7 +877,7 @@ function DeskTableRow({
                   sotPer90: row.sample.seasonSotPer90,
                 }}
               />
-              <StrictRefBadgeFromProfile ref={row.sample.strictRef} />
+              <StrictRefBadgeFromProfile profile={row.sample.strictRef} />
               <MatchupClashBadgeFromClash clash={row.sample.clash} />
               {row.form.counts.length === 0 ? (
                 <span className="rounded-full border border-[#e2e8f0] bg-white px-2 py-1">

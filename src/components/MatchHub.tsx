@@ -159,7 +159,7 @@ function Overview({ data }: { data: MatchHubData }) {
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">Why this match</h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          <StrictRefBadgeFromProfile ref={data.strictRef} />
+          <StrictRefBadgeFromProfile profile={data.strictRef} />
           <MatchupClashBadgeFromClash clash={data.clash} />
           <GameScriptBadge script={data.gameScript} />
         </div>

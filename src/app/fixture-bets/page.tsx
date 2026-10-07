@@ -16,7 +16,7 @@ export default async function FixtureBetsPage() {
   return (
     <Shell current="bets">
       <p className="text-[11px] font-extrabold tracking-[0.12em] text-[#2563eb] uppercase">Fixture bets</p>
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight">Today's match markets</h1>
+      <h1 className="mt-1 text-3xl font-semibold tracking-tight">Today&apos;s match markets</h1>
       <p className="mt-2 max-w-3xl text-sm text-[#64748b]">
         Ranked by expected return on 1 unit. The chance comes from goals per game, and a side with no goals is left out.
         Rows from two games or fewer sit in their own list, so a short table does not lead the board.

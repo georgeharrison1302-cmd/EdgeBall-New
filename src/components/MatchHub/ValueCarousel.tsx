@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 
 import type { ValueAngle } from "@/app/match-hub/load-top-angles";
 import { useBetSlip } from "@/components/stats/BetSlipContext";
@@ -10,6 +10,7 @@ import { EmptyReason } from "@/components/stats/EmptyReason";
 import { FormStrip } from "@/components/stats/FormStrip";
 
 const SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
+const noopSubscribe = () => () => {};
 
 function AngleCardShell({
   motionReady,
@@ -43,11 +44,12 @@ function AngleCardShell({
 export function ValueCarousel({ angles }: { angles: ValueAngle[] }) {
   const slip = useBetSlip();
   const reduceMotion = useReducedMotion();
-  const [motionReady, setMotionReady] = useState(false);
-
-  useEffect(() => {
-    setMotionReady(true);
-  }, []);
+  // false during SSR + hydration, true once mounted in the browser.
+  const motionReady = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 
   return (
     <section className="space-y-3">

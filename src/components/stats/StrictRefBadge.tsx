@@ -39,19 +39,19 @@ export function StrictRefBadge({
 
 /** Convenience when callers still hold a derived referee profile object. */
 export function StrictRefBadgeFromProfile({
-  ref,
+  profile,
 }: {
-  ref?: { name: string; avg: number; vsLeaguePct?: number | null; matches?: number } | null;
+  profile?: { name: string; avg: number; vsLeaguePct?: number | null; matches?: number } | null;
 }) {
-  if (!ref) return null;
+  if (!profile) return null;
   const leagueAvg =
-    ref.vsLeaguePct == null || !Number.isFinite(ref.vsLeaguePct) || ref.avg === 0
+    profile.vsLeaguePct == null || !Number.isFinite(profile.vsLeaguePct) || profile.avg === 0
       ? null
-      : ref.avg / (1 + ref.vsLeaguePct / 100);
+      : profile.avg / (1 + profile.vsLeaguePct / 100);
   return (
     <StrictRefBadge
-      refereeName={ref.name}
-      cardsPerGame={ref.avg}
+      refereeName={profile.name}
+      cardsPerGame={profile.avg}
       leagueAvgCards={leagueAvg}
     />
   );

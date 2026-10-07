@@ -293,7 +293,7 @@ function PlayerAnglePanel({
         {spell?.foulsPer90 != null ? ` · ${spell.foulsPer90.toFixed(1)} fouls/90` : ""}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
-        <StrictRefBadgeFromProfile ref={angle?.strictRef} />
+        <StrictRefBadgeFromProfile profile={angle?.strictRef} />
         <MatchupClashBadgeFromClash clash={angle?.clash} />
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">

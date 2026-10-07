@@ -125,7 +125,7 @@ function ContextStrip({ hub }: { hub: MatchHubPage }) {
         Match context
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <StrictRefBadgeFromProfile ref={hub.refereeProfile} />
+        <StrictRefBadgeFromProfile profile={hub.refereeProfile} />
         <MatchupClashBadgeFromClash clash={hub.clash} />
         <GameScriptBadge script={hub.gameScript} />
       </div>
@@ -184,7 +184,7 @@ function DisciplineGauge({ hub }: { hub: MatchHubPage }) {
         </p>
         {ref ? (
           <div className="mt-3 space-y-3">
-            <StrictRefBadgeFromProfile ref={ref} />
+            <StrictRefBadgeFromProfile profile={ref} />
             <p className="text-2xl font-bold text-[var(--ink)]">
               {ref.avg.toFixed(1)}{" "}
               <span className="text-base font-semibold text-[var(--muted)]">cards/match</span>

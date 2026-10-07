@@ -334,7 +334,7 @@ function poisson(k: number, lambda: number) {
 function toPercents(probs: { home: number; draw: number; away: number }) {
   const raw = [probs.home, probs.draw, probs.away].map((value) => value * 100);
   const floors = raw.map((value) => Math.floor(value));
-  let remainder = 100 - floors.reduce((sum, value) => sum + value, 0);
+  const remainder = 100 - floors.reduce((sum, value) => sum + value, 0);
   const order = raw
     .map((value, index) => ({ index, frac: value - floors[index] }))
     .sort((left, right) => right.frac - left.frac);
