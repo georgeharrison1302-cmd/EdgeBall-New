@@ -15,38 +15,35 @@ export async function GET(request: NextRequest) {
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
-    if (session.status !== "complete" || !customerId) {
+    const customerId =
+      typeof session.customer === "string" ? session.customer : session.customer?.id;
+    const subscriptionId =
+      typeof session.subscription === "string"
+        ? session.subscription
+        : session.subscription?.id;
+    if (
+      session.mode !== "subscription" ||
+      session.status !== "complete" ||
+      !customerId ||
+      !subscriptionId
+    ) {
       pricing.searchParams.set("checkout", "incomplete");
       return NextResponse.redirect(pricing);
     }
 
-    if (session.mode === "payment") {
-      if (session.payment_status !== "paid") {
-        pricing.searchParams.set("checkout", "incomplete");
-        return NextResponse.redirect(pricing);
-      }
-      const cookie = await customerCookieOptions(customerId);
-      const cookieStore = await cookies();
-      cookieStore.set(cookie.name, cookie.value, cookie.options);
-      pricing.searchParams.set("checkout", "success");
-      pricing.searchParams.set("plan", "founders");
-      return NextResponse.redirect(pricing);
-    }
-
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-    if (subscriptions.data.length === 0) {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    if (subscription.status !== "active" && subscription.status !== "trialing") {
       pricing.searchParams.set("checkout", "incomplete");
       return NextResponse.redirect(pricing);
     }
+
     const cookie = await customerCookieOptions(customerId);
     const cookieStore = await cookies();
     cookieStore.set(cookie.name, cookie.value, cookie.options);
     pricing.searchParams.set("checkout", "success");
+    if (session.metadata?.edgeball_plan === "premium") {
+      pricing.searchParams.set("plan", "premium");
+    }
     return NextResponse.redirect(pricing);
   } catch {
     pricing.searchParams.set("checkout", "unavailable");

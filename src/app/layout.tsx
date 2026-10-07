@@ -25,6 +25,7 @@ export default async function RootLayout({
           showUpgrade={!access.unlocked}
           showFounders={!access.unlocked || access.status !== "active"}
           pro={access.status === "active"}
+          tier={access.status === "active" ? access.tier : null}
         >
           {children}
         </AppShell>

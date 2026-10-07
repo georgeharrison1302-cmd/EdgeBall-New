@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 
 import {
   mapStripeStatus,
+  subscriptionTierFromPriceId,
   upsertSubscriptionByCustomerId,
   upsertSubscriptionByUserId,
 } from "@/utils/subscription";
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
         await handleCheckoutCompleted(stripe, session);
         break;
       }
+      case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
@@ -63,6 +65,8 @@ async function handleCheckoutCompleted(
   stripe: ReturnType<typeof getStripe>,
   session: Stripe.Checkout.Session,
 ) {
+  if (session.mode !== "subscription") return;
+
   const userId =
     session.client_reference_id ??
     session.metadata?.supabase_user_id ??
@@ -71,47 +75,30 @@ async function handleCheckoutCompleted(
     typeof session.customer === "string"
       ? session.customer
       : session.customer?.id ?? null;
-  if (!customerId) return;
-
   const subscriptionId =
     typeof session.subscription === "string"
       ? session.subscription
       : session.subscription?.id ?? null;
+  if (!customerId || !subscriptionId) return;
 
-  const paymentSettled = session.mode !== "payment" || session.payment_status === "paid";
-  let status = mapStripeStatus(session.status === "complete" && paymentSettled ? "active" : null);
-  let priceId: string | null = null;
-  let periodEnd: string | null = null;
-
-  if (subscriptionId) {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    status = mapStripeStatus(subscription.status);
-    priceId = subscription.items.data[0]?.price.id ?? null;
-    periodEnd = periodEndIso(subscription);
-  } else if (session.mode === "payment") {
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
-    priceId = lineItems.data[0]?.price?.id ?? null;
-  }
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const priceId = subscription.items.data[0]?.price.id ?? null;
+  const tier = subscriptionTierFromPriceId(priceId);
+  const input = {
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscription.id,
+    status: mapStripeStatus(subscription.status),
+    tier,
+    priceId,
+    currentPeriodEnd: periodEndIso(subscription),
+  };
 
   if (userId) {
-    await upsertSubscriptionByUserId({
-      userId,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      status: status === "inactive" && session.payment_status === "paid" ? "active" : status,
-      priceId,
-      currentPeriodEnd: periodEnd,
-    });
+    await upsertSubscriptionByUserId({ ...input, userId });
     return;
   }
 
-  await upsertSubscriptionByCustomerId({
-    stripeCustomerId: customerId,
-    stripeSubscriptionId: subscriptionId,
-    status: status === "inactive" && session.payment_status === "paid" ? "active" : status,
-    priceId,
-    currentPeriodEnd: periodEnd,
-  });
+  await upsertSubscriptionByCustomerId(input);
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
@@ -120,14 +107,15 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
       ? subscription.customer
       : subscription.customer.id;
   const userId = subscription.metadata?.supabase_user_id ?? null;
-  const status = mapStripeStatus(subscription.status);
   const priceId = subscription.items.data[0]?.price.id ?? null;
+  const tier = subscriptionTierFromPriceId(priceId);
 
   await upsertSubscriptionByCustomerId({
     userId,
     stripeCustomerId: customerId,
     stripeSubscriptionId: subscription.id,
-    status,
+    status: mapStripeStatus(subscription.status),
+    tier,
     priceId,
     currentPeriodEnd: periodEndIso(subscription),
   });

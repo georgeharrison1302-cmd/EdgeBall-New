@@ -1,22 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { usableStripeKey } from "@/app/today/access";
+import type { BillingInterval, SubscriptionTier } from "@/types/billing";
+import { checkoutPriceId } from "@/utils/subscription";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { getStripe } from "@/utils/stripe";
 
 export const dynamic = "force-dynamic";
 
-type CheckoutPlan = "pro" | "founders";
+type CheckoutInput = {
+  plan: SubscriptionTier;
+  interval: BillingInterval;
+};
 
 export async function POST(request: NextRequest) {
-  const plan = request.nextUrl.searchParams.get("plan") === "founders" ? "founders" : "pro";
   const pricing = new URL("/pricing", request.url);
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
+  const input = await checkoutInput(request);
+  if (!input) {
+    pricing.searchParams.set("checkout", "invalid");
+    return NextResponse.redirect(pricing, 303);
+  }
 
-  const price = priceIdForPlan(plan);
+  const price = checkoutPriceId(input.plan, input.interval);
   if (!price) {
-    pricing.searchParams.set("checkout", plan === "founders" ? "founders-unconfigured" : "unconfigured");
+    pricing.searchParams.set("checkout", "price-unconfigured");
+    pricing.searchParams.set("plan", input.plan);
+    pricing.searchParams.set("interval", input.interval);
     return NextResponse.redirect(pricing, 303);
   }
 
@@ -59,25 +69,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
+    const metadata = {
+      supabase_user_id: user.id,
+      edgeball_plan: input.plan,
+      billing_interval: input.interval,
+    };
     const session = await stripe.checkout.sessions.create({
-      mode: plan === "founders" ? "payment" : "subscription",
+      mode: "subscription",
       customer: customerId,
       line_items: [{ price, quantity: 1 }],
+      allow_promotion_codes: true,
       success_url: `${origin}/api/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
       client_reference_id: user.id,
-      metadata: { supabase_user_id: user.id, edgeball_plan: plan },
-      ...(plan === "founders"
-        ? {
-            payment_intent_data: {
-              metadata: { supabase_user_id: user.id, edgeball_plan: plan },
-            },
-          }
-        : {
-            subscription_data: {
-              metadata: { supabase_user_id: user.id, edgeball_plan: plan },
-            },
-          }),
+      metadata,
+      subscription_data: { metadata },
     });
     if (!session.url) {
       pricing.searchParams.set("checkout", "unavailable");
@@ -90,8 +97,36 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function priceIdForPlan(plan: CheckoutPlan) {
-  return plan === "founders"
-    ? process.env.STRIPE_FOUNDERS_PRICE_ID
-    : process.env.STRIPE_PRICE_ID;
+async function checkoutInput(request: NextRequest): Promise<CheckoutInput | null> {
+  let plan: unknown = request.nextUrl.searchParams.get("plan");
+  let interval: unknown = request.nextUrl.searchParams.get("interval");
+  const contentType = request.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    const body = (await request.json().catch(() => null)) as
+      | { plan?: unknown; interval?: unknown }
+      | null;
+    plan = body?.plan ?? plan;
+    interval = body?.interval ?? interval;
+  } else if (
+    contentType.includes("application/x-www-form-urlencoded") ||
+    contentType.includes("multipart/form-data")
+  ) {
+    const form = await request.formData().catch(() => null);
+    plan = form?.get("plan") ?? plan;
+    interval = form?.get("interval") ?? interval;
+  }
+
+  const normalizedPlan = normalizePlan(plan);
+  const normalizedInterval = normalizeInterval(interval);
+  if (!normalizedPlan || !normalizedInterval) return null;
+  return { plan: normalizedPlan, interval: normalizedInterval };
+}
+
+function normalizePlan(value: unknown): SubscriptionTier | null {
+  return value === "pro" || value === "premium" ? value : null;
+}
+
+function normalizeInterval(value: unknown): BillingInterval | null {
+  return value === "month" || value === "year" ? value : null;
 }

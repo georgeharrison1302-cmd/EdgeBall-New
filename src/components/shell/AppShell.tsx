@@ -8,6 +8,7 @@ import SiteFooter from "@/components/site-footer";
 import { Header, type HeaderSection } from "@/components/layout/Header";
 import { FoundersBanner } from "@/components/marketing/FoundersBanner";
 import { BetSlipProvider } from "@/components/stats/BetSlipContext";
+import type { SubscriptionTier } from "@/types/billing";
 
 import { BetSlipDrawer } from "./BetSlipDrawer";
 
@@ -33,18 +34,25 @@ export function AppShell({
   showUpgrade = false,
   showFounders = false,
   pro = false,
+  tier = null,
 }: {
   children: ReactNode;
   showUpgrade?: boolean;
   showFounders?: boolean;
   pro?: boolean;
+  tier?: SubscriptionTier | null;
 }) {
   const pathname = usePathname();
   return (
     <DisplayPrefsProvider>
       <BetSlipProvider>
         <div className="flex min-h-screen flex-col bg-[#eef3f9] text-[#0f172a]">
-          <Header current={sectionFromPath(pathname)} showUpgrade={showUpgrade} pro={pro} />
+          <Header
+            current={sectionFromPath(pathname)}
+            showUpgrade={showUpgrade}
+            pro={pro}
+            tier={tier}
+          />
           {showFounders ? <FoundersBanner /> : null}
           <div className="flex-1 pb-24">{children}</div>
           <SiteFooter />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
+import type { SubscriptionTier } from "@/types/billing";
 import { createClient } from "@/utils/supabase/client";
 
 import { AuthModal } from "./AuthModal";
@@ -12,10 +13,12 @@ import type { AuthMode } from "./AuthPanel";
 
 export function HeaderAuth({
   pro = false,
+  tier = null,
   mobile = false,
   onNavigate,
 }: {
   pro?: boolean;
+  tier?: SubscriptionTier | null;
   mobile?: boolean;
   onNavigate?: () => void;
 }) {
@@ -107,11 +110,17 @@ export function HeaderAuth({
     );
   }
 
+  const membershipLabel = pro
+    ? tier === "premium"
+      ? "EdgeBall Premium"
+      : "EdgeBall Pro"
+    : "Free plan";
+
   if (mobile) {
     return user ? (
       <div className="mt-3 rounded-2xl border border-[#e2e8f0] bg-white p-3">
         <p className="truncate px-2 text-sm font-bold text-[#0f172a]">{user.email ?? "Account"}</p>
-        <p className="px-2 text-xs font-semibold text-[#64748b]">{pro ? "EdgeBall Pro" : "Free plan"}</p>
+        <p className="px-2 text-xs font-semibold text-[#64748b]">{membershipLabel}</p>
         <div className="mt-2 grid gap-1">
           <MobileAccountLink href="/account" onNavigate={onNavigate}>My Account</MobileAccountLink>
           <MobileAccountLink href="/portfolio" onNavigate={onNavigate}>Portfolio</MobileAccountLink>
@@ -184,7 +193,7 @@ export function HeaderAuth({
         <div role="menu" className="absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-xl">
           <div className="border-b border-[#e2e8f0] px-4 py-3">
             <p className="truncate text-sm font-bold text-[#0f172a]">{user.email ?? displayName}</p>
-            <p className="mt-0.5 text-xs font-semibold text-[#64748b]">{pro ? "EdgeBall Pro" : "Free plan"}</p>
+            <p className="mt-0.5 text-xs font-semibold text-[#64748b]">{membershipLabel}</p>
           </div>
           <Link href="/account" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold text-[#0f172a] hover:bg-slate-50">
             My Account

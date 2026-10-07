@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { useBetSlip } from "@/components/stats/BetSlipContext";
+import type { SubscriptionTier } from "@/types/billing";
 
 const popularCompetitions = [
   { href: "/competitions?league=39", label: "Premier League", icon: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
@@ -29,16 +30,18 @@ export type HeaderSection =
 
 /**
  * Logo | Match Hub | Player Props | Match Props | Bet Builder | Competitions | Portfolio
- * Right: Slip icon + Upgrade to Pro.
+ * Right: Slip icon + upgrade link.
  */
 export function Header({
   current = null,
   showUpgrade = false,
   pro = false,
+  tier = null,
 }: {
   current?: HeaderSection;
   showUpgrade?: boolean;
   pro?: boolean;
+  tier?: SubscriptionTier | null;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const slip = useBetSlip();
@@ -64,7 +67,7 @@ export function Header({
               href="/pricing"
               className="hidden items-center rounded-full border border-[#22d3ee] bg-[#ecfeff] px-3.5 py-1.5 text-xs font-extrabold tracking-wide text-[#0e7490] uppercase hover:bg-[#cffafe] sm:inline-flex"
             >
-              Upgrade to Pro
+              Upgrade
             </Link>
           ) : null}
 
@@ -84,7 +87,7 @@ export function Header({
             </button>
           ) : null}
 
-          <HeaderAuth pro={pro} />
+          <HeaderAuth pro={pro} tier={tier} />
 
           <button
             type="button"
@@ -108,10 +111,10 @@ export function Header({
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 rounded-full border border-[#22d3ee] bg-[#ecfeff] px-3.5 py-2 text-center text-xs font-extrabold tracking-wide text-[#0e7490] uppercase"
               >
-                Upgrade to Pro
+                Upgrade
               </Link>
             ) : null}
-            <HeaderAuth mobile pro={pro} onNavigate={() => setMobileOpen(false)} />
+            <HeaderAuth mobile pro={pro} tier={tier} onNavigate={() => setMobileOpen(false)} />
           </div>
         </nav>
       ) : null}

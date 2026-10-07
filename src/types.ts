@@ -1464,6 +1464,7 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: "active" | "inactive" | "past_due"
+          subscription_tier: "pro" | "premium" | null
           price_id: string | null
           current_period_end: string | null
           updated_at: string
@@ -1474,6 +1475,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: "active" | "inactive" | "past_due"
+          subscription_tier?: "pro" | "premium" | null
           price_id?: string | null
           current_period_end?: string | null
           updated_at?: string
@@ -1484,6 +1486,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: "active" | "inactive" | "past_due"
+          subscription_tier?: "pro" | "premium" | null
           price_id?: string | null
           current_period_end?: string | null
           updated_at?: string

@@ -3,7 +3,12 @@ import { redirect } from "next/navigation";
 
 import { BillingPortalButton } from "@/components/billing/BillingPortalButton";
 import { createClient } from "@/utils/supabase/server";
-import { getSubscriptionAccess, type SubscriptionStatus } from "@/utils/subscription";
+import type { SubscriptionTier } from "@/types/billing";
+import {
+  getSubscriptionAccess,
+  subscriptionTierFromPriceId,
+  type SubscriptionStatus,
+} from "@/utils/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -22,20 +27,24 @@ export default async function AccountPage() {
   const [{ data: subscription }, access] = await Promise.all([
     supabase
       .from("user_subscriptions")
-      .select("subscription_status, price_id, stripe_subscription_id, current_period_end, updated_at")
+      .select("subscription_status, subscription_tier, price_id, stripe_subscription_id, current_period_end, updated_at")
       .eq("user_id", user.id)
       .maybeSingle(),
     getSubscriptionAccess(),
   ]);
 
   const status = (subscription?.subscription_status ?? null) as SubscriptionStatus | null;
-  const foundersPrice = process.env.STRIPE_FOUNDERS_PRICE_ID;
-  const isFounders =
-    status === "active" &&
-    foundersPrice != null &&
-    subscription?.price_id === foundersPrice;
-  const isPro = access.status === "active";
-  const plan = isPro ? (isFounders ? "Founders Club Premium" : "EdgeBall Pro") : "Free";
+  const tier =
+    status === "active"
+      ? normalizeTier(subscription?.subscription_tier) ??
+        subscriptionTierFromPriceId(subscription?.price_id)
+      : null;
+  const isPaid = access.status === "active";
+  const plan = isPaid
+    ? tier === "premium"
+      ? "EdgeBall Premium"
+      : "EdgeBall Pro"
+    : "Free";
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
@@ -68,11 +77,15 @@ export default async function AccountPage() {
           <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">Membership</p>
           <div className="mt-4 flex items-center justify-between gap-3">
             <p className="text-xl font-black text-[#0f172a]">{plan}</p>
-            <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide uppercase ${isPro ? "bg-blue-50 text-[#2563eb]" : "bg-slate-100 text-[#64748b]"}`}>
-              {isPro ? "Active" : status ?? "Free"}
+            <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide uppercase ${isPaid ? "bg-blue-50 text-[#2563eb]" : "bg-slate-100 text-[#64748b]"}`}>
+              {isPaid ? "Active" : status ?? "Free"}
             </span>
           </div>
           <dl className="mt-5 space-y-3 text-sm">
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#64748b]">Tier</dt>
+              <dd className="font-semibold text-[#0f172a]">{tierLabel(tier)}</dd>
+            </div>
             <div className="flex justify-between gap-3">
               <dt className="text-[#64748b]">Status</dt>
               <dd className="font-semibold text-[#0f172a]">{status ?? "None"}</dd>
@@ -80,7 +93,7 @@ export default async function AccountPage() {
             <div className="flex justify-between gap-3">
               <dt className="text-[#64748b]">Renews</dt>
               <dd className="font-semibold text-[#0f172a]">
-                {isFounders ? "Never — lifetime" : formatDate(subscription?.current_period_end)}
+                {formatDate(subscription?.current_period_end)}
               </dd>
             </div>
           </dl>
@@ -109,6 +122,16 @@ export default async function AccountPage() {
       </section>
     </main>
   );
+}
+
+function normalizeTier(value: unknown): SubscriptionTier | null {
+  return value === "pro" || value === "premium" ? value : null;
+}
+
+function tierLabel(tier: SubscriptionTier | null) {
+  if (tier === "premium") return "Premium";
+  if (tier === "pro") return "Pro";
+  return "None";
 }
 
 function providerLabel(value: unknown) {
