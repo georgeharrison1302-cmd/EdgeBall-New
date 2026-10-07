@@ -1,7 +1,7 @@
 import "server-only";
 
 import { BET365_BOOKMAKER_ID } from "@/utils/api-football/bet-catalogs";
-import { asNumber, asRecord, predictionPercents } from "@/utils/pyth";
+import { asNumber, asRecord, isMissingRelation, predictionPercents } from "@/utils/pyth";
 import { betsFromOddsData, latestOddsSnapshots, pickBookmaker, type StoredOddsRow } from "@/utils/odds-api-io/stored";
 import { extractModelEdge, parsePlayerPropValue } from "@/utils/odds/player-prop-value";
 import {
@@ -30,6 +30,9 @@ export type GradedTip = {
   source: "card_poisson" | "match_prediction";
   status: "pending" | "won" | "lost" | "void";
   profit: number | null;
+  /** Machine fields persisted into model_tips so stored rows re-grade. */
+  playerId?: number | null;
+  outcome?: "home" | "draw" | "away" | null;
 };
 
 export type ModelMarketLedger = {
@@ -72,6 +75,19 @@ type FixtureRow = {
 
 export async function loadModelGrading(): Promise<ModelGradingSummary> {
   const supabase = createAdminClient();
+  const stored = await loadStoredTips(supabase);
+  if (stored != null) return summarizeTips(stored);
+  return summarizeTips(await collectLiveTips(supabase));
+}
+
+/**
+ * Live tip generation from stored odds + predictions. Snapshot jobs persist
+ * the output into model_tips; the summary prefers the stored ledger once
+ * populated so repricing never rewrites history.
+ */
+export async function collectLiveTips(
+  supabase: ReturnType<typeof createAdminClient>,
+): Promise<GradedTip[]> {
   const oddsRows: StoredOddsRow[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabase
@@ -189,6 +205,7 @@ export async function loadModelGrading(): Promise<ModelGradingSummary> {
           source: "card_poisson",
           status,
           profit,
+          playerId: playerId ?? null,
         });
       }
     }
@@ -256,31 +273,170 @@ export async function loadModelGrading(): Promise<ModelGradingSummary> {
           source: "match_prediction",
           status,
           profit,
+          outcome: outcome.key.toLowerCase() as "home" | "draw" | "away",
         });
       }
     }
   }
 
-  tips.sort((left, right) => right.edgePct - left.edgePct || right.odds - left.odds);
-  const settled = tips.filter((tip) => tip.status === "won" || tip.status === "lost");
+  return tips;
+}
+
+function summarizeTips(tips: GradedTip[]): ModelGradingSummary {
+  const sorted = [...tips].sort(
+    (left, right) => right.edgePct - left.edgePct || right.odds - left.odds,
+  );
+  const settled = sorted.filter((tip) => tip.status === "won" || tip.status === "lost");
   const wins = settled.filter((tip) => tip.status === "won").length;
   const losses = settled.filter((tip) => tip.status === "lost").length;
   const totalProfit = settled.reduce((sum, tip) => sum + (tip.profit ?? 0), 0);
   const stake = settled.length * UNIT_STAKE;
 
   return {
-    tipCount: tips.length,
+    tipCount: sorted.length,
     settledCount: settled.length,
-    pendingCount: tips.filter((tip) => tip.status === "pending").length,
+    pendingCount: sorted.filter((tip) => tip.status === "pending").length,
     wins,
     losses,
     hitRate: settled.length ? wins / settled.length : null,
     unitStake: UNIT_STAKE,
     totalProfit,
     roi: stake > 0 ? totalProfit / stake : null,
-    markets: buildMarketLedgers(tips),
-    tips: tips.slice(0, 80),
+    markets: buildMarketLedgers(sorted),
+    tips: sorted.slice(0, 80),
   };
+}
+
+type StoredTipRow = {
+  tip_key: string;
+  fixture_id: number;
+  market: string;
+  selection: string;
+  player_id: number | null;
+  outcome: string | null;
+  odds: number | string;
+  model_prob: number | string;
+  edge_pct: number | string;
+  source: string;
+  kickoff: string | null;
+  status: GradedTip["status"];
+  profit: number | string | null;
+};
+
+/**
+ * Immutable point-in-time ledger. Returns null when the table is absent or
+ * empty so the live-computed path keeps serving older environments.
+ */
+async function loadStoredTips(
+  supabase: ReturnType<typeof createAdminClient>,
+): Promise<GradedTip[] | null> {
+  const { data, error } = await supabase
+    .from("model_tips")
+    .select(
+      "tip_key, fixture_id, market, selection, player_id, outcome, odds, model_prob, edge_pct, source, kickoff, status, profit",
+    )
+    .order("generated_at", { ascending: false })
+    .limit(2000);
+  if (error) {
+    if (isMissingRelation(error)) return null;
+    throw error;
+  }
+  const rows = (data ?? []) as StoredTipRow[];
+  if (rows.length === 0) return null;
+
+  const fixtureIds = [...new Set(rows.map((row) => Number(row.fixture_id)))];
+  const fixtures = new Map<number, FixtureRow>();
+  const cardBooks = new Map<number, FixtureCardBook>();
+  const teams = new Map<number, string>();
+
+  for (let i = 0; i < fixtureIds.length; i += 200) {
+    const chunk = fixtureIds.slice(i, i + 200);
+    const [{ data: fix }, { data: events }] = await Promise.all([
+      supabase
+        .from("fixtures")
+        .select("id, date, status_short, home_goals, away_goals, home_team_id, away_team_id")
+        .in("id", chunk),
+      supabase
+        .from("fixture_events")
+        .select("fixture_id, player_id, player_name, type, detail")
+        .in("fixture_id", chunk),
+    ]);
+    for (const row of fix ?? []) fixtures.set(Number(row.id), row as FixtureRow);
+    for (const row of events ?? []) {
+      const fixtureId = Number(row.fixture_id);
+      const book = cardBooks.get(fixtureId) ?? emptyCardBook(true);
+      ingestCardEventRow(book, row);
+      cardBooks.set(fixtureId, book);
+    }
+  }
+
+  const teamIds = [
+    ...new Set(
+      [...fixtures.values()]
+        .flatMap((row) => [row.home_team_id, row.away_team_id])
+        .filter((id): id is number => id != null),
+    ),
+  ];
+  for (let i = 0; i < teamIds.length; i += 200) {
+    const { data } = await supabase
+      .from("teams")
+      .select("id, name")
+      .in("id", teamIds.slice(i, i + 200));
+    for (const row of data ?? []) teams.set(Number(row.id), String(row.name));
+  }
+
+  return rows.map((row) => {
+    const fixture = fixtures.get(Number(row.fixture_id));
+    const home =
+      fixture?.home_team_id != null ? teams.get(fixture.home_team_id) ?? "Home" : "Home";
+    const away =
+      fixture?.away_team_id != null ? teams.get(fixture.away_team_id) ?? "Away" : "Away";
+    const finished = fixture?.status_short != null && FINISHED.has(fixture.status_short);
+
+    let status = row.status;
+    let profit = asNumber(row.profit);
+    const odds = asNumber(row.odds) ?? 0;
+
+    if (status === "pending" && finished) {
+      if (row.source === "card_poisson") {
+        const booked = wasPlayerBooked(
+          cardBooks.get(Number(row.fixture_id)),
+          row.player_id,
+          row.selection,
+        );
+        if (booked != null) {
+          status = booked ? "won" : "lost";
+          profit = booked ? UNIT_STAKE * (odds - 1) : -UNIT_STAKE;
+        }
+      } else if (row.source === "match_prediction" && row.outcome) {
+        const hg = fixture?.home_goals;
+        const ag = fixture?.away_goals;
+        if (hg != null && ag != null) {
+          const hit =
+            row.outcome === "home" ? hg > ag : row.outcome === "draw" ? hg === ag : ag > hg;
+          status = hit ? "won" : "lost";
+          profit = hit ? UNIT_STAKE * (odds - 1) : -UNIT_STAKE;
+        }
+      }
+    }
+
+    return {
+      id: row.tip_key,
+      fixtureId: Number(row.fixture_id),
+      match: `${home} vs ${away}`,
+      kickoff: row.kickoff ?? fixture?.date ?? null,
+      market: row.market,
+      selection: row.selection,
+      odds,
+      modelProb: asNumber(row.model_prob) ?? 0,
+      edgePct: asNumber(row.edge_pct) ?? 0,
+      source: row.source === "card_poisson" ? "card_poisson" : "match_prediction",
+      status,
+      profit,
+      playerId: row.player_id,
+      outcome: (row.outcome as GradedTip["outcome"]) ?? null,
+    } satisfies GradedTip;
+  });
 }
 
 const FAMILY_ORDER = [

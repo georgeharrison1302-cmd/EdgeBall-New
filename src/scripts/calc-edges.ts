@@ -29,6 +29,8 @@ import { asNumber, asRecord, isMissingRelation, nestNumber } from "@/utils/pyth"
 const FINISHED = ["FT", "AET", "PEN", "AWD", "WO"] as const;
 const MIN_PLAYER_MATCHES = 5;
 const MIN_REF_MATCHES = 3;
+/** Booking tips above this price are Poisson tail noise, not edge. */
+const CARD_ODDS_CAP = 4.5;
 
 const PAGE = 1000;
 const IN_CHUNK = 200;
@@ -112,11 +114,12 @@ async function main() {
     [...fixtures.values()].flatMap((fixture) => [fixture.home_team_id, fixture.away_team_id]),
   );
 
-  const [playerTeam, playerRates, refRates, teamFouls] = await Promise.all([
+  const [playerTeam, playerRates, refRates, teamFouls, startersByFixture] = await Promise.all([
     loadPlayerTeams(supabase, playerIds, teamIds),
     loadPlayerRates(supabase, playerIds, fixtures),
     loadRefereeAverages(supabase, [...fixtures.values()]),
     loadTeamFoulsDrawn(supabase, teamIds, [...fixtures.values()]),
+    loadStarters(supabase, fixtureIds),
   ]);
   const leagueFouls = leagueFoulAverages(teamFouls, [...fixtures.values()]);
 
@@ -135,6 +138,7 @@ async function main() {
       refRates.leagueAvg,
       teamFouls,
       leagueFouls,
+      startersByFixture.get(row.fixture_id),
     );
     priced += patched.priced;
     skipped += patched.skipped;
@@ -267,6 +271,36 @@ function playerRateFor(index: PlayerRateIndex, playerId: number, fixture: Fixtur
  * function would use. Units are match totals (both teams), keeping
  * refereeModifier() on the same scale as leagueRefAvg.
  */
+/**
+ * Confirmed starting XIs per fixture from fixture_lineups (synced ~90min
+ * before kickoff). A fixture with no lineup rows is absent from the map,
+ * which suppresses card tips for the whole fixture pre-lineup.
+ */
+async function loadStarters(supabase: Ingest, fixtureIds: number[]) {
+  const map = new Map<number, Set<number>>();
+  for (const chunk of chunks(fixtureIds, IN_CHUNK)) {
+    const { data, error } = await supabase
+      .from("fixture_lineups")
+      .select("fixture_id, start_xi")
+      .in("fixture_id", chunk);
+    if (error) {
+      if (isMissingRelation(error)) return map;
+      throw error;
+    }
+    for (const row of data ?? []) {
+      const fixtureId = Number(row.fixture_id);
+      const xi = Array.isArray(row.start_xi) ? row.start_xi : [];
+      const set = map.get(fixtureId) ?? new Set<number>();
+      for (const entry of xi) {
+        const playerId = Number(asRecord(entry)?.player != null ? asRecord(asRecord(entry)?.player)?.id : null);
+        if (Number.isInteger(playerId) && playerId > 0) set.add(playerId);
+      }
+      map.set(fixtureId, set);
+    }
+  }
+  return map;
+}
+
 async function loadRefereeAverages(
   supabase: Ingest,
   fixtures: FixtureCtx[],
@@ -409,6 +443,7 @@ function patchRow(
   leagueRefAvg: Map<string, number>,
   teamFouls: Map<string, number>,
   leagueFouls: Map<string, number>,
+  starters: Set<number> | undefined,
 ) {
   const data = cloneOddsData(row.odds_data);
   const bets = data.bets ?? [];
@@ -425,13 +460,29 @@ function patchRow(
     for (const value of values) {
       const playerId = Number(value.player_id);
       const odd = Number(value.odd);
-      if (!Number.isInteger(playerId) || playerId <= 0 || !Number.isFinite(odd) || odd <= 1) {
+      const suppress = (reason?: never) => {
+        delete value.model_prob;
+        delete value.edge_pct;
         skipped += 1;
+        void reason;
+      };
+      if (!Number.isInteger(playerId) || playerId <= 0 || !Number.isFinite(odd) || odd <= 1) {
+        suppress();
+        continue;
+      }
+      // Lineup gate: card tips only exist for confirmed starters.
+      if (starters == null || !starters.has(playerId)) {
+        suppress();
+        continue;
+      }
+      // Tail guardrail: extreme longshot booking prices are tail noise.
+      if (odd > CARD_ODDS_CAP) {
+        suppress();
         continue;
       }
       const rate = playerRateFor(playerRates, playerId, fixture);
       if (!rate || rate.matches < MIN_PLAYER_MATCHES) {
-        skipped += 1;
+        suppress();
         continue;
       }
       const opponentModifier = opponentFoulModifier(

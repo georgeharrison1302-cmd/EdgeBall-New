@@ -560,6 +560,63 @@ export type Database = {
           },
         ]
       }
+      model_tips: {
+        Row: {
+          id: number
+          tip_key: string
+          fixture_id: number
+          market: string
+          selection: string
+          player_id: number | null
+          outcome: string | null
+          odds: number
+          model_prob: number
+          edge_pct: number
+          source: string
+          kickoff: string | null
+          status: string
+          profit: number | null
+          generated_at: string
+          settled_at: string | null
+        }
+        Insert: {
+          id?: never
+          tip_key: string
+          fixture_id: number
+          market: string
+          selection: string
+          player_id?: number | null
+          outcome?: string | null
+          odds: number
+          model_prob: number
+          edge_pct: number
+          source: string
+          kickoff?: string | null
+          status?: string
+          profit?: number | null
+          generated_at?: string
+          settled_at?: string | null
+        }
+        Update: {
+          id?: never
+          tip_key?: string
+          fixture_id?: number
+          market?: string
+          selection?: string
+          player_id?: number | null
+          outcome?: string | null
+          odds?: number
+          model_prob?: number
+          edge_pct?: number
+          source?: string
+          kickoff?: string | null
+          status?: string
+          profit?: number | null
+          generated_at?: string
+          settled_at?: string | null
+        }
+        Relationships: []
+      }
       odds: {
         Row: {
           fixture_id: number

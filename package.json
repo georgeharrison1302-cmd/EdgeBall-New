@@ -64,6 +64,8 @@
     "sync:football-daily": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-football-daily.ts",
     "sync:football-hourly": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-football-hourly.ts",
     "grade:user-bets": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/grade-user-bets.ts",
+    "sync:model-tips": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/snapshot-model-tips.ts",
+    "grade:model-tips": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/grade-model-tips.ts",
     "grade:card-props": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/grade-card-props.ts",
     "grade:all": "npm run grade:user-bets && npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/grade-card-props.ts",
     "sync:football-live": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-football-live.ts",
