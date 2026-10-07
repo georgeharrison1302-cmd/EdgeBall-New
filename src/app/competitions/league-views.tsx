@@ -4,6 +4,7 @@ import type { TeamMatch } from "./match-logs";
 import type { RoundGroup } from "./rounds";
 import type { PlayerStreak } from "./streaks";
 import { CornersSortableTable } from "./corners-sortable-table";
+import { GoalsSortableTable } from "./goals-sortable-table";
 import { RankingsSortableTable } from "./rankings-sortable-table";
 import { Form } from "./ui";
 import { XgSortableTable } from "./xg-sortable-table";
@@ -191,6 +192,95 @@ export function CornersView({
       )}
     </section>
   );
+}
+
+const GOAL_LINES = [1.5, 2.5, 3.5];
+
+export function GoalsView({
+  title,
+  season,
+  clubs,
+  matches,
+  rounds,
+  venue,
+  games,
+  href,
+}: {
+  title: string;
+  season: number;
+  clubs: ClubRow[];
+  matches: TeamMatch[];
+  rounds: RoundGroup[];
+  venue: CornerVenue;
+  games: CornerGames;
+  href: (key: "venue" | "games", id: string) => string;
+}) {
+  const next = nextOpponents(rounds);
+  const rows = goalRows(clubs, matches, venue, games).map((row) => ({
+    ...row,
+    nextOpponent: next.get(row.teamId)?.name ?? null,
+  }));
+  return (
+    <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <ViewHeading
+        title={`${title} goal stats ${season}`}
+        subtitle="Match totals from stored finished results. Over lines, BTTS, clean sheets and failed-to-score are shares of matches counted — never estimated."
+      />
+      <div className="mt-4 flex flex-wrap gap-4">
+        <PillLinks current={venue} href={(id) => href("venue", id)} options={[{ id: "overall", label: "Overall" }, { id: "home", label: "Home" }, { id: "away", label: "Away" }]} />
+        <PillLinks current={games} href={(id) => href("games", id)} options={[{ id: "season", label: "Season" }, { id: "last10", label: "Last 10" }, { id: "last5", label: "Last 5" }]} />
+      </div>
+      {rows.length === 0 ? (
+        <p className="mt-4 text-sm text-[#64748b]">
+          No finished matches stored for this split — goal rates come from completed fixtures
+          (fixtures).
+        </p>
+      ) : (
+        <GoalsSortableTable rows={rows} />
+      )}
+    </section>
+  );
+}
+
+function goalRows(clubs: ClubRow[], matches: TeamMatch[], venue: CornerVenue, games: CornerGames) {
+  return clubs
+    .flatMap((club) => {
+      const scoped = matches.filter(
+        (match) =>
+          match.teamId === club.teamId &&
+          (venue === "overall" || (venue === "home" ? match.home : !match.home)),
+      );
+      const windowed =
+        games === "last5" ? scoped.slice(-5) : games === "last10" ? scoped.slice(-10) : scoped;
+      if (windowed.length === 0) return [];
+      const n = windowed.length;
+      const totals = windowed.map((match) => match.goalsFor + match.goalsAgainst);
+      const rates: Record<number, number> = {};
+      for (const line of GOAL_LINES) {
+        rates[line] = Math.round((totals.filter((total) => total > line).length / n) * 100);
+      }
+      return [
+        {
+          ...club,
+          played: n,
+          gfAvg: windowed.reduce((sum, match) => sum + match.goalsFor, 0) / n,
+          gaAvg: windowed.reduce((sum, match) => sum + match.goalsAgainst, 0) / n,
+          last5: totals.slice(-5),
+          rates,
+          bttsPct: Math.round(
+            (windowed.filter((match) => match.goalsFor > 0 && match.goalsAgainst > 0).length / n) *
+              100,
+          ),
+          cleanSheetPct: Math.round(
+            (windowed.filter((match) => match.goalsAgainst === 0).length / n) * 100,
+          ),
+          failedToScorePct: Math.round(
+            (windowed.filter((match) => match.goalsFor === 0).length / n) * 100,
+          ),
+        },
+      ];
+    })
+    .sort((left, right) => right.rates[2.5] - left.rates[2.5]);
 }
 
 export function StreaksView({

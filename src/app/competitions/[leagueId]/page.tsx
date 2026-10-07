@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { loadBothTeamsToScore } from "../btts";
 import { featuredCompetitions, leagueTitle, listSelectableSeasons, loadLeaders, loadLeague, loadPlayerSeasonStats, loadTeamSheetTotals, parseSeason, shotsPerGoal, type LeaderRow } from "../data";
-import { CornersView, RankingsView, StreaksView, XgView, type ClubRow } from "../league-views";
+import { CornersView, GoalsView, RankingsView, StreaksView, XgView, type ClubRow } from "../league-views";
 import { leagueHasMatchSheets, loadTeamMatches } from "../match-logs";
 import { loadLeagueFixtures, type RoundGroup } from "../rounds";
 import SeasonStats, { BttsList } from "../season-stats";
@@ -23,6 +23,7 @@ const VIEWS = [
   ["rankings", "Power rankings"],
   ["xg", "Expected goals"],
   ["btts", "BTTS"],
+  ["goals", "Goals"],
   ["corners", "Corners"],
   ["streaks", "Streaks"],
 ] as const;
@@ -71,7 +72,7 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
     view === "stats" ? loadLeaders(id, season) : Promise.resolve({ scorers: [], assists: [], yellow: [], red: [] }),
     view === "stats" ? loadPlayerSeasonStats(id, season) : Promise.resolve([]),
     view === "stats" ? loadTeamSheetTotals(id, season) : Promise.resolve([]),
-    view === "rankings" || view === "xg" || view === "corners" ? loadTeamMatches(id, season) : Promise.resolve([]),
+    view === "rankings" || view === "xg" || view === "corners" || view === "goals" ? loadTeamMatches(id, season) : Promise.resolve([]),
     view === "btts" ? loadBothTeamsToScore(id, season, teams.map((row) => ({ id: row.teamId, name: row.team, logo: row.logoUrl }))) : Promise.resolve([]),
     view === "streaks" ? loadPlayerStreaks(id, season, streakStat, streakLine) : Promise.resolve([]),
     leagueHasMatchSheets(id, season),
@@ -192,6 +193,18 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
           venue={venueParam === "home" || venueParam === "away" ? venueParam : "overall"}
           games={gamesParam === "last10" || gamesParam === "last5" ? gamesParam : "season"}
           href={(key, value) => href("corners", { side: sideParam ?? "for", venue: venueParam ?? "overall", games: gamesParam ?? "season", [key]: value })}
+        />
+      ) : null}
+      {view === "goals" ? (
+        <GoalsView
+          title={league.name}
+          season={season}
+          clubs={clubs}
+          matches={matches}
+          rounds={rounds}
+          venue={venueParam === "home" || venueParam === "away" ? venueParam : "overall"}
+          games={gamesParam === "last10" || gamesParam === "last5" ? gamesParam : "season"}
+          href={(key, value) => href("goals", { venue: venueParam ?? "overall", games: gamesParam ?? "season", [key]: value })}
         />
       ) : null}
       {view === "streaks" ? (
