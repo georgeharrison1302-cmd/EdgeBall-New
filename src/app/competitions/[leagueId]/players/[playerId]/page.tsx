@@ -6,6 +6,14 @@ import { isTargetLeagueId } from "@/utils/api-football/competitions";
 import { loadPlayerAvailability, loadPlayerTransfers, loadPlayerTrophies } from "../../../club-extras";
 import { leagueTitle, listSelectableSeasons, loadPlayer, parseSeason, type PlayerSpell } from "../../../data";
 import { formHits, hitRates, loadMatchLog, type MatchLogRow } from "../../../match-log";
+import {
+  countForStat,
+  defaultThresholdForStat,
+  DESK_STAT_MARKETS,
+  deskForm,
+  type DeskStat,
+} from "@/lib/stats/prop-desk";
+import { currentStreak } from "@/lib/stats/prop-hunter";
 import { loadPlayerCardAngle } from "../../../player-angles";
 import { Stat } from "../../../ui";
 import { HitRateStrip } from "@/components/stats/HitRateStrip";
@@ -231,8 +239,17 @@ function SpellStats({ spell }: { spell: PlayerSpell }) {
       <Stat label="Penalties scored" value={spell.penaltyScored} />
       <Stat label="Penalties missed" value={spell.penaltyMissed} />
       <Stat label="Penalties saved" value={spell.penaltySaved} />
+      <Stat label="Goals/90" value={rate(per90(spell.goals, spell.minutes))} />
+      <Stat label="Assists/90" value={rate(per90(spell.assists, spell.minutes))} />
+      <Stat label="Shots/90" value={rate(per90(spell.shots, spell.minutes))} />
+      <Stat label="SOT/90" value={rate(per90(spell.shotsOn, spell.minutes))} />
     </div>
   );
+}
+
+function per90(total: number | null | undefined, minutes: number | null | undefined) {
+  if (total == null || minutes == null || minutes < 1) return null;
+  return (total * 90) / minutes;
 }
 
 function measure(value: string | null, unit: string) {
@@ -257,6 +274,7 @@ function MatchLog({ rows }: { rows: MatchLogRow[] }) {
             <HitRateStrip values={recorded(foul2)} thresholdLabel="hit 2+ fouls" />
             <HitRateStrip values={recorded(sot)} thresholdLabel="had 1+ SOT" />
           </div>
+          <PropRatesTable rows={rows} />
           <Rates title="Last five" rows={lastFive} />
           <div className="mt-3">
             <PlayerBreakdown rows={lastFive} />
@@ -264,6 +282,76 @@ function MatchLog({ rows }: { rows: MatchLogRow[] }) {
         </>
       )}
     </section>
+  );
+}
+
+function PropRatesTable({ rows }: { rows: MatchLogRow[] }) {
+  const stats = DESK_STAT_MARKETS.flatMap((market) => {
+    const stat = market.id as DeskStat;
+    const threshold = defaultThresholdForStat(stat);
+    const last10 = deskForm(rows, threshold, stat);
+    if (last10.hitPct == null || last10.counts.length === 0) return [];
+    const last5 = deskForm(rows.slice(0, 5), threshold, stat);
+    // MatchLogRow[] is newest-first; currentStreak expects oldest→newest.
+    const hits = rows
+      .map((row) => {
+        const value = countForStat(row, stat);
+        return value == null ? null : value >= threshold;
+      })
+      .reverse();
+    return [
+      {
+        stat,
+        label: market.label,
+        threshold,
+        last5,
+        last10,
+        streak: currentStreak(hits),
+      },
+    ];
+  });
+
+  if (stats.length === 0) return null;
+
+  return (
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white">
+      <table className="w-full min-w-[560px] text-left text-sm">
+        <thead>
+          <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+            <th className="px-4 py-2.5">Prop market</th>
+            <th className="px-3 py-2.5 text-right" title="Hits in the last five appearances">L5</th>
+            <th className="px-3 py-2.5 text-right" title="Hits in the last ten appearances">L10</th>
+            <th className="px-3 py-2.5 text-right" title="Average per appearance">Avg</th>
+            <th className="px-4 py-2.5 text-right" title="Consecutive hits counting back from the latest match">Streak</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stats.map((row) => (
+            <tr key={row.stat} className="border-t border-[#f1f5f9]">
+              <td className="px-4 py-2.5 font-semibold text-[#0f172a]">
+                {row.threshold}+ {row.label}
+              </td>
+              <td className="px-3 py-2.5 text-right">
+                {row.last5.hitPct == null ? "–" : `${row.last5.hits}/${row.last5.counts.length}`}
+              </td>
+              <td className="px-3 py-2.5 text-right">
+                {row.last10.hits}/{row.last10.counts.length}
+              </td>
+              <td className="px-3 py-2.5 text-right text-[#64748b]">
+                {row.last10.avg == null ? "–" : row.last10.avg.toFixed(1)}
+              </td>
+              <td
+                className={`px-4 py-2.5 text-right font-bold ${
+                  row.streak >= 3 ? "text-[#2563eb]" : "text-[#64748b]"
+                }`}
+              >
+                {row.streak > 0 ? `${row.streak}` : "–"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
