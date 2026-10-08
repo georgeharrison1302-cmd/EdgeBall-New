@@ -10,9 +10,17 @@ import {
   wasPlayerBooked,
   type FixtureCardBook,
 } from "@/utils/portfolio/card-events";
+import {
+  edgePct as edgeFor,
+  isPlausibleEdge,
+  noVigProbs,
+  shrinkProb,
+} from "@/lib/model/probability";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 const EDGE_FLOOR = 5;
+/** Longshot 1X2 prices amplify any model error into a fake edge. */
+const ONE_X_TWO_ODDS_CAP = 8;
 const UNIT_STAKE = 1;
 const FINISHED = new Set(["FT", "AET", "PEN", "AWD", "WO"]);
 const CARD_MARKETS = /player cards|player to be booked|player props - cards/i;
@@ -61,6 +69,8 @@ export type ModelGradingSummary = {
   roi: number | null;
   markets: ModelMarketLedger[];
   tips: GradedTip[];
+  /** Stored tips above the edge plausibility cap — counted in totals, hidden from the list. */
+  hiddenImplausible: number;
 };
 
 type FixtureRow = {
@@ -241,6 +251,19 @@ export async function collectLiveTips(
               : fixture.away_goals > fixture.home_goals,
         },
       ];
+      const priceOf = (key: string) =>
+        asNumber(
+          winner.values?.find(
+            (row: { value?: string | number | null }) =>
+              String(row.value ?? "").toLowerCase() === key.toLowerCase(),
+          )?.odd,
+        );
+      const marketProbs = noVigProbs(
+        ["Home", "Draw", "Away"].map((key) => priceOf(key) ?? Number.NaN),
+      );
+      const marketByKey = marketProbs
+        ? { Home: marketProbs[0], Draw: marketProbs[1], Away: marketProbs[2] }
+        : null;
       for (const outcome of map) {
         const value = winner.values.find(
           (row: { value?: string | number | null; odd?: string | number | null }) =>
@@ -248,8 +271,13 @@ export async function collectLiveTips(
         );
         const odd = asNumber(value?.odd);
         if (odd == null || odd <= 1 || outcome.model == null || outcome.model <= 0) continue;
-        const edgePct = (odd * outcome.model - 1) * 100;
-        if (edgePct <= EDGE_FLOOR) continue;
+        // The raw prediction is a coarse third-party percentage. Without a
+        // de-vigged market price to anchor it, publish nothing.
+        const marketProb = marketByKey?.[outcome.key] ?? null;
+        if (marketProb == null || odd > ONE_X_TWO_ODDS_CAP) continue;
+        const modelProb = shrinkProb(outcome.model, marketProb);
+        const edgePct = edgeFor(modelProb, odd);
+        if (edgePct <= EDGE_FLOOR || !isPlausibleEdge(edgePct)) continue;
         let status: GradedTip["status"] = "pending";
         let profit: number | null = null;
         if (finished) {
@@ -268,7 +296,7 @@ export async function collectLiveTips(
           market: "Match Winner",
           selection: outcome.key === "Home" ? `${home} win` : outcome.key === "Away" ? `${away} win` : "Draw",
           odds: odd,
-          modelProb: outcome.model,
+          modelProb,
           edgePct,
           source: "match_prediction",
           status,
@@ -303,7 +331,8 @@ function summarizeTips(tips: GradedTip[]): ModelGradingSummary {
     totalProfit,
     roi: stake > 0 ? totalProfit / stake : null,
     markets: buildMarketLedgers(sorted),
-    tips: sorted.slice(0, 80),
+    tips: sorted.filter((tip) => isPlausibleEdge(tip.edgePct)).slice(0, 80),
+    hiddenImplausible: sorted.filter((tip) => !isPlausibleEdge(tip.edgePct)).length,
   };
 }
 

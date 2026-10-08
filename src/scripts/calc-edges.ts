@@ -31,6 +31,8 @@ const MIN_PLAYER_MATCHES = 5;
 const MIN_REF_MATCHES = 3;
 /** Booking tips above this price are Poisson tail noise, not edge. */
 const CARD_ODDS_CAP = 4.5;
+/** A booking edge above this is almost always a rate/sample artefact. */
+const CARD_EDGE_CAP_PCT = 40;
 
 const PAGE = 1000;
 const IN_CHUNK = 200;
@@ -494,6 +496,10 @@ function patchRow(
       const lambda = rate.rate * refModifier * opponentModifier;
       const modelProb = 1 - Math.exp(-lambda);
       const edgePct = (odd * modelProb - 1) * 100;
+      if (edgePct > CARD_EDGE_CAP_PCT) {
+        suppress();
+        continue;
+      }
       value.model_prob = round(modelProb, 6);
       value.edge_pct = round(edgePct, 2);
       priced += 1;

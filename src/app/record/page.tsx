@@ -118,6 +118,29 @@ export default async function RecordPage() {
           </section>
 
           <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">Model versions</h2>
+            <p className="mt-1 text-sm text-muted">
+              We changed how probabilities are built after the calibration below showed the first
+              version was overconfident. Old tips stay in the record untouched; new tips are tracked
+              separately so the fix is judged on its own results.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {record.versions.map((version) => (
+                <div key={version.label} className="rounded-xl border border-line bg-surface px-4 py-3">
+                  <p className="text-sm font-black text-ink">
+                    {version.label}
+                    <span className="ml-2 text-xs font-semibold text-muted">{version.tips} tips · {version.settled} settled</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">{version.note}</p>
+                  <p className="mt-2 text-sm font-bold tabular-nums text-ink">
+                    {version.settled ? `${version.wins}-${version.settled - version.wins} · ${units(version.profit)}` : "No settled tips yet"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
             <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">Calibration</h2>
             <p className="mt-1 text-sm text-muted">
               When the model says a tip has a given chance, how often does it win? Close agreement

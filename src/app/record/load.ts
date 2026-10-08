@@ -14,6 +14,7 @@ import {
   type CurvePoint,
   type SettledTip,
 } from "@/lib/record/metrics";
+import { MODEL_V2_CUTOFF } from "@/lib/model/probability";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export type ModelRecord = {
@@ -31,6 +32,16 @@ export type ModelRecord = {
   curve: CurvePoint[];
   calibration: CalibrationBin[];
   markets: ModelMarketLedger[];
+  versions: ModelVersionRecord[];
+};
+
+export type ModelVersionRecord = {
+  label: string;
+  note: string;
+  tips: number;
+  settled: number;
+  wins: number;
+  profit: number;
 };
 
 type Row = {
@@ -84,6 +95,22 @@ export async function loadModelRecord(): Promise<ModelRecord> {
     profit: row.profit == null ? null : Number(row.profit),
   }));
 
+  const versionOf = (row: Row) => (Date.parse(row.generated_at) < Date.parse(MODEL_V2_CUTOFF) ? "v1" : "v2");
+  const versions: ModelVersionRecord[] = [
+    { label: "v1", note: "Raw third-party win probabilities compared directly to Bet365 prices" },
+    { label: "v2", note: "Probabilities shrunk toward the de-vigged market, implausible edges rejected" },
+  ].map((meta) => {
+    const mine = rows.filter((row) => versionOf(row) === meta.label);
+    const done = mine.filter((row) => row.status === "won" || row.status === "lost");
+    return {
+      ...meta,
+      tips: mine.length,
+      settled: done.length,
+      wins: done.filter((row) => row.status === "won").length,
+      profit: done.reduce((sum, row) => sum + Number(row.profit ?? 0), 0),
+    };
+  });
+
   const wins = settled.filter((tip) => tip.won).length;
   const profit = settled.reduce((sum, tip) => sum + tip.profit, 0);
   const curve = cumulativeCurve(settled);
@@ -103,5 +130,6 @@ export async function loadModelRecord(): Promise<ModelRecord> {
     curve,
     calibration: calibrationBins(settled),
     markets: buildMarketLedgers(graded),
+    versions,
   };
 }

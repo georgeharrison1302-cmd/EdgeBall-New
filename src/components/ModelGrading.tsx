@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { EmptyReason } from "@/components/stats/EmptyReason";
+import { confidenceFor } from "@/lib/model/probability";
 import { formatMoney, formatOdds } from "@/utils/display-prefs";
 
 import type { ModelGradingSummary } from "@/app/tracker/model-grading-load";
@@ -121,6 +122,13 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
           source="prematch_odds"
         />
       ) : (
+        <div>
+        {data.hiddenImplausible > 0 ? (
+          <p className="mb-2 text-xs text-faint">
+            {data.hiddenImplausible} earlier tips with implausibly large edges (over 40%) are counted in the
+            totals above but hidden from this list.
+          </p>
+        ) : null}
         <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-sm">
           <table className="w-full min-w-[44rem] text-left text-sm">
             <thead>
@@ -129,6 +137,7 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
                 <th className="px-3 py-2 font-medium">Selection</th>
                 <th className="px-3 py-2 font-medium">Odds</th>
                 <th className="px-3 py-2 font-medium">Edge</th>
+                <th className="px-3 py-2 font-medium">Confidence</th>
                 <th className="px-3 py-2 font-medium">Result</th>
                 <th className="px-3 py-2 font-medium">P/L</th>
               </tr>
@@ -147,6 +156,9 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
                   <td className="px-3 py-2 font-semibold tabular-nums text-cobalt">
                     +{tip.edgePct.toFixed(1)}%
                   </td>
+                  <td className="px-3 py-2">
+                    <ConfidencePill level={confidenceFor(tip.edgePct, tip.modelProb, 1 / tip.odds)} />
+                  </td>
                   <td className="px-3 py-2 capitalize text-muted">{tip.status}</td>
                   <td className="px-3 py-2 tabular-nums">
                     {tip.profit == null ? "—" : formatMoney(tip.profit, "GBP")}
@@ -156,8 +168,21 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
             </tbody>
           </table>
         </div>
+        </div>
       )}
     </div>
+  );
+}
+
+function ConfidencePill({ level }: { level: "high" | "medium" | "low" }) {
+  const style =
+    level === "high"
+      ? "bg-blue-50 text-cobalt"
+      : level === "medium"
+        ? "bg-slate-100 text-ink"
+        : "bg-amber-50 text-amber-700";
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold capitalize ${style}`}>{level}</span>
   );
 }
 
