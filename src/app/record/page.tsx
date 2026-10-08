@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { MarketTable } from "@/components/record/MarketTable";
 import { ProfitCurve } from "@/components/record/ProfitCurve";
 import { EmptyReason } from "@/components/stats/EmptyReason";
 import { DataFreshness } from "@/components/ui/DataFreshness";
@@ -53,7 +54,7 @@ export default async function RecordPage() {
             </p>
           ) : null}
 
-          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <Stat label="Settled tips" value={String(record.settled)} sub={`${record.pending} pending`} />
             <Stat label="Record" value={`${record.wins}-${record.losses}`} sub={`${pct(record.hitRate)} hit rate`} />
             <Stat
@@ -69,6 +70,20 @@ export default async function RecordPage() {
               sub="profit per unit staked"
             />
             <Stat label="Max drawdown" value={`${record.maxDrawdown.toFixed(1)}u`} sub="peak to trough" />
+            <Stat
+              label="Beat the close"
+              value={
+                record.clv.priced === 0
+                  ? "—"
+                  : `${pct(record.clv.beatClose / record.clv.priced)}`
+              }
+              tone={record.clv.avgClv == null ? undefined : record.clv.avgClv >= 0 ? "good" : "bad"}
+              sub={
+                record.clv.priced === 0
+                  ? "needs stamped closing prices"
+                  : `avg CLV ${record.clv.avgClv! >= 0 ? "+" : ""}${(record.clv.avgClv! * 100).toFixed(1)}% · ${record.clv.priced} priced`
+              }
+            />
           </section>
 
           <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
@@ -84,36 +99,8 @@ export default async function RecordPage() {
 
           <section>
             <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">By market</h2>
-            <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-white shadow-sm">
-              <table className="w-full min-w-[40rem] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-line text-muted">
-                    {["Market", "Tips", "Settled", "W-L", "Hit rate", "Avg edge", "P/L", "ROI"].map((head) => (
-                      <th key={head} className="px-3 py-2 font-medium">{head}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {record.markets.map((market) => (
-                    <tr key={market.family} className="border-b border-line/60 last:border-0">
-                      <td className="px-3 py-2 font-semibold text-ink">{market.label}</td>
-                      <td className="px-3 py-2 tabular-nums">{market.tips}</td>
-                      <td className="px-3 py-2 tabular-nums text-muted">{market.settled}</td>
-                      <td className="px-3 py-2 tabular-nums">{market.settled ? `${market.wins}-${market.losses}` : "—"}</td>
-                      <td className="px-3 py-2 tabular-nums">{pct(market.hitRate)}</td>
-                      <td className="px-3 py-2 tabular-nums text-muted">
-                        {market.avgEdge == null ? "—" : `+${market.avgEdge.toFixed(1)}%`}
-                      </td>
-                      <td className={`px-3 py-2 font-semibold tabular-nums ${market.settled === 0 ? "text-muted" : market.profit >= 0 ? "text-cobalt" : "text-red-600"}`}>
-                        {market.settled ? units(market.profit) : "—"}
-                      </td>
-                      <td className={`px-3 py-2 font-semibold tabular-nums ${market.roi == null ? "text-muted" : market.roi >= 0 ? "text-cobalt" : "text-red-600"}`}>
-                        {market.roi == null ? "—" : `${(market.roi * 100).toFixed(1)}%`}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3">
+              <MarketTable markets={record.markets} />
             </div>
           </section>
 
@@ -181,8 +168,9 @@ export default async function RecordPage() {
                   : "Price versus result appears once tips settle."}
               </li>
               <li>
-                Closing-line value (did we beat the final price?) needs closing odds, which we do not store yet,
-                so it is not shown rather than estimated.
+                {record.clv.priced > 0
+                  ? `Beat the close on ${record.clv.beatClose} of ${record.clv.priced} tips with a stamped closing price (avg CLV ${record.clv.avgClv! >= 0 ? "+" : ""}${(record.clv.avgClv! * 100).toFixed(2)}%). CLV is the sharpest truth test we have — a consistently positive number means our prices beat the market's final answer.`
+                  : "Closing-line value (did we beat the final price?) appears once tips have stamped closing prices — these are frozen at kickoff as tips settle."}
               </li>
               <li>Prices come from stored Bet365 snapshots and may have moved by the time you look.</li>
               <li>Past performance does not predict future results. 18+. Gamble responsibly.</li>

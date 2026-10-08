@@ -10,6 +10,16 @@ import { sleep, upsertFixtureEvents } from "./fixture-event-sync";
 const FINISHED = ["FT", "AET", "PEN"] as const;
 const WINDOW_MS = 48 * 60 * 60 * 1000;
 const REQUEST_GAP_MS = 220;
+/**
+ * Extra fixtures older than the 48h window fetched per run to slowly backfill
+ * history for the Match Hub timeline. Bounded so API quota stays predictable;
+ * override with EVENTS_BACKFILL_PER_RUN=0 to disable.
+ */
+const BACKFILL_PER_RUN = Math.max(
+  0,
+  Number(process.env.EVENTS_BACKFILL_PER_RUN ?? 8) || 0,
+);
+const BACKFILL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 async function main() {
   const apiKey = process.env.API_FOOTBALL_KEY;
@@ -17,7 +27,13 @@ async function main() {
 
   const supabase = createIngestClient();
   const fixtureIds = await targetFixtureIds(supabase);
-  console.log(`sync-fixture-events targets=${fixtureIds.length} (FT last 48h needing cards)`);
+  const backfill = await backfillFixtureIds(supabase);
+  for (const id of backfill) {
+    if (!fixtureIds.includes(id)) fixtureIds.push(id);
+  }
+  console.log(
+    `sync-fixture-events targets=${fixtureIds.length} (FT last 48h needing cards + ${backfill.length} backfill)`,
+  );
 
   if (fixtureIds.length === 0) {
     console.log("sync-fixture-events done cached=0 skipped=0");
@@ -135,6 +151,44 @@ async function targetFixtureIds(supabase: ReturnType<typeof createIngestClient>)
   }
 
   return [...needing];
+}
+
+/**
+ * Finished fixtures older than the 48h window with zero stored events —
+ * a few per run so the Timeline tab fills in gradually without a quota spike.
+ */
+async function backfillFixtureIds(supabase: ReturnType<typeof createIngestClient>) {
+  if (BACKFILL_PER_RUN === 0) return [];
+  const from = new Date(Date.now() - BACKFILL_WINDOW_MS).toISOString();
+  const to = new Date(Date.now() - WINDOW_MS).toISOString();
+  const { data: finished, error } = await supabase
+    .from("fixtures")
+    .select("id")
+    .in("status_short", [...FINISHED])
+    .gte("date", from)
+    .lt("date", to)
+    .order("date", { ascending: false })
+    .limit(300);
+  if (error) throw error;
+
+  const candidates = (finished ?? [])
+    .map((row) => Number(row.id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+  const missing: number[] = [];
+  for (let i = 0; i < candidates.length && missing.length < BACKFILL_PER_RUN; i += 100) {
+    const chunk = candidates.slice(i, i + 100);
+    const { data: events, error: eventError } = await supabase
+      .from("fixture_events")
+      .select("fixture_id")
+      .in("fixture_id", chunk);
+    if (eventError) throw eventError;
+    const have = new Set((events ?? []).map((row) => Number(row.fixture_id)));
+    for (const id of chunk) {
+      if (!have.has(id)) missing.push(id);
+      if (missing.length >= BACKFILL_PER_RUN) break;
+    }
+  }
+  return missing;
 }
 
 main().catch((error: unknown) => {

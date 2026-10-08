@@ -56,7 +56,7 @@ export function TopValueAngles({
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-cobalt text-[11px] font-black text-white">
                   {index + 1}
                 </span>
-                <span className="rounded-full bg-[#ecfeff] px-2.5 py-0.5 text-[11px] font-extrabold text-[#0e7490]">
+                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-extrabold text-cobalt">
                   +{(row.edgePct ?? 0).toFixed(1)}% edge
                 </span>
               </div>

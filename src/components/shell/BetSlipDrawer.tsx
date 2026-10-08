@@ -84,7 +84,7 @@ export function BetSlipDrawer() {
         <span aria-hidden="true">📋</span>
         Slip
         {count > 0 ? (
-          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#22d3ee] px-1.5 text-[11px] font-extrabold text-slate-900">
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-cobalt px-1.5 text-[11px] font-extrabold text-white">
             {count}
           </span>
         ) : null}

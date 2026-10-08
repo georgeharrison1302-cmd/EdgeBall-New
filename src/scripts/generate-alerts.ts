@@ -7,6 +7,7 @@
  * hour, new model tip). Inserts are deduplicated per (user, dedupe_key).
  */
 import { alertsFor, type FixtureState, type WatchItem } from "@/lib/alerts/rules";
+import { alertEmailConfigured, sendAlertDigest } from "@/lib/alerts/email";
 import { isMissingRelation } from "@/utils/pyth";
 import { createIngestClient } from "@/utils/supabase/admin";
 
@@ -118,6 +119,7 @@ async function main() {
   }));
 
   let created = 0;
+  const emailed: { userId: string; alerts: { title: string; body: string | null; href: string | null }[] }[] = [];
   for (const [userId, items] of byUser) {
     const rows = alertsFor(items, states, now).map((alert) => ({
       user_id: userId,
@@ -141,6 +143,29 @@ async function main() {
     const { error } = await supabase.from("user_alerts").insert(fresh);
     if (error) throw error;
     created += fresh.length;
+    if (alertEmailConfigured()) emailed.push({ userId, alerts: fresh });
+  }
+
+  if (alertEmailConfigured() && emailed.length > 0) {
+    let sent = 0;
+    for (const entry of emailed) {
+      const { data } = await supabase.auth.admin.getUserById(entry.userId);
+      const email = data.user?.email;
+      if (!email) continue;
+      if (
+        await sendAlertDigest(
+          email,
+          entry.alerts.map((alert) => ({
+            title: alert.title,
+            body: alert.body,
+            href: alert.href,
+          })),
+        )
+      ) {
+        sent += 1;
+      }
+    }
+    console.log(`alerts: emailed ${sent}/${emailed.length} users`);
   }
 
   console.log(`alerts: ${created} new for ${byUser.size} premium watchlists`);

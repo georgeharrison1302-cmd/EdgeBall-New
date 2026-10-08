@@ -1,9 +1,20 @@
 export type SettledTip = {
   at: string;
   odds: number;
+  /** Last stored bookmaker price before kickoff; null when not stamped. */
+  closingOdds?: number | null;
   modelProb: number;
   won: boolean;
   profit: number;
+};
+
+export type ClosingLine = {
+  /** Settled tips with a stamped closing price. */
+  priced: number;
+  /** Tips where the taken price was better than the close. */
+  beatClose: number;
+  /** Mean of (taken / closing - 1); positive = we beat the market close. */
+  avgClv: number | null;
 };
 
 export type CurvePoint = { at: string; cumulative: number; n: number };
@@ -63,4 +74,20 @@ export function priceVsResult(tips: SettledTip[]) {
   const implied = tips.reduce((sum, tip) => sum + 1 / tip.odds, 0) / tips.length;
   const actual = tips.filter((tip) => tip.won).length / tips.length;
   return { implied, actual };
+}
+
+/**
+ * Closing-line value over tips with a stamped closing price. A positive
+ * average means our published price beat the final market price — the
+ * closest thing to an objective skill signal without P&L at scale.
+ */
+export function closingLineValue(tips: SettledTip[]): ClosingLine {
+  const priced = tips.filter(
+    (tip) => tip.closingOdds != null && tip.closingOdds > 1 && tip.odds > 1,
+  );
+  if (priced.length === 0) return { priced: 0, beatClose: 0, avgClv: null };
+  const beatClose = priced.filter((tip) => tip.closingOdds! < tip.odds).length;
+  const avgClv =
+    priced.reduce((sum, tip) => sum + (tip.odds / tip.closingOdds! - 1), 0) / priced.length;
+  return { priced: priced.length, beatClose, avgClv };
 }

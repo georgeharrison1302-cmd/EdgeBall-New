@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import BrandMark from "@/components/BrandMark";
+import { AlertBell } from "./AlertBell";
 import { SearchBox } from "./SearchBox";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { useBetSlip } from "@/components/stats/BetSlipContext";
@@ -70,11 +71,13 @@ export function Header({
           {showUpgrade ? (
             <Link
               href="/pricing"
-              className="hidden items-center rounded-full border border-[#22d3ee] bg-[#ecfeff] px-3.5 py-1.5 text-xs font-extrabold tracking-wide text-[#0e7490] uppercase hover:bg-[#cffafe] sm:inline-flex"
+              className="hidden items-center rounded-full border border-cobalt bg-blue-50 px-3.5 py-1.5 text-xs font-extrabold tracking-wide text-cobalt uppercase hover:bg-blue-100 sm:inline-flex"
             >
               Upgrade
             </Link>
           ) : null}
+
+          <AlertBell />
 
           {slip ? (
             <button
@@ -85,7 +88,7 @@ export function Header({
             >
               <SlipIcon />
               {slip.legs.length > 0 ? (
-                <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#22d3ee] px-1 text-[10px] font-extrabold text-slate-900">
+                <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-cobalt px-1 text-[10px] font-extrabold text-white">
                   {slip.legs.length}
                 </span>
               ) : null}
@@ -117,7 +120,7 @@ export function Header({
               <Link
                 href="/pricing"
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 rounded-full border border-[#22d3ee] bg-[#ecfeff] px-3.5 py-2 text-center text-xs font-extrabold tracking-wide text-[#0e7490] uppercase"
+                className="mt-2 rounded-full border border-cobalt bg-blue-50 px-3.5 py-2 text-center text-xs font-extrabold tracking-wide text-cobalt uppercase"
               >
                 Upgrade
               </Link>

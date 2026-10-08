@@ -15,6 +15,25 @@ export type FixtureEvent = {
   assistName: string | null;
 };
 
+export type FixtureXg = { teamId: number; xg: number };
+
+/** Per-team expected goals from fixture_statistics for this fixture. */
+export async function loadFixtureXg(fixtureId: number): Promise<FixtureXg[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("fixture_statistics")
+    .select("team_id, statistics")
+    .eq("fixture_id", fixtureId);
+  if (error) throw error;
+  return (data ?? []).flatMap((row) => {
+    const stats = row.statistics as Record<string, unknown> | null;
+    const raw = stats?.expected_goals;
+    const xg = raw == null ? null : Number(raw);
+    if (xg == null || !Number.isFinite(xg)) return [];
+    return [{ teamId: Number(row.team_id), xg }];
+  });
+}
+
 /** Match timeline from fixture_events, ordered by minute then insertion order. */
 export async function loadFixtureEvents(fixtureId: number): Promise<FixtureEvent[]> {
   const supabase = createAdminClient();

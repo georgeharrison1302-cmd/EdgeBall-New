@@ -7,6 +7,8 @@ import {
   SortableTh,
   useColumnSort,
 } from "@/components/stats/SortableStatHeader";
+import { ExportCsvButton } from "@/components/ui/TableToolbar";
+import type { CsvColumn } from "@/lib/csv";
 
 const LINES = [1.5, 2.5, 3.5] as const;
 
@@ -59,8 +61,27 @@ export function GoalsSortableTable({ rows }: { rows: GoalTableRow[] }) {
     });
   }, [rows, sortKey, sortDir]);
 
+  const csvColumns: CsvColumn<GoalTableRow>[] = [
+    { header: "Team", value: (row) => row.team },
+    { header: "Played", value: (row) => row.played },
+    { header: "GF per game", value: (row) => row.gfAvg.toFixed(2) },
+    { header: "GA per game", value: (row) => row.gaAvg.toFixed(2) },
+    ...LINES.map((line): CsvColumn<GoalTableRow> => ({
+      header: `Over ${line} %`,
+      value: (row) => row.rates[line] ?? null,
+    })),
+    { header: "BTTS %", value: (row) => row.bttsPct },
+    { header: "Clean sheet %", value: (row) => row.cleanSheetPct },
+    { header: "Failed to score %", value: (row) => row.failedToScorePct },
+    { header: "Last 5 total goals", value: (row) => row.last5.join(" ") },
+    { header: "Next opponent", value: (row) => row.nextOpponent },
+  ];
+
   return (
     <div className="mt-4 overflow-x-auto">
+      <div className="mb-2 flex justify-end">
+        <ExportCsvButton filename="edgeball-goal-stats.csv" columns={csvColumns} rows={sorted} />
+      </div>
       <table className="w-full min-w-[980px] text-left text-sm">
         <thead>
           <tr>

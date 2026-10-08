@@ -7,10 +7,12 @@ import {
 } from "@/app/tracker/model-grading-load";
 import {
   calibrationBins,
+  closingLineValue,
   cumulativeCurve,
   drawdown,
   priceVsResult,
   type CalibrationBin,
+  type ClosingLine,
   type CurvePoint,
   type SettledTip,
 } from "@/lib/record/metrics";
@@ -29,6 +31,7 @@ export type ModelRecord = {
   maxDrawdown: number;
   firstTipAt: string | null;
   price: { implied: number; actual: number } | null;
+  clv: ClosingLine;
   curve: CurvePoint[];
   calibration: CalibrationBin[];
   markets: ModelMarketLedger[];
@@ -57,24 +60,36 @@ type Row = {
   generated_at: string;
   status: string;
   profit: number | null;
+  closing_odds?: number | null;
 };
 
 export async function loadModelRecord(): Promise<ModelRecord> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const base =
+    "tip_key, fixture_id, market, selection, source, odds, model_prob, edge_pct, kickoff, generated_at, status, profit";
+  const first = await supabase
     .from("model_tips")
-    .select(
-      "tip_key, fixture_id, market, selection, source, odds, model_prob, edge_pct, kickoff, generated_at, status, profit",
-    )
+    .select(`${base}, closing_odds`)
     .order("generated_at", { ascending: true })
     .limit(10000);
-  if (error) throw error;
+  let data: unknown[] | null = first.data;
+  if (first.error) {
+    // closing_odds migration not applied yet — fall back without it.
+    const second = await supabase
+      .from("model_tips")
+      .select(base)
+      .order("generated_at", { ascending: true })
+      .limit(10000);
+    if (second.error) throw second.error;
+    data = second.data;
+  }
   const rows = (data ?? []) as Row[];
 
   const settledRows = rows.filter((row) => row.status === "won" || row.status === "lost");
   const settled: SettledTip[] = settledRows.map((row) => ({
     at: row.kickoff ?? row.generated_at,
     odds: Number(row.odds),
+    closingOdds: row.closing_odds == null ? null : Number(row.closing_odds),
     modelProb: Number(row.model_prob),
     won: row.status === "won",
     profit: Number(row.profit ?? 0),
@@ -127,6 +142,7 @@ export async function loadModelRecord(): Promise<ModelRecord> {
     maxDrawdown: drawdown(curve),
     firstTipAt: rows[0]?.generated_at ?? null,
     price: priceVsResult(settled),
+    clv: closingLineValue(settled),
     curve,
     calibration: calibrationBins(settled),
     markets: buildMarketLedgers(graded),

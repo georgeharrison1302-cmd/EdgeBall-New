@@ -130,7 +130,7 @@ function HunterRow({ prop, rank }: { prop: PlayerProp; rank: number }) {
         <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-extrabold text-cobalt">
           {prop.selection}
         </span>
-        <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[11px] font-extrabold text-[#0e7490]">
+        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-extrabold text-cobalt">
           +{edge.toFixed(1)}% edge
         </span>
         <AddToSlipButton

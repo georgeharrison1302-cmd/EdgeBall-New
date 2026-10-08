@@ -11,7 +11,7 @@ export type CollisionCardData = KeyMatchup & {
  */
 export function TacticalCollision({ matchup }: { matchup: CollisionCardData }) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-[#dbeafe] bg-gradient-to-br from-[#eff6ff] via-white to-[#ecfeff] p-4 shadow-sm">
+    <article className="overflow-hidden rounded-2xl border border-[#dbeafe] bg-gradient-to-br from-[#eff6ff] via-white to-[#eff6ff] p-4 shadow-sm">
       {matchup.match ? (
         <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
           {matchup.competition ? `${matchup.competition} · ` : ""}

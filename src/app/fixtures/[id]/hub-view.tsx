@@ -28,7 +28,7 @@ import {
   type FixtureAvailability,
   type TeamLineup,
 } from "./hub-availability";
-import { loadFixtureEvents, type FixtureEvent } from "./hub-events";
+import { loadFixtureEvents, loadFixtureXg, type FixtureEvent, type FixtureXg } from "./hub-events";
 import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
@@ -155,7 +155,7 @@ function Hero({ hub, unlocked }: { hub: MatchHubPage; unlocked: boolean }) {
         className="px-6 py-7"
         style={{
           background:
-            "linear-gradient(135deg, var(--canvas) 0%, #ffffff 45%, #ecfeff 100%)",
+            "linear-gradient(135deg, var(--canvas) 0%, #ffffff 45%, #eff6ff 100%)",
         }}
       >
         <p className="text-center text-[11px] font-extrabold tracking-wide text-[var(--cobalt)] uppercase">
@@ -443,26 +443,47 @@ function matchStarted(status: string | null) {
 }
 
 async function TimelineLoader({ hub }: { hub: MatchHubPage }) {
-  const events = await loadFixtureEvents(hub.id).catch((cause: unknown) => {
-    console.error(`[timeline] fixture ${hub.id}:`, cause);
-    return [] as FixtureEvent[];
-  });
-  return <TimelinePanel hub={hub} events={events} />;
+  const [events, xg] = await Promise.all([
+    loadFixtureEvents(hub.id).catch((cause: unknown) => {
+      console.error(`[timeline] fixture ${hub.id}:`, cause);
+      return [] as FixtureEvent[];
+    }),
+    loadFixtureXg(hub.id).catch(() => [] as FixtureXg[]),
+  ]);
+  return <TimelinePanel hub={hub} events={events} xg={xg} />;
 }
 
-function TimelinePanel({ hub, events }: { hub: MatchHubPage; events: FixtureEvent[] }) {
+function TimelinePanel({
+  hub,
+  events,
+  xg,
+}: {
+  hub: MatchHubPage;
+  events: FixtureEvent[];
+  xg: FixtureXg[];
+}) {
+  const homeXg = xg.find((row) => row.teamId === hub.home.id)?.xg ?? null;
+  const awayXg = xg.find((row) => row.teamId === hub.away.id)?.xg ?? null;
   if (events.length === 0) {
     return (
-      <EmptyReason
-        variant="panel"
-        title="No match events stored yet"
-        detail="Goals, cards and substitutions appear here once the results sync has covered this fixture"
-        source="fixture_events"
-      />
+      <>
+        {homeXg != null && awayXg != null ? (
+          <XgStrip home={homeXg} away={awayXg} homeName={hub.home.name} awayName={hub.away.name} />
+        ) : null}
+        <EmptyReason
+          variant="panel"
+          title="No match events stored yet"
+          detail="Goals, cards and substitutions appear here once the results sync has covered this fixture"
+          source="fixture_events"
+        />
+      </>
     );
   }
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      {homeXg != null && awayXg != null ? (
+        <XgStrip home={homeXg} away={awayXg} homeName={hub.home.name} awayName={hub.away.name} bare />
+      ) : null}
       <ol className="space-y-3">
         {events.map((event) => {
           const home = event.teamId === hub.home.id;
@@ -482,6 +503,34 @@ function TimelinePanel({ hub, events }: { hub: MatchHubPage; events: FixtureEven
         <span>{hub.away.name}</span>
       </div>
     </section>
+  );
+}
+
+function XgStrip({
+  home,
+  away,
+  homeName,
+  awayName,
+  bare,
+}: {
+  home: number;
+  away: number;
+  homeName: string;
+  awayName: string;
+  bare?: boolean;
+}) {
+  return (
+    <p
+      className={`flex items-baseline justify-center gap-2 text-xs text-[var(--muted)] ${
+        bare ? "mb-4 border-b border-[var(--line)] pb-3" : "rounded-2xl border border-[var(--line)] bg-white p-4"
+      }`}
+    >
+      <span className="font-semibold text-ink">{homeName}</span>
+      <span className="text-sm font-black tabular-nums text-cobalt">
+        xG {home.toFixed(2)} – {away.toFixed(2)}
+      </span>
+      <span className="font-semibold text-ink">{awayName}</span>
+    </p>
   );
 }
 

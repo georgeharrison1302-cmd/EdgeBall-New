@@ -578,6 +578,8 @@ export type Database = {
           profit: number | null
           generated_at: string
           settled_at: string | null
+          closing_odds: number | null
+          closed_at: string | null
         }
         Insert: {
           id?: never
@@ -596,6 +598,8 @@ export type Database = {
           profit?: number | null
           generated_at?: string
           settled_at?: string | null
+          closing_odds?: number | null
+          closed_at?: string | null
         }
         Update: {
           id?: never
@@ -614,6 +618,8 @@ export type Database = {
           profit?: number | null
           generated_at?: string
           settled_at?: string | null
+          closing_odds?: number | null
+          closed_at?: string | null
         }
         Relationships: []
       }
