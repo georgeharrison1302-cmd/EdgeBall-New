@@ -1,0 +1,62 @@
+name: Ingest
+
+# Scheduled data pipeline. Each job runs the matching `npm run job -- <name>`
+# which executes its scripts in order and records a heartbeat for the site's
+# "Updated x min ago" freshness stamps. Add the secrets below under
+# Settings > Secrets and variables > Actions.
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # lineups (script only fetches the next 90 minutes)
+    - cron: "5,35 * * * *"   # results, events, stats
+    - cron: "10 */3 * * *"   # odds
+    - cron: "20 */3 * * *"   # fixtures, predictions, injuries
+    - cron: "25,55 * * * *"  # edges, model tip snapshot, grading
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Job to run
+        type: choice
+        options: [lineups, results, odds, reference, tips]
+        required: true
+
+concurrency:
+  group: ingest-${{ github.event.schedule || inputs.job }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Write env
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+        run: |
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY"
+            echo "API_FOOTBALL_KEY=$API_FOOTBALL_KEY"
+            echo "ODDS_API_IO_KEY=$ODDS_API_IO_KEY"
+          } > .env.local
+      - name: Pick job
+        id: pick
+        run: |
+          case "${{ github.event.schedule }}" in
+            "*/15 * * * *") job=lineups ;;
+            "5,35 * * * *") job=results ;;
+            "10 */3 * * *") job=odds ;;
+            "20 */3 * * *") job=reference ;;
+            "25,55 * * * *") job=tips ;;
+            *) job="${{ inputs.job }}" ;;
+          esac
+          echo "job=$job" >> "$GITHUB_OUTPUT"
+      - run: npm run job -- ${{ steps.pick.outputs.job }}

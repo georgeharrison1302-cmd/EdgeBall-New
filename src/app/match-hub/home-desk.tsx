@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { MatchGrid } from "@/components/MatchHub/MatchGrid";
 import type { DayLoad, FixtureMatch } from "@/app/fixtures/types";
 import type { ArbitrageOpportunity } from "@/lib/odds/arbitrage";
@@ -25,6 +27,7 @@ type DeskProps = {
   arbitrage: ArbitrageOpportunity[];
   arbitrageError: string | null;
   unlocked: boolean;
+  freshness?: ReactNode;
 };
 
 /** Fixture-first home desk — fixtures board + SureBets tab. */
@@ -45,6 +48,7 @@ export function MatchHubHomeDesk(props: DeskProps) {
             ? "Guaranteed-price discrepancies across your stored Odds-API bookmakers."
             : "Browse fixtures by date and competition, then open Match Hub for team stats, player props, H2H, and the bet builder."}
         </p>
+        {props.freshness ? <div className="mt-3">{props.freshness}</div> : null}
       </header>
 
       <MatchGrid {...props} />

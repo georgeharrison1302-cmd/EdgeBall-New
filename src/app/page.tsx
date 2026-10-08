@@ -5,6 +5,7 @@ import { featuredCompetitions } from "@/app/competitions/data";
 import { fixtureDateOptions, hasFixtureOdds } from "@/app/fixtures/board-utils";
 import { loadFixtureDay } from "@/app/fixtures/load";
 import type { FixtureMatch } from "@/app/fixtures/types";
+import { DataFreshness } from "@/components/ui/DataFreshness";
 import { MatchHubHomeDesk } from "@/app/match-hub/home-desk";
 import { fetchArbitrageBets, type ArbitrageOpportunity } from "@/lib/odds/arbitrage";
 import { isTargetLeagueId } from "@/utils/api-football/competitions";
@@ -72,6 +73,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
       arbitrage={arbResult.opportunities}
       arbitrageError={arbResult.error}
       unlocked={access.unlocked}
+      freshness={<DataFreshness jobs={["odds", "results", "lineups"]} />}
     />
   );
 }

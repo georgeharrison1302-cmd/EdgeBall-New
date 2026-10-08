@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { DataFreshness } from "@/components/ui/DataFreshness";
+
 import { loadMatchHubPage } from "./hub-load";
 import MatchHubView from "./hub-view";
 
@@ -31,6 +33,9 @@ export default async function FixtureMatchHubPage({ params, searchParams }: Page
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mb-4">
+        <DataFreshness jobs={["odds", "lineups", "results"]} />
+      </div>
       <MatchHubView hub={hub} initialTab={tab} />
     </main>
   );
