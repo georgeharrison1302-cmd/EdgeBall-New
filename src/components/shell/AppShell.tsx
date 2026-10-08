@@ -10,6 +10,8 @@ import { FoundersBanner } from "@/components/marketing/FoundersBanner";
 import { BetSlipProvider } from "@/components/stats/BetSlipContext";
 import type { SubscriptionTier } from "@/types/billing";
 
+import { useAccess } from "./AccessProvider";
+
 import { BetSlipDrawer } from "./BetSlipDrawer";
 
 function sectionFromPath(pathname: string | null): HeaderSection {
@@ -29,19 +31,12 @@ function sectionFromPath(pathname: string | null): HeaderSection {
   return null;
 }
 
-export function AppShell({
-  children,
-  showUpgrade = false,
-  showFounders = false,
-  pro = false,
-  tier = null,
-}: {
-  children: ReactNode;
-  showUpgrade?: boolean;
-  showFounders?: boolean;
-  pro?: boolean;
-  tier?: SubscriptionTier | null;
-}) {
+export function AppShell({ children }: { children: ReactNode }) {
+  const access = useAccess();
+  const showUpgrade = !access.unlocked;
+  const showFounders = !access.unlocked || access.status !== "active";
+  const pro = access.status === "active";
+  const tier: SubscriptionTier | null = pro ? access.tier : null;
   const pathname = usePathname();
   return (
     <DisplayPrefsProvider>

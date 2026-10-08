@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cache, Suspense } from "react";
 
 import { TeamBadge } from "@/components/assets";
 
@@ -36,30 +37,7 @@ export default async function MatchHubView({
   hub: MatchHubPage;
   initialTab?: string;
 }) {
-  const [access, stats, availability, lineups] = await Promise.all([
-    getSubscriptionAccess(),
-    loadMatchStats({ leagueId: hub.leagueId, season: hub.season, home: hub.home, away: hub.away }).catch(
-      (cause: unknown) => {
-        console.error(`[match-stats] fixture ${hub.id}:`, cause);
-        return null;
-      },
-    ),
-    loadFixtureAvailability(hub.home.id, hub.away.id, hub.kickoffAt).catch((cause: unknown) => {
-      console.error(`[availability] fixture ${hub.id}:`, cause);
-      return null;
-    }),
-    loadFixtureLineups(hub.id).catch((cause: unknown) => {
-      console.error(`[lineups] fixture ${hub.id}:`, cause);
-      return [] as TeamLineup[];
-    }),
-  ]);
-  const statsMissing = (
-    <EmptyReason
-      variant="panel"
-      detail="Team stats could not be loaded for this fixture"
-      source="fixtures / fixture_statistics"
-    />
-  );
+  const access = await getSubscriptionAccess();
 
   return (
     <div className="space-y-6">
@@ -87,9 +65,13 @@ export default async function MatchHubView({
             label: "Overview",
             content: (
               <>
-                {stats ? <MatchGlance home={stats.home} away={stats.away} competition={hub.competition} /> : statsMissing}
+                <Suspense fallback={<PanelSkeleton />}>
+                  <StatsPanel hub={hub} view="glance" />
+                </Suspense>
                 <ContextStrip hub={hub} />
-                <AvailabilityPanel hub={hub} availability={availability} />
+                <Suspense fallback={<PanelSkeleton />}>
+                  <AvailabilityLoader hub={hub} />
+                </Suspense>
                 <DisciplineGauge hub={hub} />
               </>
             ),
@@ -97,24 +79,29 @@ export default async function MatchHubView({
           {
             id: "stats",
             label: "Team stats",
-            content: stats ? (
-              <>
-                <TeamStatsComparison home={stats.home} away={stats.away} competition={hub.competition} />
-                <StreaksPanel home={stats.home} away={stats.away} competition={hub.competition} />
-              </>
-            ) : (
-              statsMissing
+            content: (
+              <Suspense fallback={<PanelSkeleton />}>
+                <StatsPanel hub={hub} view="stats" />
+              </Suspense>
             ),
           },
           {
             id: "lineups",
             label: "Lineups",
-            content: <LineupsPanel hub={hub} lineups={lineups} />,
+            content: (
+              <Suspense fallback={<PanelSkeleton />}>
+                <LineupsLoader hub={hub} />
+              </Suspense>
+            ),
           },
           {
             id: "h2h",
             label: "H2H",
-            content: stats ? <HeadToHeadPanel h2h={stats.h2h} home={hub.home} away={hub.away} /> : statsMissing,
+            content: (
+              <Suspense fallback={<PanelSkeleton />}>
+                <StatsPanel hub={hub} view="h2h" />
+              </Suspense>
+            ),
           },
           {
             id: "props",
@@ -203,6 +190,60 @@ function Hero({ hub, unlocked }: { hub: MatchHubPage; unlocked: boolean }) {
       </div>
     </section>
   );
+}
+
+const statsFor = cache((hub: MatchHubPage) =>
+  loadMatchStats({ leagueId: hub.leagueId, season: hub.season, home: hub.home, away: hub.away }).catch(
+    (cause: unknown) => {
+      console.error(`[match-stats] fixture ${hub.id}:`, cause);
+      return null;
+    },
+  ),
+);
+
+function PanelSkeleton() {
+  return <div className="h-48 animate-pulse rounded-2xl border border-line bg-white/70" aria-busy="true" />;
+}
+
+async function StatsPanel({ hub, view }: { hub: MatchHubPage; view: "glance" | "stats" | "h2h" }) {
+  const stats = await statsFor(hub);
+  if (!stats) {
+    return (
+      <EmptyReason
+        variant="panel"
+        detail="Team stats could not be loaded for this fixture"
+        source="fixtures / fixture_statistics"
+      />
+    );
+  }
+  if (view === "glance") {
+    return <MatchGlance home={stats.home} away={stats.away} competition={hub.competition} />;
+  }
+  if (view === "h2h") return <HeadToHeadPanel h2h={stats.h2h} home={hub.home} away={hub.away} />;
+  return (
+    <>
+      <TeamStatsComparison home={stats.home} away={stats.away} competition={hub.competition} />
+      <StreaksPanel home={stats.home} away={stats.away} competition={hub.competition} />
+    </>
+  );
+}
+
+async function AvailabilityLoader({ hub }: { hub: MatchHubPage }) {
+  const availability = await loadFixtureAvailability(hub.home.id, hub.away.id, hub.kickoffAt).catch(
+    (cause: unknown) => {
+      console.error(`[availability] fixture ${hub.id}:`, cause);
+      return null;
+    },
+  );
+  return <AvailabilityPanel hub={hub} availability={availability} />;
+}
+
+async function LineupsLoader({ hub }: { hub: MatchHubPage }) {
+  const lineups = await loadFixtureLineups(hub.id).catch((cause: unknown) => {
+    console.error(`[lineups] fixture ${hub.id}:`, cause);
+    return [] as TeamLineup[];
+  });
+  return <LineupsPanel hub={hub} lineups={lineups} />;
 }
 
 function LineupsPanel({ hub, lineups }: { hub: MatchHubPage; lineups: TeamLineup[] }) {

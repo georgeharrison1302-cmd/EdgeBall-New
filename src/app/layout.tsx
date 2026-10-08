@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import { AppShell } from "@/components/shell/AppShell";
-import { getSubscriptionAccess } from "@/utils/subscription";
 
 import "./globals.css";
 
@@ -17,24 +16,15 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const access = await getSubscriptionAccess();
-
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AppShell
-          showUpgrade={!access.unlocked}
-          showFounders={!access.unlocked || access.status !== "active"}
-          pro={access.status === "active"}
-          tier={access.status === "active" ? access.tier : null}
-        >
-          {children}
-        </AppShell>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

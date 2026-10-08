@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 import type { SubscriptionTier } from "@/types/billing";
+import { refreshAccess } from "@/components/shell/AccessProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import { AuthModal } from "./AuthModal";
@@ -45,6 +46,7 @@ export function HeaderAuth({
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setReady(true);
+      void refreshAccess();
     });
     return () => {
       mounted = false;
