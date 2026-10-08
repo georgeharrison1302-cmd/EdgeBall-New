@@ -78,7 +78,7 @@ export function BetSlipDrawer() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed right-4 bottom-4 z-40 inline-flex items-center gap-2 rounded-full bg-[#2563eb] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700 lg:right-6"
+        className="fixed right-4 bottom-4 z-40 inline-flex items-center gap-2 rounded-full bg-cobalt px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700 lg:right-6"
         aria-label={count ? `Open bet slip, ${count} legs` : "Open bet slip"}
       >
         <span aria-hidden="true">📋</span>
@@ -100,24 +100,24 @@ export function BetSlipDrawer() {
       ) : null}
 
       <aside
-        className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-[#e2e8f0] bg-white shadow-2xl transition-transform duration-200 ${
+        className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-line bg-white shadow-2xl transition-transform duration-200 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         aria-hidden={!open}
       >
-        <div className="flex items-center justify-between border-b border-[#e2e8f0] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
-            <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+            <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
               Bet slip
             </p>
-            <h2 className="text-lg font-bold text-[#0f172a]">
+            <h2 className="text-lg font-bold text-ink">
               {count === 0 ? "No legs yet" : `${count} leg${count === 1 ? "" : "s"}`}
             </h2>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-full border border-[#e2e8f0] px-3 py-1.5 text-xs font-semibold text-[#64748b] hover:bg-slate-50"
+            className="rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:bg-slate-50"
           >
             Close
           </button>
@@ -154,19 +154,19 @@ export function BetSlipDrawer() {
                       className={`rounded-2xl border px-4 py-3 shadow-sm ${
                         flagged
                           ? "border-amber-300 bg-amber-50/80"
-                          : "border-[#e2e8f0] bg-slate-50"
+                          : "border-line bg-slate-50"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-[#0f172a]">
+                          <p className="truncate text-sm font-bold text-ink">
                             {leg.label ?? leg.marketName}
                           </p>
                           {leg.match ? (
-                            <p className="mt-0.5 truncate text-xs text-[#64748b]">{leg.match}</p>
+                            <p className="mt-0.5 truncate text-xs text-muted">{leg.match}</p>
                           ) : null}
                           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            <p className="inline-flex rounded-full bg-[#2563eb] px-2.5 py-1 text-xs font-bold text-white">
+                            <p className="inline-flex rounded-full bg-cobalt px-2.5 py-1 text-xs font-bold text-white">
                               {formatOddsLabel(leg.decimalOdds as number)}
                             </p>
                             {flagged ? (
@@ -179,7 +179,7 @@ export function BetSlipDrawer() {
                         <button
                           type="button"
                           onClick={() => removeLeg(leg.id)}
-                          className="shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-[#64748b] hover:bg-white hover:text-red-600"
+                          className="shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-muted hover:bg-white hover:text-red-600"
                           aria-label={`Remove ${leg.marketName}`}
                         >
                           Remove
@@ -193,9 +193,9 @@ export function BetSlipDrawer() {
           )}
         </div>
 
-        <div className="border-t border-[#e2e8f0] bg-white px-5 py-4">
+        <div className="border-t border-line bg-white px-5 py-4">
           <label className="flex items-center justify-between gap-3 text-sm">
-            <span className="font-semibold text-[#64748b]">Stake</span>
+            <span className="font-semibold text-muted">Stake</span>
             <input
               type="number"
               inputMode="decimal"
@@ -203,19 +203,19 @@ export function BetSlipDrawer() {
               step="1"
               value={stakeInput}
               onChange={(event) => setStakeInput(event.target.value)}
-              className="w-28 rounded-full border border-[#e2e8f0] px-3 py-1.5 text-right text-sm font-semibold tabular-nums text-[#0f172a] outline-none focus:border-[#2563eb]"
+              className="w-28 rounded-full border border-line px-3 py-1.5 text-right text-sm font-semibold tabular-nums text-ink outline-none focus:border-cobalt"
               aria-label="Stake amount"
             />
           </label>
           <div className="mt-3 flex items-center justify-between text-sm">
-            <span className="font-semibold text-[#64748b]">Combined odds</span>
-            <span className="text-lg font-bold tabular-nums text-[#2563eb]">
+            <span className="font-semibold text-muted">Combined odds</span>
+            <span className="text-lg font-bold tabular-nums text-cobalt">
               {totalOdds == null ? "—" : formatOdds(totalOdds) ?? "—"}
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between text-sm">
-            <span className="font-semibold text-[#64748b]">Returns</span>
-            <span className="text-lg font-bold tabular-nums text-[#0f172a]">
+            <span className="font-semibold text-muted">Returns</span>
+            <span className="text-lg font-bold tabular-nums text-ink">
               {returns == null ? "—" : formatMoney(returns)}
             </span>
           </div>
@@ -224,7 +224,7 @@ export function BetSlipDrawer() {
               type="button"
               disabled={count === 0}
               onClick={() => clear()}
-              className="flex-1 rounded-full border border-[#e2e8f0] px-4 py-2.5 text-sm font-semibold text-[#64748b] disabled:opacity-40"
+              className="flex-1 rounded-full border border-line px-4 py-2.5 text-sm font-semibold text-muted disabled:opacity-40"
             >
               Clear
             </button>
@@ -232,21 +232,21 @@ export function BetSlipDrawer() {
               type="button"
               disabled={count === 0 || !stakeOk || saving}
               onClick={() => void saveToPortfolio()}
-              className="flex-1 rounded-full bg-[#2563eb] px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-40"
+              className="flex-1 rounded-full bg-cobalt px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-40"
             >
               {saving ? "Saving…" : "Save to Portfolio"}
             </button>
           </div>
           {saveNote ? (
-            <p className="mt-2 text-xs text-[#64748b]">
+            <p className="mt-2 text-xs text-muted">
               {saveNote}{" "}
               {saveNote.includes("Sign in") ? (
-                <Link href="/auth/login" className="font-semibold text-[#2563eb]">
+                <Link href="/auth/login" className="font-semibold text-cobalt">
                   Sign in
                 </Link>
               ) : null}
               {saveNote.includes("Saved") ? (
-                <Link href="/portfolio" className="font-semibold text-[#2563eb]">
+                <Link href="/portfolio" className="font-semibold text-cobalt">
                   Open portfolio
                 </Link>
               ) : null}

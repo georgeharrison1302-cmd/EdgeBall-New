@@ -88,7 +88,7 @@ export function TaleOfTheTape({ data }: { data: TaleOfTheTapeData }) {
 
       {data.keyMatchups.length > 0 ? (
         <div className="mt-5 space-y-3">
-          <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
             Tactical collisions
           </p>
           <div className="grid gap-3 lg:grid-cols-2">
@@ -175,7 +175,7 @@ function TeamChip({ name, logo }: { name: string; logo: string | null }) {
     <span className="inline-flex items-center gap-1.5">
       {logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logo} alt="" className="h-5 w-5 object-contain" />
+        <img loading="lazy" decoding="async" src={logo} alt="" className="h-5 w-5 object-contain" />
       ) : null}
       <span className="text-[var(--ink)]">{name}</span>
     </span>

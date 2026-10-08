@@ -79,7 +79,7 @@ export function RankingsView({
         />
       </div>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-[#64748b]">
+        <p className="mt-4 text-sm text-muted">
           No match sheets stored for this window — power rankings need expected goals from finished fixtures
           (fixture_statistics).
         </p>
@@ -129,7 +129,7 @@ export function XgView({
         />
       </div>
       {sheeted.length === 0 ? (
-        <p className="mt-4 text-sm text-[#64748b]">
+        <p className="mt-4 text-sm text-muted">
           No match sheets stored for this split — expected goals come from finished fixture statistics
           (fixture_statistics).
         </p>
@@ -183,7 +183,7 @@ export function CornersView({
         <PillLinks current={games} href={(id) => href("games", id)} options={[{ id: "season", label: "Season" }, { id: "last10", label: "Last 10" }, { id: "last5", label: "Last 5" }]} />
       </div>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-[#64748b]">
+        <p className="mt-4 text-sm text-muted">
           No corner counts stored for this split — corners come from finished match sheets
           (fixture_statistics).
         </p>
@@ -231,7 +231,7 @@ export function GoalsView({
         <PillLinks current={games} href={(id) => href("games", id)} options={[{ id: "season", label: "Season" }, { id: "last10", label: "Last 10" }, { id: "last5", label: "Last 5" }]} />
       </div>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-[#64748b]">
+        <p className="mt-4 text-sm text-muted">
           No finished matches stored for this split — goal rates come from completed fixtures
           (fixtures).
         </p>
@@ -343,7 +343,7 @@ export function StreaksView({
                   <td className="py-2 text-gray-500">{index + 1}</td>
                   <td className="py-2">
                     <span className="flex items-center gap-2">
-                      {row.photo ? <img src={row.photo} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="h-7 w-7 rounded-full bg-blue-50" />}
+                      {row.photo ? <img loading="lazy" decoding="async" src={row.photo} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="h-7 w-7 rounded-full bg-blue-50" />}
                       <span>
                         <span className="block font-medium text-slate-900">{row.name}</span>
                         <span className="block text-xs text-gray-500">{[row.position, row.team].filter(Boolean).join(" · ")}</span>

@@ -101,22 +101,22 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
           ))
         )}
       </nav>
-      <p className="mt-4 text-sm text-[#64748b]">
-        <Link href="/competitions" className="text-[#2563eb]">
+      <p className="mt-4 text-sm text-muted">
+        <Link href="/competitions" className="text-cobalt">
           Competitions
         </Link>
       </p>
       <div className="mt-3 flex items-center gap-3">
         {league.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={league.logoUrl} alt="" className="h-12 w-12 object-contain" />
+          <img loading="lazy" decoding="async" src={league.logoUrl} alt="" className="h-12 w-12 object-contain" />
         ) : null}
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{league.name}</h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-[#64748b]">
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted">
             {league.flagUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={league.flagUrl} alt="" className="h-3.5 w-5 rounded-sm object-cover" />
+              <img loading="lazy" decoding="async" src={league.flagUrl} alt="" className="h-3.5 w-5 rounded-sm object-cover" />
             ) : null}
             {league.country}
           </p>
@@ -145,7 +145,7 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div>
       {league.groups.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-6 text-sm text-[#64748b]">
+        <p className="mt-6 rounded-2xl border border-line bg-white px-4 py-6 text-sm text-muted">
           {league.standingsAvailable
             ? `No ${season} table stored (standings).`
             : "Standings are not stored for this competition (standings)."}
@@ -289,7 +289,7 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
       </div>
 
       <h2 className="mt-8 text-lg font-semibold">League stats</h2>
-      <p className="mt-1 text-sm text-[#64748b]">
+      <p className="mt-1 text-sm text-muted">
         Table totals come from the standings. Player totals come from the stored player rows for {season}.
         {league.players.rows > 0 ? ` ${league.players.rows} player rows.` : ""}
       </p>
@@ -326,7 +326,7 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
       <>
       <h2 className="mt-6 text-lg font-semibold">Fixtures</h2>
       {rounds.length === 0 ? (
-        <p className="mt-2 text-sm text-[#64748b]">
+        <p className="mt-2 text-sm text-muted">
           Fixtures are not stored for this season (fixtures).
         </p>
       ) : (
@@ -334,15 +334,15 @@ export default async function LeaguePage({ params, searchParams }: PageProps) {
           <section key={round.name} className="mt-4">
             <h3 className="text-sm font-semibold text-[#334155]">
               {round.name}
-              {round.current ? <span className="ml-2 text-[#2563eb]">Current</span> : null}
+              {round.current ? <span className="ml-2 text-cobalt">Current</span> : null}
             </h3>
-            <ul className="mt-2 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
+            <ul className="mt-2 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-line bg-white">
               {round.fixtures.map((fixture) => (
                 <li key={fixture.id}>
                   <Link href={`/fixtures/${fixture.id}`} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                     <span>
                       <span className="block font-semibold">{fixture.label}</span>
-                      <span className={`text-xs ${fixture.called ? "font-semibold text-amber-700" : "text-[#64748b]"}`}>
+                      <span className={`text-xs ${fixture.called ? "font-semibold text-amber-700" : "text-muted"}`}>
                         {fixture.kickoff}
                         {fixture.statusLabel ? ` · ${fixture.statusLabel}` : fixture.status ? ` · ${fixture.status}` : ""}
                       </span>
@@ -399,25 +399,25 @@ function LeaderList({
     <section>
       <h2 className="text-lg font-semibold">{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-2 text-sm text-[#64748b]">{empty}</p>
+        <p className="mt-2 text-sm text-muted">{empty}</p>
       ) : (
-        <ol className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
+        <ol className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-line bg-white">
           {rows.map((row) => (
             <li key={row.playerId}>
               <Link
                 href={`/competitions/${leagueId}/players/${row.playerId}?season=${season}`}
                 className="flex items-center gap-3 px-4 py-3"
               >
-                <span className="w-6 text-sm font-semibold text-[#64748b]">{row.rank}</span>
+                <span className="w-6 text-sm font-semibold text-muted">{row.rank}</span>
                 {row.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={row.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover bg-[#e2e8f0]" />
+                  <img loading="lazy" decoding="async" src={row.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover bg-line" />
                 ) : (
-                  <span className="h-8 w-8 rounded-full bg-[#e2e8f0]" />
+                  <span className="h-8 w-8 rounded-full bg-line" />
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{row.name}</span>
-                  <span className="block text-xs text-[#64748b]">{row.team}</span>
+                  <span className="block text-xs text-muted">{row.team}</span>
                 </span>
                 <span className="max-w-[11rem] text-right text-xs text-[#334155]">{line(row)}</span>
               </Link>
@@ -452,13 +452,13 @@ function RoundCard({ round }: { round: RoundGroup }) {
               <li key={fixture.id}>
                 <Link href={`/fixtures/${fixture.id}`} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-sm">
                   <span className="flex items-center gap-2">
-                    {fixture.homeLogo ? <img src={fixture.homeLogo} alt="" className="h-5 w-5 object-contain" /> : null}
+                    {fixture.homeLogo ? <img loading="lazy" decoding="async" src={fixture.homeLogo} alt="" className="h-5 w-5 object-contain" /> : null}
                     <span className="truncate font-medium">{fixture.home}</span>
                   </span>
                   <span className="font-semibold text-blue-600">{fixture.score ?? fixture.time}</span>
                   <span className="flex items-center justify-end gap-2">
                     <span className="truncate text-right font-medium">{fixture.away}</span>
-                    {fixture.awayLogo ? <img src={fixture.awayLogo} alt="" className="h-5 w-5 object-contain" /> : null}
+                    {fixture.awayLogo ? <img loading="lazy" decoding="async" src={fixture.awayLogo} alt="" className="h-5 w-5 object-contain" /> : null}
                   </span>
                 </Link>
               </li>

@@ -46,7 +46,7 @@ export function AppShell({
   return (
     <DisplayPrefsProvider>
       <BetSlipProvider>
-        <div className="flex min-h-screen flex-col bg-[#eef3f9] text-[#0f172a]">
+        <div className="flex min-h-screen flex-col bg-canvas text-ink">
           <Header
             current={sectionFromPath(pathname)}
             showUpgrade={showUpgrade}

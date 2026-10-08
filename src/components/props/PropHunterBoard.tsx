@@ -54,7 +54,7 @@ export function PropHunterBoard({ props }: { props: PlayerProp[] }) {
             {name} · {ranked.filter((prop) => prop.market === name).length}
           </FilterChip>
         ))}
-        <span className="mx-1 hidden h-5 w-px bg-[#e2e8f0] sm:inline-block" />
+        <span className="mx-1 hidden h-5 w-px bg-line sm:inline-block" />
         {EDGE_FILTERS.map((filter) => (
           <FilterChip
             key={filter.id}
@@ -103,9 +103,9 @@ function HunterRow({ prop, rank }: { prop: PlayerProp; rank: number }) {
   });
 
   return (
-    <li className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+    <li className="rounded-2xl border border-line bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#2563eb] text-xs font-black text-white">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cobalt text-xs font-black text-white">
           {rank}
         </span>
         <PlayerHeadshot
@@ -115,11 +115,11 @@ function HunterRow({ prop, rank }: { prop: PlayerProp; rank: number }) {
           size={36}
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-[#0f172a]">{prop.player}</p>
-          <p className="truncate text-xs text-[#64748b]">
+          <p className="truncate text-sm font-bold text-ink">{prop.player}</p>
+          <p className="truncate text-xs text-muted">
             <Link
               href={prop.fixtureId ? `/fixtures/${prop.fixtureId}` : "/"}
-              className="hover:text-[#2563eb]"
+              className="hover:text-cobalt"
             >
               {prop.match}
             </Link>
@@ -127,7 +127,7 @@ function HunterRow({ prop, rank }: { prop: PlayerProp; rank: number }) {
             {prop.competition}
           </p>
         </div>
-        <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-extrabold text-[#2563eb]">
+        <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-extrabold text-cobalt">
           {prop.selection}
         </span>
         <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[11px] font-extrabold text-[#0e7490]">
@@ -146,14 +146,14 @@ function HunterRow({ prop, rank }: { prop: PlayerProp; rank: number }) {
           size="lg"
         />
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-dashed border-[#e2e8f0] pt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-dashed border-line pt-3">
         <PoissonVsBook
           modelProb={prop.modelProb}
           decimalOdds={prop.odds}
           edgePct={prop.edgePct ?? prop.edgeScore}
         />
         <div>
-          <p className="mb-1 text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+          <p className="mb-1 text-[10px] font-extrabold tracking-wide text-faint uppercase">
             Last {prop.formCounts?.length ?? 0} at {prop.formThreshold ?? prop.line ?? 1}+
           </p>
           <FormDots
@@ -182,8 +182,8 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
         active
-          ? "border-[#2563eb] bg-[#2563eb] text-white"
-          : "border-[#e2e8f0] bg-white text-[#0f172a] hover:border-[#2563eb]"
+          ? "border-cobalt bg-cobalt text-white"
+          : "border-line bg-white text-ink hover:border-cobalt"
       }`}
     >
       {children}

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function GeneratorPage() {
   const board = await loadBuilderBoard();
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Bet Builder</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight">The Generator</h1>

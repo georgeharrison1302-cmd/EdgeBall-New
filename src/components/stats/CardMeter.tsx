@@ -18,12 +18,12 @@ export function CardMeter({
   const width = Math.min(100, (combined / line) * 100);
   return (
     <div>
-      <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">Combined cards / game</p>
+      <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">Combined cards / game</p>
       <p className="mt-1 text-sm font-semibold text-slate-900">
-        {combined.toFixed(1)} <span className="font-normal text-[#64748b]">({homeName} {home.toFixed(1)} + {awayName} {away.toFixed(1)})</span>
+        {combined.toFixed(1)} <span className="font-normal text-muted">({homeName} {home.toFixed(1)} + {awayName} {away.toFixed(1)})</span>
       </p>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
-        <div className="h-full rounded-full bg-[#2563eb]" style={{ width: `${width}%` }} />
+        <div className="h-full rounded-full bg-cobalt" style={{ width: `${width}%` }} />
       </div>
     </div>
   );

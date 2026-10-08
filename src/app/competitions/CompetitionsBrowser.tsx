@@ -79,7 +79,7 @@ export default function CompetitionsBrowser({
                     >
                       {group.flagUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={group.flagUrl} alt="" className="h-3.5 w-5 shrink-0 rounded-sm object-cover" />
+                        <img loading="lazy" decoding="async" src={group.flagUrl} alt="" className="h-3.5 w-5 shrink-0 rounded-sm object-cover" />
                       ) : (
                         <span className="h-3.5 w-5 shrink-0 rounded-sm bg-gray-100" />
                       )}
@@ -96,7 +96,7 @@ export default function CompetitionsBrowser({
                             >
                               {league.logoUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img src={league.logoUrl} alt="" className="h-4 w-4 shrink-0 object-contain" />
+                                <img loading="lazy" decoding="async" src={league.logoUrl} alt="" className="h-4 w-4 shrink-0 object-contain" />
                               ) : (
                                 <span className="h-4 w-4 shrink-0 rounded-sm bg-gray-100" />
                               )}

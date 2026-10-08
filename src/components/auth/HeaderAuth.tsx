@@ -103,8 +103,8 @@ export function HeaderAuth({
         aria-hidden="true"
         className={
           mobile
-            ? "h-10 rounded-full border border-[#e2e8f0] bg-white"
-            : "hidden h-9 w-40 rounded-full border border-[#e2e8f0] bg-white sm:block"
+            ? "h-10 rounded-full border border-line bg-white"
+            : "hidden h-9 w-40 rounded-full border border-line bg-white sm:block"
         }
       />
     );
@@ -118,13 +118,13 @@ export function HeaderAuth({
 
   if (mobile) {
     return user ? (
-      <div className="mt-3 rounded-2xl border border-[#e2e8f0] bg-white p-3">
-        <p className="truncate px-2 text-sm font-bold text-[#0f172a]">{user.email ?? "Account"}</p>
-        <p className="px-2 text-xs font-semibold text-[#64748b]">{membershipLabel}</p>
+      <div className="mt-3 rounded-2xl border border-line bg-white p-3">
+        <p className="truncate px-2 text-sm font-bold text-ink">{user.email ?? "Account"}</p>
+        <p className="px-2 text-xs font-semibold text-muted">{membershipLabel}</p>
         <div className="mt-2 grid gap-1">
           <MobileAccountLink href="/account" onNavigate={onNavigate}>My Account</MobileAccountLink>
           <MobileAccountLink href="/portfolio" onNavigate={onNavigate}>Portfolio</MobileAccountLink>
-          <button type="button" onClick={openBillingPortal} disabled={portalBusy} className="rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#0f172a] hover:bg-slate-50 disabled:opacity-50">
+          <button type="button" onClick={openBillingPortal} disabled={portalBusy} className="rounded-lg px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-slate-50 disabled:opacity-50">
             {portalBusy ? "Opening billing…" : "Billing / Stripe Portal"}
           </button>
           <button type="button" onClick={logOut} disabled={logoutBusy} className="rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
@@ -135,10 +135,10 @@ export function HeaderAuth({
       </div>
     ) : (
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <button type="button" onClick={() => openAuth("signin")} className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm font-bold text-[#0f172a]">
+        <button type="button" onClick={() => openAuth("signin")} className="rounded-full border border-line bg-white px-4 py-2.5 text-sm font-bold text-ink">
           Sign in
         </button>
-        <button type="button" onClick={() => openAuth("signup")} className="rounded-full bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white">
+        <button type="button" onClick={() => openAuth("signup")} className="rounded-full bg-cobalt px-4 py-2.5 text-sm font-bold text-white">
           Sign up
         </button>
         {modal ? <AuthModal mode={modal.mode} next={modal.next} onClose={() => setModal(null)} /> : null}
@@ -153,14 +153,14 @@ export function HeaderAuth({
           <button
             type="button"
             onClick={() => openAuth("signin")}
-            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-sm font-bold text-[#0f172a] transition-colors hover:border-[#2563eb]"
+            className="rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink transition-colors hover:border-cobalt"
           >
             Sign in
           </button>
           <button
             type="button"
             onClick={() => openAuth("signup")}
-            className="rounded-full bg-[#2563eb] px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-[#1d4ed8]"
+            className="rounded-full bg-cobalt px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-cobalt-dark"
           >
             Sign up
           </button>
@@ -178,33 +178,33 @@ export function HeaderAuth({
         aria-haspopup="menu"
         aria-expanded={menuOpen}
         onClick={() => setMenuOpen((value) => !value)}
-        className="flex items-center gap-2 rounded-full border border-[#e2e8f0] bg-white py-1 pr-2 pl-1 shadow-sm transition-colors hover:border-[#2563eb]"
+        className="flex items-center gap-2 rounded-full border border-line bg-white py-1 pr-2 pl-1 shadow-sm transition-colors hover:border-cobalt"
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-[#2563eb] text-[11px] font-black text-white">
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-cobalt text-[11px] font-black text-white">
           {initials(displayName)}
         </span>
-        <span className="hidden max-w-28 truncate text-sm font-bold text-[#0f172a] lg:inline">
+        <span className="hidden max-w-28 truncate text-sm font-bold text-ink lg:inline">
           {displayName}
         </span>
         <Chevron open={menuOpen} />
       </button>
 
       {menuOpen ? (
-        <div role="menu" className="absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-xl">
-          <div className="border-b border-[#e2e8f0] px-4 py-3">
-            <p className="truncate text-sm font-bold text-[#0f172a]">{user.email ?? displayName}</p>
-            <p className="mt-0.5 text-xs font-semibold text-[#64748b]">{membershipLabel}</p>
+        <div role="menu" className="absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+          <div className="border-b border-line px-4 py-3">
+            <p className="truncate text-sm font-bold text-ink">{user.email ?? displayName}</p>
+            <p className="mt-0.5 text-xs font-semibold text-muted">{membershipLabel}</p>
           </div>
-          <Link href="/account" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold text-[#0f172a] hover:bg-slate-50">
+          <Link href="/account" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold text-ink hover:bg-slate-50">
             My Account
           </Link>
-          <Link href="/portfolio" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold text-[#0f172a] hover:bg-slate-50">
+          <Link href="/portfolio" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold text-ink hover:bg-slate-50">
             Portfolio
           </Link>
-          <button type="button" role="menuitem" onClick={openBillingPortal} disabled={portalBusy} className="block w-full px-4 py-3 text-left text-sm font-semibold text-[#0f172a] hover:bg-slate-50 disabled:opacity-50">
+          <button type="button" role="menuitem" onClick={openBillingPortal} disabled={portalBusy} className="block w-full px-4 py-3 text-left text-sm font-semibold text-ink hover:bg-slate-50 disabled:opacity-50">
             {portalBusy ? "Opening billing…" : "Billing / Stripe Portal"}
           </button>
-          <button type="button" role="menuitem" onClick={logOut} disabled={logoutBusy} className="block w-full border-t border-[#e2e8f0] px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
+          <button type="button" role="menuitem" onClick={logOut} disabled={logoutBusy} className="block w-full border-t border-line px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
             {logoutBusy ? "Logging out…" : "Log out"}
           </button>
           {accountError ? <p className="border-t border-red-100 bg-red-50 px-4 py-2 text-xs text-red-600">{accountError}</p> : null}
@@ -225,7 +225,7 @@ function MobileAccountLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} onClick={onNavigate} className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0f172a] hover:bg-slate-50">
+    <Link href={href} onClick={onNavigate} className="rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-slate-50">
       {children}
     </Link>
   );

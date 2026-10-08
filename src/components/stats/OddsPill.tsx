@@ -72,7 +72,7 @@ export function OddsPill({
         added
           ? "border-2 border-[var(--cobalt)] bg-blue-50 text-[var(--cobalt)] ring-2 ring-[var(--cobalt)]/20"
           : interactive && variant === "card"
-            ? "border border-[#e2e8f0] bg-white text-[#0f172a] shadow-sm hover:border-[#2563eb] hover:bg-[#eff6ff]"
+            ? "border border-line bg-white text-ink shadow-sm hover:border-cobalt hover:bg-[#eff6ff]"
             : interactive
               ? "bg-[var(--cobalt)] text-white shadow-sm shadow-blue-600/20 hover:bg-[var(--cobalt-dark)]"
               : "border border-[var(--line)] bg-white text-[var(--muted)]"

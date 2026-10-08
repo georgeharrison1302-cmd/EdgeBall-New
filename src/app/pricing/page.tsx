@@ -35,19 +35,19 @@ export default async function PricingPage({
       }}
     >
       <div className="mx-auto max-w-5xl">
-        <p className="text-center text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        <p className="text-center text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
           Pricing
         </p>
-        <h1 className="mt-2 text-center text-3xl font-black tracking-tight text-[#0f172a] sm:text-4xl">
+        <h1 className="mt-2 text-center text-3xl font-black tracking-tight text-ink sm:text-4xl">
           Bet with stored edge — not vibes
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-[#64748b] sm:text-base">
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted sm:text-base">
           Free covers the fixture board. Premium is a recurring subscription that unlocks
           factors, backtests, Poisson edges, player props, and deep match logs.
         </p>
 
         {note ? (
-          <p className="mx-auto mt-4 max-w-lg rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-center text-sm font-semibold text-[#0f172a]">
+          <p className="mx-auto mt-4 max-w-lg rounded-xl border border-line bg-white px-4 py-3 text-center text-sm font-semibold text-ink">
             {note}
           </p>
         ) : null}
@@ -68,9 +68,9 @@ export default async function PricingPage({
           proof={lead ? proofSummary(lead) : null}
         />
 
-        <p className="mt-8 text-center text-xs text-[#64748b]">
+        <p className="mt-8 text-center text-xs text-muted">
           Already subscribed?{" "}
-          <Link href="/auth/login?next=/pricing" className="font-semibold text-[#2563eb]">
+          <Link href="/auth/login?next=/pricing" className="font-semibold text-cobalt">
             Sign in
           </Link>{" "}
           to sync your membership.
@@ -97,15 +97,15 @@ function LiveProofBanner({
   samples: PricingFactorSample[];
 }) {
   return (
-    <section className="mx-auto mt-8 max-w-3xl rounded-2xl border border-[#e2e8f0] bg-white/90 p-5 shadow-sm">
-      <p className="text-center text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+    <section className="mx-auto mt-8 max-w-3xl rounded-2xl border border-line bg-white/90 p-5 shadow-sm">
+      <p className="text-center text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
         Live factor proof · from your database
       </p>
-      <p className="mt-2 text-center text-lg font-bold text-[#0f172a]">
+      <p className="mt-2 text-center text-lg font-bold text-ink">
         {sample.badgeLabel} hit {sample.backtest.hitRatePct}% on{" "}
         {sample.marketLabel.toLowerCase()}
       </p>
-      <p className="mt-1 text-center text-sm text-[#64748b]">
+      <p className="mt-1 text-center text-sm text-muted">
         {sample.backtest.hits}/{sample.backtest.totalSamples} finished fixtures
         {sample.backtest.flatRoiPct != null
           ? ` · flat ROI ${sample.backtest.flatRoiPct >= 0 ? "+" : ""}${sample.backtest.flatRoiPct}%`
@@ -118,7 +118,7 @@ function LiveProofBanner({
           {samples.slice(0, 3).map((row) => (
             <span
               key={row.factorId}
-              className="rounded-full border border-[#e2e8f0] bg-[#eef3f9] px-3 py-1 text-xs font-semibold text-[#0f172a]"
+              className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-ink"
             >
               {row.badgeLabel} {row.backtest.hitRatePct}% · n={row.backtest.totalSamples}
             </span>

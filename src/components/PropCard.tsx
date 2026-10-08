@@ -37,7 +37,7 @@ export function PropCard({
         </div>
         {row.teamLogo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.teamLogo} alt="" className="h-6 w-6 shrink-0 object-contain" />
+          <img loading="lazy" decoding="async" src={row.teamLogo} alt="" className="h-6 w-6 shrink-0 object-contain" />
         ) : null}
       </div>
 

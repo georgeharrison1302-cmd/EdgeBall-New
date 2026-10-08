@@ -13,15 +13,15 @@ export const metadata: Metadata = {
 export default async function MatchPropsPage() {
   const board = await loadBuilderBoard();
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#2563eb]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-cobalt">
           Match Props
         </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0f172a]">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink">
           Match Props
         </h1>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <p className="mt-1 text-sm text-muted">
           1X2, BTTS and Over/Under from stored pre-match odds for {board.dateLabel}
           {board.matchCount > 0 ? ` · ${board.matchCount} pre-match` : ""}.
         </p>

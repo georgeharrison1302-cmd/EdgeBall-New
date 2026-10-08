@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import BrandMark from "@/components/BrandMark";
+import { SearchBox } from "./SearchBox";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { useBetSlip } from "@/components/stats/BetSlipContext";
 import type { SubscriptionTier } from "@/types/billing";
@@ -47,12 +48,12 @@ export function Header({
   const slip = useBetSlip();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#e2e8f0] bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="EdgeBall home">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#2563eb] bg-white text-[11px] font-semibold tracking-tight shadow-sm shadow-blue-600/20">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cobalt bg-white text-[11px] font-semibold tracking-tight shadow-sm shadow-blue-600/20">
             <span className="text-slate-900">E</span>
-            <span className="text-[#2563eb]">B</span>
+            <span className="text-cobalt">B</span>
           </span>
           <BrandMark />
         </Link>
@@ -62,6 +63,9 @@ export function Header({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <div className="hidden md:block">
+            <SearchBox />
+          </div>
           {showUpgrade ? (
             <Link
               href="/pricing"
@@ -75,7 +79,7 @@ export function Header({
             <button
               type="button"
               onClick={() => slip.setOpen(true)}
-              className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#e2e8f0] bg-[#eef3f9] text-[#0f172a] hover:border-[#2563eb]"
+              className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-canvas text-ink hover:border-cobalt"
               aria-label={`Bet slip${slip.legs.length > 0 ? `, ${slip.legs.length} legs` : ""}`}
             >
               <SlipIcon />
@@ -102,8 +106,11 @@ export function Header({
       </div>
 
       {mobileOpen ? (
-        <nav className="border-t border-[#f1f5f9] bg-[#eef3f9]/40 px-4 py-3 text-sm md:hidden">
+        <nav className="border-t border-[#f1f5f9] bg-canvas/40 px-4 py-3 text-sm md:hidden">
           <div className="flex flex-col gap-1">
+            <div className="mb-2">
+              <SearchBox onNavigate={() => setMobileOpen(false)} />
+            </div>
             <NavItems current={current} onNavigate={() => setMobileOpen(false)} />
             {showUpgrade ? (
               <Link
@@ -206,7 +213,7 @@ function CompetitionsMenu({
       {open ? (
         <div
           role="menu"
-          className="absolute top-full left-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-xl max-md:static max-md:mt-1 max-md:w-full"
+          className="absolute top-full left-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-white shadow-xl max-md:static max-md:mt-1 max-md:w-full"
         >
           {popularCompetitions.map((item) => (
             <Link
@@ -217,7 +224,7 @@ function CompetitionsMenu({
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="flex items-center px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#2563eb]"
+              className="flex items-center px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-cobalt"
             >
               <span className="mr-3 w-5 text-center" aria-hidden="true">
                 {item.icon}
@@ -232,7 +239,7 @@ function CompetitionsMenu({
               setOpen(false);
               onNavigate?.();
             }}
-            className="block border-t border-[#f1f5f9] bg-slate-50 px-4 py-3 text-sm font-semibold text-[#2563eb]"
+            className="block border-t border-[#f1f5f9] bg-slate-50 px-4 py-3 text-sm font-semibold text-cobalt"
           >
             View All Competitions →
           </Link>
@@ -288,7 +295,7 @@ function HamburgerIcon({ open }: { open: boolean }) {
 function itemClass(active: boolean) {
   return `shrink-0 rounded-full px-3 py-2 ${
     active
-      ? "bg-[#2563eb] font-semibold text-white shadow-sm shadow-blue-600/30"
+      ? "bg-cobalt font-semibold text-white shadow-sm shadow-blue-600/30"
       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
   }`;
 }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { notFound } from "next/navigation";
 
 import type {
@@ -108,6 +109,7 @@ export type MatchHubPage = {
   kickoff: string;
   kickoffAt: string | null;
   status: string | null;
+  score: { home: number; away: number } | null;
   venue: string | null;
   referee: string | null;
   home: MatchHubTeam;
@@ -135,11 +137,13 @@ type SeasonStatRow = {
   stats_data: unknown;
 };
 
-export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage> {
+export const loadMatchHubPage = cache(async function loadMatchHubPage(
+  fixtureId: number,
+): Promise<MatchHubPage> {
   const supabase = createIngestClient();
   const { data, error } = await supabase
     .from("fixtures")
-    .select("id, date, status_short, referee, league_id, season, venue_id, home_team_id, away_team_id")
+    .select("id, date, status_short, home_goals, away_goals, referee, league_id, season, venue_id, home_team_id, away_team_id")
     .eq("id", fixtureId)
     .maybeSingle();
   if (error) throw error;
@@ -233,6 +237,10 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
     kickoff: formatKickoff(data.date),
     kickoffAt: Number.isFinite(kickoffMs) ? new Date(kickoffMs).toISOString() : null,
     status: data.status_short,
+    score:
+      data.home_goals != null && data.away_goals != null
+        ? { home: Number(data.home_goals), away: Number(data.away_goals) }
+        : null,
     venue: venue ? [venue.name, venue.city].filter(Boolean).join(", ") : null,
     referee,
     home,
@@ -257,7 +265,7 @@ export async function loadMatchHubPage(fixtureId: number): Promise<MatchHubPage>
       : [],
     taleOfTheTape,
   };
-}
+});
 
 async function loadPropBoard(
   home: MatchHubTeam,

@@ -21,11 +21,11 @@ export function EmptyReason({
   if (variant === "panel" || variant === "center") {
     return (
       <div
-        className={`rounded-2xl border border-dashed border-[#e2e8f0] bg-slate-50 px-4 py-6 text-[#64748b] ${
+        className={`rounded-2xl border border-dashed border-line bg-slate-50 px-4 py-6 text-muted ${
           variant === "center" ? "text-center" : ""
         } ${className}`.trim()}
       >
-        {title ? <p className="text-sm font-medium text-[#0f172a]">{title}</p> : null}
+        {title ? <p className="text-sm font-medium text-ink">{title}</p> : null}
         <p className={`text-sm ${title ? "mt-1" : ""}`.trim()}>{body}</p>
       </div>
     );
@@ -33,8 +33,8 @@ export function EmptyReason({
 
   return (
     <div className={className}>
-      {title ? <p className="text-sm font-medium text-[#0f172a]">{title}</p> : null}
-      <p className={`text-sm text-[#64748b] ${title ? "mt-1" : ""}`.trim()}>{body}</p>
+      {title ? <p className="text-sm font-medium text-ink">{title}</p> : null}
+      <p className={`text-sm text-muted ${title ? "mt-1" : ""}`.trim()}>{body}</p>
     </div>
   );
 }

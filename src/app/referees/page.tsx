@@ -25,9 +25,9 @@ export default async function RefereesPage({
   const data = await loadRefereeDesk(scoped);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <p className="text-xs font-bold uppercase tracking-wider text-[#2563eb]">Card market context</p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0f172a]">Referee Desk</h1>
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <p className="text-xs font-bold uppercase tracking-wider text-cobalt">Card market context</p>
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink">Referee Desk</h1>
       <p className="mt-2 max-w-2xl text-sm text-slate-500">
         How many cards each referee actually shows, computed from finished fixtures and their stored
         stats sheets — the same referee rates used for card props in the Match Hub. Use O3.5%/O4.5%
@@ -73,7 +73,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-xl font-bold tabular-nums text-[#0f172a]">{value}</p>
+      <p className="mt-1 text-xl font-bold tabular-nums text-ink">{value}</p>
     </div>
   );
 }

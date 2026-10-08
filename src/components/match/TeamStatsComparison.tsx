@@ -97,16 +97,16 @@ export function TeamStatsComparison({
         : `Most recent ${split === "last5" ? 5 : 10} matches`;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-      <header className="border-b border-[#e2e8f0] px-5 py-4">
+    <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+      <header className="border-b border-line px-5 py-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">Team stats</p>
-            <h2 className="mt-1 text-lg font-black tracking-tight text-[#0f172a]">
+            <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">Team stats</p>
+            <h2 className="mt-1 text-lg font-black tracking-tight text-ink">
               {competition} · {splitNote}
             </h2>
           </div>
-          <div role="group" aria-label="Stats split" className="flex rounded-full border border-[#e2e8f0] bg-[#eef3f9] p-0.5">
+          <div role="group" aria-label="Stats split" className="flex rounded-full border border-line bg-canvas p-0.5">
             {SPLITS.map((option) => (
               <button
                 key={option.key}
@@ -114,7 +114,7 @@ export function TeamStatsComparison({
                 aria-pressed={split === option.key}
                 onClick={() => setSplit(option.key)}
                 className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                  split === option.key ? "bg-white text-[#0f172a] shadow-sm" : "text-[#64748b] hover:text-[#0f172a]"
+                  split === option.key ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"
                 }`}
               >
                 {option.label}
@@ -124,7 +124,7 @@ export function TeamStatsComparison({
         </div>
         <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <TeamHeading panel={home} summary={left} align="left" />
-          <span className="text-xs font-bold text-[#94a3b8]">vs</span>
+          <span className="text-xs font-bold text-faint">vs</span>
           <TeamHeading panel={away} summary={right} align="right" />
         </div>
       </header>
@@ -137,7 +137,7 @@ export function TeamStatsComparison({
           source="fixtures"
         />
       ) : (
-        <div className="divide-y divide-[#e2e8f0]">
+        <div className="divide-y divide-line">
           {SECTIONS.map((section) => (
             <StatSection key={section.title} section={section} left={left} right={right} />
           ))}
@@ -152,8 +152,8 @@ function TeamHeading({ panel, summary, align }: { panel: TeamPanel; summary: Tea
     <div className={`flex min-w-0 items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
       <TeamLogo src={panel.team.logo} name={panel.team.name} size={36} />
       <div className="min-w-0">
-        <p className="truncate text-sm font-black text-[#0f172a]">{panel.team.name}</p>
-        <p className="text-xs font-semibold text-[#64748b]">
+        <p className="truncate text-sm font-black text-ink">{panel.team.name}</p>
+        <p className="text-xs font-semibold text-muted">
           {summary.played === 0
             ? "No matches"
             : `${summary.wins}W ${summary.draws}D ${summary.losses}L · ${summary.ppg?.toFixed(2)} PPG`}
@@ -180,8 +180,8 @@ function StatSection({ section, left, right }: { section: Section; left: TeamSta
   return (
     <div className="px-5 py-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-[11px] font-extrabold tracking-wide text-[#0f172a] uppercase">{section.title}</h3>
-        <p className="text-[11px] font-semibold text-[#94a3b8]">
+        <h3 className="text-[11px] font-extrabold tracking-wide text-ink uppercase">{section.title}</h3>
+        <p className="text-[11px] font-semibold text-faint">
           {section.sheet ? "Match stats stored" : "Matches"}: {sampleLeft} vs {sampleRight}
         </p>
       </div>
@@ -210,19 +210,19 @@ function StatRow({ label, left, right }: { label: string; left: Cell; right: Cel
   const leader = a == null || b == null || a === b ? null : a > b ? "left" : "right";
 
   return (
-    <li className="rounded-xl px-2 py-2 hover:bg-[#f8fafc]">
+    <li className="rounded-xl px-2 py-2 hover:bg-surface">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <CellValue cell={left} strong={leader === "left"} align="left" />
-        <span className="text-center text-xs font-semibold text-[#64748b]">{label}</span>
+        <span className="text-center text-xs font-semibold text-muted">{label}</span>
         <CellValue cell={right} strong={leader === "right"} align="right" />
       </div>
       {a != null && b != null ? (
-        <div className="mt-1.5 flex h-1.5 overflow-hidden rounded-full bg-[#eef3f9]">
+        <div className="mt-1.5 flex h-1.5 overflow-hidden rounded-full bg-canvas">
           <span
-            className={leader === "left" ? "bg-[#2563eb]" : "bg-[#cbd5e1]"}
+            className={leader === "left" ? "bg-cobalt" : "bg-[#cbd5e1]"}
             style={{ width: `${leftShare}%` }}
           />
-          <span className={`flex-1 ${leader === "right" ? "bg-[#2563eb]" : "bg-[#cbd5e1]"}`} />
+          <span className={`flex-1 ${leader === "right" ? "bg-cobalt" : "bg-[#cbd5e1]"}`} />
         </div>
       ) : null}
     </li>
@@ -230,7 +230,7 @@ function StatRow({ label, left, right }: { label: string; left: Cell; right: Cel
 }
 
 function CellValue({ cell, strong, align }: { cell: Cell; strong: boolean; align: "left" | "right" }) {
-  const tone = strong ? "text-[#2563eb]" : "text-[#0f172a]";
+  const tone = strong ? "text-cobalt" : "text-ink";
   if (cell.kind === "avg") {
     return (
       <span className={`text-sm font-black tabular-nums ${tone} ${align === "right" ? "text-right" : ""}`}>
@@ -242,11 +242,11 @@ function CellValue({ cell, strong, align }: { cell: Cell; strong: boolean; align
   return (
     <span className={`text-sm tabular-nums ${align === "right" ? "text-right" : ""}`}>
       {rate.pct == null ? (
-        <span className="font-semibold text-[#94a3b8]">—</span>
+        <span className="font-semibold text-faint">—</span>
       ) : (
         <>
           <span className={`font-black ${tone}`}>{Math.round(rate.pct)}%</span>{" "}
-          <span className="text-xs font-semibold text-[#94a3b8]">
+          <span className="text-xs font-semibold text-faint">
             ({rate.hits}/{rate.n})
           </span>
         </>

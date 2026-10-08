@@ -14,14 +14,14 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
 
   if (!data.signedIn) {
     return (
-      <section className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold text-[#0f172a]">Sign in to track your bankroll</p>
-        <p className="mt-2 max-w-xl text-sm text-[#64748b]">
+      <section className="rounded-2xl border border-line bg-white p-8 shadow-sm">
+        <p className="text-sm font-semibold text-ink">Sign in to track your bankroll</p>
+        <p className="mt-2 max-w-xl text-sm text-muted">
           Save slips from the Bet Slip drawer, then grade them automatically when fixtures finish.
         </p>
         <Link
           href="/auth/login"
-          className="mt-6 inline-flex rounded-full bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white"
+          className="mt-6 inline-flex rounded-full bg-cobalt px-5 py-2.5 text-sm font-bold text-white"
         >
           Sign in
         </Link>
@@ -33,7 +33,7 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
 
   return (
     <div className="space-y-8">
-      <p className="text-sm text-[#64748b]">Signed in as {data.email ?? "user"}</p>
+      <p className="text-sm text-muted">Signed in as {data.email ?? "user"}</p>
 
       <SlipAlerts alerts={data.alerts} />
 
@@ -50,11 +50,11 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
         />
       </section>
 
-      <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
-        <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
           Last 30 days
         </p>
-        <h2 className="mt-1 text-lg font-bold text-[#0f172a]">Cumulative profit</h2>
+        <h2 className="mt-1 text-lg font-bold text-ink">Cumulative profit</h2>
         {data.chart.length === 0 ? (
           <EmptyReason
             className="mt-4"
@@ -69,7 +69,7 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
                 <div key={point.day} className="flex min-w-0 flex-1 flex-col items-center justify-end">
                   <div
                     title={`${point.day}: ${formatMoney(point.cumulative)}`}
-                    className={`w-full max-w-[18px] rounded-t ${positive ? "bg-[#2563eb]" : "bg-amber-500"}`}
+                    className={`w-full max-w-[18px] rounded-t ${positive ? "bg-cobalt" : "bg-amber-500"}`}
                     style={{ height: `${height}%` }}
                   />
                 </div>
@@ -104,21 +104,21 @@ export function PortfolioView({ data }: { data: PortfolioSummary }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-sm">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">{label}</p>
-      <p className="mt-1 text-xl font-bold tabular-nums text-[#0f172a]">{value}</p>
+    <div className="rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">{label}</p>
+      <p className="mt-1 text-xl font-bold tabular-nums text-ink">{value}</p>
     </div>
   );
 }
 
 function PerformanceInsights({ insights }: { insights: PerformanceInsight[] }) {
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+    <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
         Performance Insights
       </p>
-      <h2 className="mt-1 text-lg font-bold text-[#0f172a]">Your betting coach</h2>
-      <p className="mt-1 text-sm text-[#64748b]">
+      <h2 className="mt-1 text-lg font-bold text-ink">Your betting coach</h2>
+      <p className="mt-1 text-sm text-muted">
         Habits from your settled slips — double down on strengths, cut the leaks.
       </p>
 
@@ -138,21 +138,21 @@ function PerformanceInsights({ insights }: { insights: PerformanceInsight[] }) {
                   ? "border-emerald-200 bg-emerald-50/70"
                   : insight.kind === "leak"
                     ? "border-amber-200 bg-amber-50/70"
-                    : "border-[#e2e8f0] bg-[#eef3f9]/60"
+                    : "border-line bg-canvas/60"
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+                  <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
                     {insight.kind === "strength"
                       ? "Strength"
                       : insight.kind === "leak"
                         ? "Leak"
                         : "Watch"}
                   </p>
-                  <p className="mt-1 text-sm font-bold text-[#0f172a]">{insight.title}</p>
+                  <p className="mt-1 text-sm font-bold text-ink">{insight.title}</p>
                 </div>
-                <div className="text-right text-xs font-semibold tabular-nums text-[#0f172a]">
+                <div className="text-right text-xs font-semibold tabular-nums text-ink">
                   <p>{insight.hitRatePct}% hit</p>
                   <p className={insight.roiPct >= 0 ? "text-emerald-700" : "text-amber-700"}>
                     {insight.roiPct >= 0 ? "+" : ""}
@@ -161,7 +161,7 @@ function PerformanceInsights({ insights }: { insights: PerformanceInsight[] }) {
                 </div>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-[#475569]">{insight.detail}</p>
-              <p className="mt-1 text-[11px] text-[#94a3b8]">n={insight.sampleSize} settled</p>
+              <p className="mt-1 text-[11px] text-faint">n={insight.sampleSize} settled</p>
             </li>
           ))}
         </ul>
@@ -173,8 +173,8 @@ function PerformanceInsights({ insights }: { insights: PerformanceInsight[] }) {
 function SlipAlerts({ alerts }: { alerts: PortfolioAlert[] }) {
   if (alerts.length === 0) return null;
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+    <section className="rounded-2xl border border-line bg-white p-4 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
         Slip alerts
       </p>
       <ul className="mt-3 space-y-2">
@@ -188,11 +188,11 @@ function SlipAlerts({ alerts }: { alerts: PortfolioAlert[] }) {
                   ? "border-red-200 bg-red-50/70"
                   : alert.kind === "in_play"
                     ? "border-blue-200 bg-blue-50/70"
-                    : "border-[#e2e8f0] bg-[#eef3f9]/60"
+                    : "border-line bg-canvas/60"
             }`}
           >
-            <span className="font-semibold text-[#0f172a]">{alert.text}</span>
-            <span className="shrink-0 text-xs text-[#64748b]">{alert.detail}</span>
+            <span className="font-semibold text-ink">{alert.text}</span>
+            <span className="shrink-0 text-xs text-muted">{alert.detail}</span>
           </li>
         ))}
       </ul>
@@ -208,11 +208,11 @@ function MarketBreakdownTable({
   formatMoney: (n: number | null | undefined) => string;
 }) {
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+    <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
         Market breakdown
       </p>
-      <h2 className="mt-1 text-lg font-bold text-[#0f172a]">Record by market</h2>
+      <h2 className="mt-1 text-lg font-bold text-ink">Record by market</h2>
       {rows.length === 0 ? (
         <EmptyReason
           className="mt-4"
@@ -223,7 +223,7 @@ function MarketBreakdownTable({
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+              <tr className="text-[11px] tracking-wide text-faint uppercase">
                 <th className="py-2 pr-3">Market</th>
                 <th className="px-3 py-2 text-right">Slips</th>
                 <th className="px-3 py-2 text-right">Won</th>
@@ -237,7 +237,7 @@ function MarketBreakdownTable({
             <tbody>
               {rows.map((row) => (
                 <tr key={row.key} className="border-t border-[#f1f5f9]">
-                  <td className="py-2.5 pr-3 font-semibold text-[#0f172a]">{row.label}</td>
+                  <td className="py-2.5 pr-3 font-semibold text-ink">{row.label}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{row.bets}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{row.wins}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{row.hitRatePct}%</td>
@@ -279,14 +279,14 @@ function MonthlyPnlTable({
 }) {
   if (rows.length === 0) return null;
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+    <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
         Monthly P/L
       </p>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[480px] text-left text-sm">
           <thead>
-            <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+            <tr className="text-[11px] tracking-wide text-faint uppercase">
               <th className="py-2 pr-3">Month</th>
               <th className="px-3 py-2 text-right">Slips</th>
               <th className="px-3 py-2 text-right">Staked</th>
@@ -297,7 +297,7 @@ function MonthlyPnlTable({
           <tbody>
             {rows.map((row) => (
               <tr key={row.month} className="border-t border-[#f1f5f9]">
-                <td className="py-2.5 pr-3 font-semibold text-[#0f172a]">{row.month}</td>
+                <td className="py-2.5 pr-3 font-semibold text-ink">{row.month}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{row.bets}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatMoney(row.stake)}</td>
                 <td
@@ -339,7 +339,7 @@ function SlipList({
 }) {
   return (
     <section>
-      <h2 className="text-lg font-bold text-[#0f172a]">{title}</h2>
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
       {bets.length === 0 ? (
         <EmptyReason className="mt-3" detail={empty} />
       ) : (
@@ -347,24 +347,24 @@ function SlipList({
           {bets.map((bet) => (
             <li
               key={bet.id}
-              className="rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-sm"
+              className="rounded-2xl border border-line bg-white px-4 py-3 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="text-xs font-extrabold tracking-wide text-[#64748b] uppercase">
+                  <p className="text-xs font-extrabold tracking-wide text-muted uppercase">
                     {bet.status} · {bet.legs.length} leg{bet.legs.length === 1 ? "" : "s"}
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-[#0f172a]">
+                  <p className="mt-1 text-sm font-semibold text-ink">
                     Stake {formatMoney(bet.stake)} @ {formatOdds(bet.combined_odds) ?? "—"}
                   </p>
                 </div>
-                <p className="text-sm font-bold tabular-nums text-[#2563eb]">
+                <p className="text-sm font-bold tabular-nums text-cobalt">
                   {bet.profit == null ? `To return ${formatMoney(bet.potential_return)}` : formatMoney(bet.profit)}
                 </p>
               </div>
               <ul className="mt-3 space-y-1 border-t border-[#f1f5f9] pt-3">
                 {bet.legs.map((leg, index) => (
-                  <li key={`${bet.id}-${index}`} className="flex justify-between gap-3 text-xs text-[#64748b]">
+                  <li key={`${bet.id}-${index}`} className="flex justify-between gap-3 text-xs text-muted">
                     <span className="min-w-0 truncate">
                       {leg.label}
                       {leg.match ? ` · ${leg.match}` : ""}

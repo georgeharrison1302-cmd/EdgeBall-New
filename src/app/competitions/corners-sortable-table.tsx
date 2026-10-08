@@ -74,7 +74,7 @@ export function CornersSortableTable({ rows }: { rows: CornerTableRow[] }) {
                 <span className="flex items-center gap-2 font-medium text-slate-900">
                   {row.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.logo} alt="" className="h-5 w-5 object-contain" />
+                    <img loading="lazy" decoding="async" src={row.logo} alt="" className="h-5 w-5 object-contain" />
                   ) : null}
                   {row.team}
                 </span>

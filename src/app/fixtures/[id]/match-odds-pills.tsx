@@ -76,7 +76,7 @@ export function MatchOddsPills({
     <div className="mt-4 space-y-4">
       {pricedGroups.map((group) => (
         <section key={group.title}>
-          <p className="mb-2 text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">{group.title}</p>
+          <p className="mb-2 text-[11px] font-extrabold tracking-wide text-muted uppercase">{group.title}</p>
           <div className={`grid gap-2 ${group.columns}`}>
             {group.selections.map((selection) => (
               <AddToSlipButton

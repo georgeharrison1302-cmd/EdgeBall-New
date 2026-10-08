@@ -59,7 +59,7 @@ export default function FixtureBoard({
   return (
     <section>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-full border border-[#e2e8f0] bg-white p-1 shadow-sm">
+        <div className="flex rounded-full border border-line bg-white p-1 shadow-sm">
           <BoardToggle active={group === "league"} onClick={() => setGroup("league")}>
             Competition
           </BoardToggle>
@@ -67,7 +67,7 @@ export default function FixtureBoard({
             Kickoff
           </BoardToggle>
         </div>
-        <p className="text-sm text-[#64748b]">
+        <p className="text-sm text-muted">
           {shown.length} {shown.length === 1 ? "match" : "matches"}
         </p>
       </div>
@@ -76,7 +76,7 @@ export default function FixtureBoard({
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search team or competition"
-        className="mt-4 w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm text-[#0f172a] shadow-sm outline-none placeholder:text-[#94a3b8] focus:border-[#2563eb]"
+        className="mt-4 w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink shadow-sm outline-none placeholder:text-faint focus:border-cobalt"
       />
 
       {shown.length === 0 ? (
@@ -90,21 +90,21 @@ export default function FixtureBoard({
       ) : (
         <div className="mt-4 space-y-5">
           {groups.map((league) => (
-            <section key={league.id} className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
+            <section key={league.id} className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
               {league.name ? (
                 <Link
                   prefetch={false}
                   href={`/competitions/${league.id}`}
-                  className="flex items-center gap-2 border-b border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 transition-colors hover:bg-[#eff6ff]"
+                  className="flex items-center gap-2 border-b border-line bg-surface px-4 py-3 transition-colors hover:bg-[#eff6ff]"
                 >
                   <LeagueLogo src={league.logo} leagueId={Number(league.id)} leagueName={league.name} size={20} />
-                  <span className="text-sm font-bold text-[#0f172a]">{league.name}</span>
-                  <span className="ml-auto text-xs font-semibold text-[#64748b]">
+                  <span className="text-sm font-bold text-ink">{league.name}</span>
+                  <span className="ml-auto text-xs font-semibold text-muted">
                     {league.matches.length} {league.matches.length === 1 ? "match" : "matches"}
                   </span>
                 </Link>
               ) : null}
-              <div className="divide-y divide-[#e2e8f0]">
+              <div className="divide-y divide-line">
                 {league.matches.map((match) => (
                   <MatchCard key={match.id} match={match} />
                 ))}
@@ -130,7 +130,7 @@ function MatchCard({ match }: { match: FixtureMatch }) {
     <article className="bg-white p-4 transition-colors hover:bg-[#fbfdff]">
       <div className="grid gap-4 lg:grid-cols-[76px_minmax(0,1fr)_230px] lg:items-center">
         <div className="flex items-center gap-3 lg:block">
-          <p className="text-sm font-bold text-[#0f172a]">
+          <p className="text-sm font-bold text-ink">
             <KickoffText utc={match.kickoffAt} fallback={match.kickoff || "TBC"} />
           </p>
           <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-extrabold tracking-wide uppercase ${statusClass(match)}`}>
@@ -142,7 +142,7 @@ function MatchCard({ match }: { match: FixtureMatch }) {
           prefetch={false}
           href={`/fixtures/${match.id}`}
           aria-label={`Open ${matchName}`}
-          className="block min-w-0 rounded-xl px-2 py-1 -m-1 transition-colors hover:bg-[#f8fafc]"
+          className="block min-w-0 rounded-xl px-2 py-1 -m-1 transition-colors hover:bg-surface"
         >
           <TeamRow side={match.home} score={scored ? match.goalsHome : null} />
           <TeamRow side={match.away} score={scored ? match.goalsAway : null} />
@@ -188,7 +188,7 @@ function MatchCard({ match }: { match: FixtureMatch }) {
       </div>
 
       {hasBtts || hasTotals ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#e2e8f0] pt-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
           {hasBtts ? (
             <SecondaryMarket label="BTTS">
               <PriceButton
@@ -239,13 +239,13 @@ function MatchCard({ match }: { match: FixtureMatch }) {
               />
             </SecondaryMarket>
           ) : null}
-          <Link prefetch={false} href={`/fixtures/${match.id}`} className="ml-auto text-xs font-bold text-[#2563eb]">
+          <Link prefetch={false} href={`/fixtures/${match.id}`} className="ml-auto text-xs font-bold text-cobalt">
             Match Hub →
           </Link>
         </div>
       ) : (
         <div className="mt-3 flex justify-end">
-          <Link prefetch={false} href={`/fixtures/${match.id}`} className="text-xs font-bold text-[#2563eb]">
+          <Link prefetch={false} href={`/fixtures/${match.id}`} className="text-xs font-bold text-cobalt">
             Match Hub →
           </Link>
         </div>
@@ -293,8 +293,8 @@ function PriceButton({
 
 function SecondaryMarket({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-[#e2e8f0] bg-[#f8fafc] p-1">
-      <span className="px-2 text-[10px] font-extrabold tracking-wide text-[#64748b] uppercase">{label}</span>
+    <div className="flex items-center gap-1.5 rounded-full border border-line bg-surface p-1">
+      <span className="px-2 text-[10px] font-extrabold tracking-wide text-muted uppercase">{label}</span>
       {children}
     </div>
   );
@@ -304,9 +304,9 @@ function TeamRow({ side, score }: { side: FixtureMatch["home"]; score: number | 
   return (
     <div className="flex min-w-0 items-center gap-3 py-1.5">
       <TeamBadge src={side.logo} teamId={side.id} teamName={side.name} size={26} />
-      <span className="min-w-0 truncate text-sm font-semibold text-[#0f172a]">{side.name}</span>
+      <span className="min-w-0 truncate text-sm font-semibold text-ink">{side.name}</span>
       <FormDots form={side.form} />
-      <span className="ml-auto w-7 text-right text-base font-black tabular-nums text-[#0f172a]">
+      <span className="ml-auto w-7 text-right text-base font-black tabular-nums text-ink">
         {score ?? ""}
       </span>
     </div>
@@ -323,10 +323,10 @@ function FormDots({ form }: { form: string | null }) {
           key={`${letter}-${index}`}
           className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
             letter === "W"
-              ? "bg-[#2563eb] text-white"
+              ? "bg-cobalt text-white"
               : letter === "L"
-                ? "bg-[#0f172a] text-white"
-                : "bg-[#e2e8f0] text-[#475569]"
+                ? "bg-ink text-white"
+                : "bg-line text-[#475569]"
           }`}
         >
           {letter}
@@ -342,7 +342,7 @@ function BoardToggle({ active, onClick, children }: { active: boolean; onClick: 
       type="button"
       onClick={onClick}
       className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
-        active ? "bg-[#2563eb] text-white" : "text-[#64748b] hover:text-[#0f172a]"
+        active ? "bg-cobalt text-white" : "text-muted hover:text-ink"
       }`}
     >
       {children}
@@ -360,7 +360,7 @@ function statusLabel(match: FixtureMatch) {
 function statusClass(match: FixtureMatch) {
   if (match.bucket === "live") return "bg-red-50 text-red-600";
   if (match.bucket === "finished") return "bg-slate-100 text-slate-500";
-  if (match.bucket === "upcoming") return "bg-blue-50 text-[#2563eb]";
+  if (match.bucket === "upcoming") return "bg-blue-50 text-cobalt";
   return "bg-slate-100 text-slate-500";
 }
 

@@ -29,7 +29,7 @@ export function FallbackImage({
   height,
   fallbackText = "?",
   className = "",
-  fallbackClassName = "bg-[#e2e8f0] text-[#64748b]",
+  fallbackClassName = "bg-line text-muted",
   fit = "contain",
   unoptimized = true,
 }: Props) {

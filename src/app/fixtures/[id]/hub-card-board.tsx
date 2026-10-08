@@ -103,7 +103,7 @@ export function HubCardBoard({
             type="button"
             onClick={() => setBoardMode("edge")}
             className={`rounded-full px-3 py-1.5 text-xs font-bold ${
-              boardMode === "edge" ? "bg-[#2563eb] text-white" : "text-[var(--muted)]"
+              boardMode === "edge" ? "bg-cobalt text-white" : "text-[var(--muted)]"
             }`}
           >
             By +Edge%
@@ -112,7 +112,7 @@ export function HubCardBoard({
             type="button"
             onClick={() => setBoardMode("market")}
             className={`rounded-full px-3 py-1.5 text-xs font-bold ${
-              boardMode === "market" ? "bg-[#2563eb] text-white" : "text-[var(--muted)]"
+              boardMode === "market" ? "bg-cobalt text-white" : "text-[var(--muted)]"
             }`}
           >
             By market
@@ -122,7 +122,7 @@ export function HubCardBoard({
               type="button"
               onClick={() => setBoardMode("no-model")}
               className={`rounded-full px-3 py-1.5 text-xs font-bold ${
-                boardMode === "no-model" ? "bg-[#64748b] text-white" : "text-[var(--muted)]"
+                boardMode === "no-model" ? "bg-muted text-white" : "text-[var(--muted)]"
               }`}
             >
               No model ({noModelRows.length})
@@ -158,7 +158,7 @@ export function HubCardBoard({
         </ul>
       ) : boardMode === "no-model" ? (
         <div>
-          <p className="mb-3 rounded-xl border border-[#e2e8f0] bg-[#eef3f9] px-3 py-2 text-xs font-semibold text-[#64748b]">
+          <p className="mb-3 rounded-xl border border-line bg-canvas px-3 py-2 text-xs font-semibold text-muted">
             Book prices only — these selections have no active Poisson model and are excluded from the edge board.
           </p>
           <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

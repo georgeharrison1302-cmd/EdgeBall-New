@@ -136,7 +136,7 @@ export function RankingsSortableTable({ rows }: { rows: RankingRow[] }) {
                 <span className="flex min-w-0 items-center gap-2 font-medium text-slate-900">
                   {row.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
+                    <img loading="lazy" decoding="async" src={row.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
                   ) : null}
                   <span className="truncate">{row.team}</span>
                 </span>
@@ -171,7 +171,7 @@ function signed(value: number | null, digits: number) {
 }
 
 function Trend({ values }: { values: number[] }) {
-  if (values.length === 0) return <span className="text-[#94a3b8]">–</span>;
+  if (values.length === 0) return <span className="text-faint">–</span>;
   return (
     <span className="inline-flex items-end gap-0.5">
       {values.map((value, index) => (

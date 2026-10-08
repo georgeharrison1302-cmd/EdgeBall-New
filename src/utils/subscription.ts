@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { hasActiveSubscription, usableStripeKey } from "@/app/today/access";
 import type { BillingInterval, SubscriptionTier } from "@/types/billing";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -19,7 +21,7 @@ export type SubscriptionAccess = {
  * Resolve EdgeBall Pro access for the current session.
  * Prefers `user_subscriptions`, falls back to live Stripe customer check.
  */
-export async function getSubscriptionAccess(): Promise<SubscriptionAccess> {
+export const getSubscriptionAccess = cache(async function getSubscriptionAccess(): Promise<SubscriptionAccess> {
   if (process.env.SUBSCRIPTION_BYPASS === "1") {
     return { unlocked: true, status: "active", tier: null, userId: null, signedIn: false };
   }
@@ -83,7 +85,7 @@ export async function getSubscriptionAccess(): Promise<SubscriptionAccess> {
     userId: user.id,
     signedIn: true,
   };
-}
+});
 
 export async function upsertSubscriptionByUserId(input: {
   userId: string;

@@ -98,9 +98,9 @@ export default function AdvancedTable({
         return (
           <div key={group.name || "table"}>
             {group.name && groups.length > 1 ? (
-              <h2 className="mb-3 text-lg font-semibold text-[#0f172a]">{group.name}</h2>
+              <h2 className="mb-3 text-lg font-semibold text-ink">{group.name}</h2>
             ) : null}
-            <div className="overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white">
+            <div className="overflow-x-auto rounded-2xl border border-line bg-white">
               <table className="w-full min-w-[760px] text-left text-sm">
                 <thead>
                   <tr>
@@ -353,8 +353,8 @@ function StandingRowBlock({
   return (
     <>
       <tr
-        className={`cursor-pointer border-t border-[#e2e8f0] ${zoneClass(row.description)} ${
-          open ? "bg-[#f8fafc]" : "hover:bg-[#f8fafc]"
+        className={`cursor-pointer border-t border-line ${zoneClass(row.description)} ${
+          open ? "bg-surface" : "hover:bg-surface"
         }`}
         onClick={onToggle}
         title={row.description ?? extra?.narrative}
@@ -365,12 +365,12 @@ function StandingRowBlock({
             onClick={onToggle}
             aria-expanded={open}
             aria-label={open ? `Hide ${row.team} angles` : `Show ${row.team} angles`}
-            className="grid h-6 w-6 place-items-center rounded-full border border-[#e2e8f0] text-xs font-semibold text-[#64748b]"
+            className="grid h-6 w-6 place-items-center rounded-full border border-line text-xs font-semibold text-muted"
           >
             {open ? "–" : "+"}
           </button>
         </td>
-        <td className="px-3 py-3 text-[#0f172a]">
+        <td className="px-3 py-3 text-ink">
           {showLeagueRank && row.movement === "up" ? (
             <span className="text-green-700">↑ </span>
           ) : null}
@@ -382,20 +382,20 @@ function StandingRowBlock({
         <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
           <Link
             href={`/competitions/${leagueId}/teams/${row.teamId}?season=${season}`}
-            className="flex items-center gap-2 font-semibold text-[#0f172a]"
+            className="flex items-center gap-2 font-semibold text-ink"
           >
             {row.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={row.logoUrl} alt="" className="h-5 w-5 object-contain" />
+              <img loading="lazy" decoding="async" src={row.logoUrl} alt="" className="h-5 w-5 object-contain" />
             ) : null}
             <span>{row.team}</span>
           </Link>
         </td>
         {lens === "discipline" ? (
           <>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{rate(extra?.cardsPerGame)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(extra?.totalYellows ?? null)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(extra?.reds ?? null)}</td>
+            <td className="px-2 py-3 text-right text-ink">{rate(extra?.cardsPerGame)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(extra?.totalYellows ?? null)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(extra?.reds ?? null)}</td>
             <td className="px-3 py-3 text-[#334155]">
               {extra?.topYellow
                 ? `${extra.topYellow.name} (${extra.topYellow.yellows})`
@@ -404,20 +404,20 @@ function StandingRowBlock({
           </>
         ) : lens === "attacking" ? (
           <>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{rate(extra?.gfPerGame)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(extra?.cleanSheets ?? null)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{pct(extra?.bttsPct ?? null)}</td>
+            <td className="px-2 py-3 text-right text-ink">{rate(extra?.gfPerGame)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(extra?.cleanSheets ?? null)}</td>
+            <td className="px-2 py-3 text-right text-ink">{pct(extra?.bttsPct ?? null)}</td>
           </>
         ) : (
           <>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.played)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.win)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.draw)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.lose)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.goalsFor)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.goalsAgainst)}</td>
-            <td className="px-2 py-3 text-right text-[#0f172a]">{count(side.goalsDiff)}</td>
-            <td className="px-2 py-3 text-right font-semibold text-[#0f172a]">{count(side.points)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.played)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.win)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.draw)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.lose)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.goalsFor)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.goalsAgainst)}</td>
+            <td className="px-2 py-3 text-right text-ink">{count(side.goalsDiff)}</td>
+            <td className="px-2 py-3 text-right font-semibold text-ink">{count(side.points)}</td>
             <td className="px-3 py-3">
               <Form value={row.form} />
             </td>
@@ -425,7 +425,7 @@ function StandingRowBlock({
         )}
       </tr>
       {open ? (
-        <tr className="border-t border-[#e2e8f0] bg-[#f8fafc]">
+        <tr className="border-t border-line bg-surface">
           <td colSpan={colSpan} className="px-4 py-4">
             <AccordionBody leagueId={leagueId} season={season} extra={extra} />
           </td>
@@ -446,7 +446,7 @@ function AccordionBody({
 }) {
   if (!extra) {
     return (
-      <p className="text-sm text-[#64748b]">
+      <p className="text-sm text-muted">
         Team angles are not stored yet — Last-5 form and sheet rates are empty for this club.
       </p>
     );
@@ -470,40 +470,40 @@ function AccordionBody({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-[#e2e8f0] bg-white px-4 py-3">
-        <p className="text-sm font-semibold text-[#0f172a]">
+      <div className="rounded-xl border border-line bg-white px-4 py-3">
+        <p className="text-sm font-semibold text-ink">
           {narrative || "Next fixture and team rates are not stored yet."}
         </p>
         {extra.nextFixtureId ? (
           <Link
             href={`/fixtures/${extra.nextFixtureId}`}
-            className="mt-3 inline-flex rounded-full bg-[#2563eb] px-3 py-1.5 text-xs font-semibold text-white"
+            className="mt-3 inline-flex rounded-full bg-cobalt px-3 py-1.5 text-xs font-semibold text-white"
           >
             Open Match Hub
           </Link>
         ) : (
-          <p className="mt-2 text-xs text-[#64748b]">No upcoming fixture stored for Match Hub.</p>
+          <p className="mt-2 text-xs text-muted">No upcoming fixture stored for Match Hub.</p>
         )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
             Discipline leaders
           </p>
           {extra.leaders.length === 0 ? (
-            <p className="mt-2 text-sm text-[#64748b]">No stored card leaders.</p>
+            <p className="mt-2 text-sm text-muted">No stored card leaders.</p>
           ) : (
             <ul className="mt-2 space-y-1 text-sm">
               {extra.leaders.map((leader) => (
                 <li key={leader.playerId}>
                   <Link
                     href={`/competitions/${leagueId}/players/${leader.playerId}?season=${season}`}
-                    className="font-semibold text-[#2563eb]"
+                    className="font-semibold text-cobalt"
                   >
                     {leader.name}
                   </Link>
-                  <span className="text-[#64748b]">
+                  <span className="text-muted">
                     {" "}
                     · {leader.yellows} yellows
                     {leader.fouls != null ? ` · ${leader.fouls} fouls` : ""}
@@ -514,8 +514,8 @@ function AccordionBody({
           )}
         </div>
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">BTTS</p>
-          <p className="mt-2 text-sm font-semibold text-[#0f172a]">
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">BTTS</p>
+          <p className="mt-2 text-sm font-semibold text-ink">
             {extra.bttsPct == null ? "BTTS is not stored." : `${extra.bttsPct}% this season`}
           </p>
           <div className="mt-2">
@@ -523,16 +523,16 @@ function AccordionBody({
           </div>
         </div>
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
             Clean sheets
           </p>
-          <p className="mt-2 text-sm font-semibold text-[#0f172a]">
+          <p className="mt-2 text-sm font-semibold text-ink">
             {extra.cleanSheets == null
               ? "Clean sheets are not stored."
               : `${extra.cleanSheets} this season`}
           </p>
           {extra.cardsPerGame != null ? (
-            <p className="mt-2 text-xs text-[#64748b]">
+            <p className="mt-2 text-xs text-muted">
               {extra.cardsPerGame.toFixed(2)} cards/g ·{" "}
               {extra.totalYellows ?? 0} yellows · {extra.reds ?? 0} reds
             </p>

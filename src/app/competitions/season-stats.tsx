@@ -124,7 +124,7 @@ function PlayerTable({ players, season }: { players: SeasonPlayer[]; season: num
                 <td className="py-2 pr-2 text-gray-500">{index + 1}</td>
                 <td className="py-2">
                   <span className="flex items-center gap-2">
-                    {player.photo ? <img src={player.photo} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="h-7 w-7 rounded-full bg-blue-50" />}
+                    {player.photo ? <img loading="lazy" decoding="async" src={player.photo} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="h-7 w-7 rounded-full bg-blue-50" />}
                     <span>
                       <span className="block font-medium text-slate-900">{player.name}</span>
                       <span className="block text-xs text-gray-500">{player.team}</span>
@@ -225,7 +225,7 @@ function TeamTable({ teams, players, season }: { teams: TeamGoals[]; players: Se
                   <td className="py-2 pr-2 text-gray-500">{index + 1}</td>
                   <td className="py-2">
                     <span className="flex items-center gap-2 font-medium text-slate-900">
-                      {team.logo ? <img src={team.logo} alt="" className="h-5 w-5 object-contain" /> : null}
+                      {team.logo ? <img loading="lazy" decoding="async" src={team.logo} alt="" className="h-5 w-5 object-contain" /> : null}
                       {team.team}
                     </span>
                   </td>
@@ -343,7 +343,7 @@ export function BttsList({ rows }: { rows: Array<{ teamId: number; team: string;
                 <td className="py-2 text-gray-500">{index + 1}</td>
                 <td className="py-2">
                   <span className="flex items-center gap-2 font-medium">
-                    {row.logo ? <img src={row.logo} alt="" className="h-5 w-5 object-contain" /> : null}
+                    {row.logo ? <img loading="lazy" decoding="async" src={row.logo} alt="" className="h-5 w-5 object-contain" /> : null}
                     {row.team}
                   </span>
                 </td>

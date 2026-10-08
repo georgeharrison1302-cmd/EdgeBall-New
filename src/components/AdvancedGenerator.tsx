@@ -589,7 +589,7 @@ export default function AdvancedGenerator({
             </CheckboxList>
           )}
           {!hasFixtureSelection ? (
-            <p className="mt-2 text-xs text-[#64748b]">
+            <p className="mt-2 text-xs text-muted">
               No fixtures selected — tick at least one fixture to generate.
             </p>
           ) : null}
@@ -646,7 +646,7 @@ export default function AdvancedGenerator({
                     onClick={() => toggleThreshold(half)}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold tabular-nums ${
                       on
-                        ? "bg-[#2563eb] text-white"
+                        ? "bg-cobalt text-white"
                         : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                     }`}
                   >
@@ -659,7 +659,7 @@ export default function AdvancedGenerator({
                 onClick={() => toggleThreshold(THRESHOLD_ANY)}
                 className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${
                   selectedThresholds.includes(THRESHOLD_ANY)
-                    ? "bg-[#2563eb] text-white"
+                    ? "bg-cobalt text-white"
                     : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >

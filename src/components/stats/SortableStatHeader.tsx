@@ -118,7 +118,7 @@ export function sortByNumber<T>(
 type Align = "left" | "right";
 
 const baseTh =
-  "py-2 font-semibold tracking-wide uppercase text-[11px] text-[#64748b]";
+  "py-2 font-semibold tracking-wide uppercase text-[11px] text-muted";
 
 /** Non-sortable header with full name on hover. */
 export function LabeledTh({
@@ -173,8 +173,8 @@ export function SortableTh({
       <button
         type="button"
         onClick={onSort}
-        className={`inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 font-semibold tracking-wide uppercase transition-colors hover:bg-slate-100 hover:text-[#0f172a] ${
-          active ? "text-[#2563eb]" : "text-[#64748b]"
+        className={`inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 font-semibold tracking-wide uppercase transition-colors hover:bg-slate-100 hover:text-ink ${
+          active ? "text-cobalt" : "text-muted"
         } ${align === "right" ? "justify-end" : "justify-start"}`}
       >
         {label}

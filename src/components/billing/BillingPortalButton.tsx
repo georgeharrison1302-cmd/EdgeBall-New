@@ -30,7 +30,7 @@ export function BillingPortalButton({ className = "" }: { className?: string }) 
         type="button"
         onClick={openPortal}
         disabled={busy}
-        className={`inline-flex items-center justify-center rounded-full bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-50 ${className}`.trim()}
+        className={`inline-flex items-center justify-center rounded-full bg-cobalt px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-cobalt-dark disabled:opacity-50 ${className}`.trim()}
       >
         {busy ? "Opening Stripe…" : "Billing / Stripe Portal"}
       </button>

@@ -99,18 +99,18 @@ export function AuthPanel({
 
   return (
     <div>
-      <div className="grid grid-cols-2 rounded-full border border-[#e2e8f0] bg-[#eef3f9] p-1 text-sm font-bold">
+      <div className="grid grid-cols-2 rounded-full border border-line bg-canvas p-1 text-sm font-bold">
         <button
           type="button"
           onClick={() => setMode("signin")}
-          className={`rounded-full px-3 py-2 transition-colors ${mode === "signin" ? "bg-white text-[#0f172a] shadow-sm" : "text-[#64748b]"}`}
+          className={`rounded-full px-3 py-2 transition-colors ${mode === "signin" ? "bg-white text-ink shadow-sm" : "text-muted"}`}
         >
           Sign in
         </button>
         <button
           type="button"
           onClick={() => setMode("signup")}
-          className={`rounded-full px-3 py-2 transition-colors ${mode === "signup" ? "bg-white text-[#0f172a] shadow-sm" : "text-[#64748b]"}`}
+          className={`rounded-full px-3 py-2 transition-colors ${mode === "signup" ? "bg-white text-ink shadow-sm" : "text-muted"}`}
         >
           Sign up
         </button>
@@ -120,33 +120,33 @@ export function AuthPanel({
         type="button"
         onClick={continueWithGoogle}
         disabled={busy != null}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm font-bold text-[#0f172a] transition-colors hover:border-[#2563eb] disabled:opacity-50"
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:border-cobalt disabled:opacity-50"
       >
         <GoogleIcon />
         {busy === "google" ? "Opening Google…" : "Continue with Google"}
       </button>
 
-      <div className="my-4 flex items-center gap-3 text-[11px] font-bold tracking-wide text-[#94a3b8] uppercase">
-        <span className="h-px flex-1 bg-[#e2e8f0]" />
+      <div className="my-4 flex items-center gap-3 text-[11px] font-bold tracking-wide text-faint uppercase">
+        <span className="h-px flex-1 bg-line" />
         or use email
-        <span className="h-px flex-1 bg-[#e2e8f0]" />
+        <span className="h-px flex-1 bg-line" />
       </div>
 
       <form onSubmit={completePasswordAuth} className="space-y-3">
         <label className="block text-sm">
-          <span className="font-semibold text-[#64748b]">Email</span>
+          <span className="font-semibold text-muted">Email</span>
           <input
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1.5 w-full rounded-full border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm text-[#0f172a] outline-none focus:border-[#2563eb]"
+            className="mt-1.5 w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-cobalt"
             placeholder="you@email.com"
           />
         </label>
         <label className="block text-sm">
-          <span className="font-semibold text-[#64748b]">Password</span>
+          <span className="font-semibold text-muted">Password</span>
           <input
             type="password"
             required
@@ -154,14 +154,14 @@ export function AuthPanel({
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1.5 w-full rounded-full border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm text-[#0f172a] outline-none focus:border-[#2563eb]"
+            className="mt-1.5 w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-cobalt"
             placeholder={mode === "signin" ? "Your password" : "At least 6 characters"}
           />
         </label>
         <button
           type="submit"
           disabled={busy != null}
-          className="w-full rounded-full bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#1d4ed8] disabled:opacity-50"
+          className="w-full rounded-full bg-cobalt px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-cobalt-dark disabled:opacity-50"
         >
           {busy === "password"
             ? mode === "signin"
@@ -175,7 +175,7 @@ export function AuthPanel({
           type="button"
           onClick={sendMagicLink}
           disabled={busy != null || email.trim() === ""}
-          className="w-full rounded-full border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm font-bold text-[#2563eb] transition-colors hover:border-[#2563eb] disabled:opacity-50"
+          className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm font-bold text-cobalt transition-colors hover:border-cobalt disabled:opacity-50"
         >
           {busy === "magic" ? "Sending link…" : "Email me a magic link"}
         </button>
@@ -186,7 +186,7 @@ export function AuthPanel({
           className={`mt-4 rounded-xl px-3 py-2 text-sm ${
             notice.tone === "error"
               ? "border border-red-200 bg-red-50 text-red-700"
-              : "border border-blue-100 bg-blue-50 text-[#1d4ed8]"
+              : "border border-blue-100 bg-blue-50 text-cobalt-dark"
           }`}
           role={notice.tone === "error" ? "alert" : "status"}
         >
@@ -194,7 +194,7 @@ export function AuthPanel({
         </p>
       ) : null}
 
-      <p className="mt-4 text-center text-xs leading-5 text-[#64748b]">
+      <p className="mt-4 text-center text-xs leading-5 text-muted">
         Email/password, magic link, and Google auth are handled by Supabase Auth.
       </p>
     </div>

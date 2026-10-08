@@ -12,7 +12,7 @@ export function FormDots({
 }) {
   if (counts.length === 0) {
     return (
-      <p className={`text-[11px] font-semibold text-[#94a3b8] ${className}`.trim()}>
+      <p className={`text-[11px] font-semibold text-faint ${className}`.trim()}>
         No match logs stored
       </p>
     );

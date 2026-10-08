@@ -60,7 +60,7 @@ export function PricingPlans({
       <div className="mt-8 flex justify-center">
         <div
           aria-label="Billing interval"
-          className="inline-flex rounded-full border border-[#e2e8f0] bg-white p-1 shadow-sm"
+          className="inline-flex rounded-full border border-line bg-white p-1 shadow-sm"
           role="group"
         >
           {(["month", "year"] as const).map((value) => (
@@ -71,8 +71,8 @@ export function PricingPlans({
               onClick={() => setInterval(value)}
               className={`rounded-full px-5 py-2 text-sm font-bold transition-colors ${
                 interval === value
-                  ? "bg-[#2563eb] text-white shadow-sm"
-                  : "text-[#64748b] hover:text-[#0f172a]"
+                  ? "bg-cobalt text-white shadow-sm"
+                  : "text-muted hover:text-ink"
               }`}
             >
               {value === "month" ? "Monthly" : "Annual"}
@@ -91,7 +91,7 @@ export function PricingPlans({
           cta={
             <Link
               href="/"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-[#e2e8f0] bg-white px-4 py-3 text-sm font-bold text-[#0f172a] hover:border-[#2563eb]"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-line bg-white px-4 py-3 text-sm font-bold text-ink hover:border-cobalt"
             >
               Open Match Hub
             </Link>
@@ -135,7 +135,7 @@ function PaidTierCta({
     return (
       <Link
         href="/account"
-        className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#0f172a] px-4 py-3 text-sm font-bold text-white hover:bg-[#1e293b]"
+        className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-ink px-4 py-3 text-sm font-bold text-white hover:bg-[#1e293b]"
       >
         {activeTier === "premium" ? "Current plan" : "Manage subscription"}
       </Link>
@@ -148,7 +148,7 @@ function PaidTierCta({
       <input type="hidden" name="interval" value={interval} />
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center rounded-full bg-[#0f172a] px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#1e293b]"
+        className="inline-flex w-full items-center justify-center rounded-full bg-ink px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#1e293b]"
       >
         Subscribe to Premium {interval === "month" ? "monthly" : "annually"}
       </button>
@@ -184,41 +184,41 @@ function TierCard({
   return (
     <section
       className={`rounded-3xl border bg-white p-6 shadow-sm sm:p-8 ${
-        featured ? "border-[#2563eb] ring-2 ring-[#2563eb]/15" : "border-[#e2e8f0]"
+        featured ? "border-cobalt ring-2 ring-cobalt/15" : "border-line"
       }`}
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
           {eyebrow}
         </p>
         {badge ? (
-          <span className="rounded-full bg-[#2563eb] px-3 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase">
+          <span className="rounded-full bg-cobalt px-3 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase">
             {badge}
           </span>
         ) : null}
       </div>
-      <h2 className="mt-1 text-xl font-bold text-[#0f172a]">{title}</h2>
+      <h2 className="mt-1 text-xl font-bold text-ink">{title}</h2>
       <p className="mt-4 flex items-baseline gap-1">
-        <span className="text-4xl font-black tracking-tight text-[#0f172a]">{price}</span>
-        <span className="text-sm font-semibold text-[#64748b]">{period}</span>
+        <span className="text-4xl font-black tracking-tight text-ink">{price}</span>
+        <span className="text-sm font-semibold text-muted">{period}</span>
       </p>
       {note ? (
-        <p className="mt-3 rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1.5 text-center text-xs font-extrabold text-[#1d4ed8]">
+        <p className="mt-3 rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1.5 text-center text-xs font-extrabold text-cobalt-dark">
           {note}
         </p>
       ) : null}
       {detail ? (
-        <p className="mt-2 text-center text-xs font-semibold text-[#64748b]">{detail}</p>
+        <p className="mt-2 text-center text-xs font-semibold text-muted">{detail}</p>
       ) : null}
       {proof ? (
         <div className="mt-4 rounded-xl border border-[#dbeafe] bg-[#eff6ff] px-3.5 py-3">
-          <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
             Included · live backtest
           </p>
-          <p className="mt-1 text-sm font-bold text-[#0f172a]">
+          <p className="mt-1 text-sm font-bold text-ink">
             {proof.badgeLabel}: {proof.hitRatePct}% hit rate
           </p>
-          <p className="mt-0.5 text-xs text-[#64748b]">
+          <p className="mt-0.5 text-xs text-muted">
             vs {proof.marketLabel} · {proof.totalSamples} historical fixtures
           </p>
         </div>
@@ -226,7 +226,7 @@ function TierCard({
       <ul className="mt-6 space-y-2.5">
         {features.map((feature) => (
           <li key={feature} className="flex gap-2 text-sm text-[#334155]">
-            <span className="mt-0.5 font-bold text-[#2563eb]" aria-hidden>
+            <span className="mt-0.5 font-bold text-cobalt" aria-hidden>
               ✓
             </span>
             <span>{feature}</span>

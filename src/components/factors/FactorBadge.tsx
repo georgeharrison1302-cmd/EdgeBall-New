@@ -86,19 +86,19 @@ export function FactorBadge({
         <div
           id={tipId}
           role="tooltip"
-          className="absolute top-full left-0 z-30 mt-2 w-64 rounded-xl border border-[#e2e8f0] bg-[#ffffff] p-3 text-left shadow-lg"
+          className="absolute top-full left-0 z-30 mt-2 w-64 rounded-xl border border-line bg-[#ffffff] p-3 text-left shadow-lg"
           style={{ backgroundColor: "#ffffff" }}
         >
-          <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
             {evaluation.factor.name}
           </p>
-          <p className="mt-1 text-xs font-semibold text-[#0f172a]">{evaluation.summary}</p>
+          <p className="mt-1 text-xs font-semibold text-ink">{evaluation.summary}</p>
           {evidenceRows.length > 0 ? (
-            <dl className="mt-2 space-y-1 border-t border-[#eef3f9] pt-2">
+            <dl className="mt-2 space-y-1 border-t border-canvas pt-2">
               {evidenceRows.map(([key, value]) => (
                 <div key={key} className="flex justify-between gap-2 text-[11px]">
-                  <dt className="text-[#64748b]">{formatEvidenceKey(key)}</dt>
-                  <dd className="font-semibold tabular-nums text-[#0f172a]">{String(value)}</dd>
+                  <dt className="text-muted">{formatEvidenceKey(key)}</dt>
+                  <dd className="font-semibold tabular-nums text-ink">{String(value)}</dd>
                 </div>
               ))}
             </dl>

@@ -62,25 +62,25 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
 
   return (
     <div>
-      <p className="text-sm text-[#64748b]">
-        <Link href="/competitions" className="text-[#2563eb]">
+      <p className="text-sm text-muted">
+        <Link href="/competitions" className="text-cobalt">
           Competitions
         </Link>
         <span> / </span>
-        <Link href={`/competitions/${page.leagueId}?season=${season}`} className="text-[#2563eb]">
+        <Link href={`/competitions/${page.leagueId}?season=${season}`} className="text-cobalt">
           {page.league}
         </Link>
       </p>
       <div className="mt-3 flex items-center gap-3">
         {page.photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={page.photoUrl} alt="" className="h-16 w-16 rounded-full object-cover bg-[#e2e8f0]" />
+          <img loading="lazy" decoding="async" src={page.photoUrl} alt="" className="h-16 w-16 rounded-full object-cover bg-line" />
         ) : (
-          <span className="h-16 w-16 rounded-full bg-[#e2e8f0]" />
+          <span className="h-16 w-16 rounded-full bg-line" />
         )}
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{page.name}</h1>
-          <p className="mt-1 text-sm text-[#64748b]">
+          <p className="mt-1 text-sm text-muted">
             {[page.position, page.age === null ? null : String(page.age), page.nationality, measure(page.height, "cm"), measure(page.weight, "kg")]
               .filter(Boolean)
               .join(" · ")}
@@ -90,7 +90,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
       </div>
 
       {page.stored ? null : (
-        <p className="mt-5 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-4 text-sm text-[#64748b]">
+        <p className="mt-5 rounded-2xl border border-line bg-white px-4 py-4 text-sm text-muted">
           Season totals are not stored for {season}.
         </p>
       )}
@@ -102,7 +102,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
           <section key={competition.leagueId}>
             <h2 className="text-lg font-semibold">
               {isTargetLeagueId(competition.leagueId) ? (
-                <Link href={`/competitions/${competition.leagueId}?season=${season}`} className="text-[#2563eb]">
+                <Link href={`/competitions/${competition.leagueId}?season=${season}`} className="text-cobalt">
                   {competition.league}
                 </Link>
               ) : (
@@ -120,7 +120,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
       {page.combined ? (
         <section className="mt-8">
           <h2 className="text-lg font-semibold">All competitions</h2>
-          <p className="mt-1 text-sm text-[#64748b]">
+          <p className="mt-1 text-sm text-muted">
             Added from each competition stored for {season}. Pass accuracy stays with its own competition. A blank figure is left out.
           </p>
           <SpellStats spell={page.combined} />
@@ -129,9 +129,9 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Trophies</h2>
         {trophies.length === 0 ? (
-          <p className="mt-2 text-sm text-[#64748b]">Trophies are not stored.</p>
+          <p className="mt-2 text-sm text-muted">Trophies are not stored.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
+          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-line bg-white">
             {trophies.map((line, index) => (
               <li key={`${line}-${index}`} className="px-4 py-3 text-sm">
                 {line}
@@ -142,7 +142,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
       </section>
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Sidelined</h2>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <p className="mt-1 text-sm text-muted">
           Stored injury and suspension history. An end date of Unknown means no return date was confirmed.
           {availability.overlap === "counted"
             ? ` Missed ${availability.missed} stored ${season} ${availability.missed === 1 ? "match" : "matches"} while a spell covered the kickoff.`
@@ -151,16 +151,16 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               : ""}
         </p>
         {availability.rated.length > 0 ? (
-          <p className="mt-1 text-sm text-[#64748b]">Ratings from stored appearances this season: {availability.rated.join(", ")}</p>
+          <p className="mt-1 text-sm text-muted">Ratings from stored appearances this season: {availability.rated.join(", ")}</p>
         ) : null}
         {availability.spells.length === 0 ? (
-          <p className="mt-2 text-sm text-[#64748b]">Sidelined spells are not stored.</p>
+          <p className="mt-2 text-sm text-muted">Sidelined spells are not stored.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
+          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-line bg-white">
             {availability.spells.map((spell, index) => (
               <li key={`${spell.type}-${spell.start}-${index}`} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span className="font-semibold">{spell.type ?? "Sidelined"}</span>
-                <span className="text-[#64748b]">
+                <span className="text-muted">
                   {spell.start ?? ""}
                   {spell.start || spell.end ? " – " : ""}
                   {spell.end ?? ""}
@@ -173,9 +173,9 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Transfers</h2>
         {transfers.length === 0 ? (
-          <p className="mt-2 text-sm text-[#64748b]">Transfers are not stored.</p>
+          <p className="mt-2 text-sm text-muted">Transfers are not stored.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
+          <ul className="mt-3 divide-y divide-[#f1f5f9] overflow-hidden rounded-2xl border border-line bg-white">
             {transfers.map((line, index) => (
               <li key={`${line}-${index}`} className="px-4 py-3 text-sm">
                 {line}
@@ -206,7 +206,7 @@ function Spell({
       >
         {spell.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={spell.logoUrl} alt="" className="h-6 w-6 object-contain" />
+          <img loading="lazy" decoding="async" src={spell.logoUrl} alt="" className="h-6 w-6 object-contain" />
         ) : null}
         {spell.team}
       </Link>
@@ -266,7 +266,7 @@ function MatchLog({ rows }: { rows: MatchLogRow[] }) {
     <section className="mt-8">
       <h2 className="text-lg font-semibold">Match log</h2>
       {rows.length === 0 ? (
-        <p className="mt-2 text-sm text-[#64748b]">Match log is not stored.</p>
+        <p className="mt-2 text-sm text-muted">Match log is not stored.</p>
       ) : (
         <>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -314,10 +314,10 @@ function PropRatesTable({ rows }: { rows: MatchLogRow[] }) {
   if (stats.length === 0) return null;
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white">
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-white">
       <table className="w-full min-w-[560px] text-left text-sm">
         <thead>
-          <tr className="text-[11px] tracking-wide text-[#94a3b8] uppercase">
+          <tr className="text-[11px] tracking-wide text-faint uppercase">
             <th className="px-4 py-2.5">Prop market</th>
             <th className="px-3 py-2.5 text-right" title="Hits in the last five appearances">L5</th>
             <th className="px-3 py-2.5 text-right" title="Hits in the last ten appearances">L10</th>
@@ -328,7 +328,7 @@ function PropRatesTable({ rows }: { rows: MatchLogRow[] }) {
         <tbody>
           {stats.map((row) => (
             <tr key={row.stat} className="border-t border-[#f1f5f9]">
-              <td className="px-4 py-2.5 font-semibold text-[#0f172a]">
+              <td className="px-4 py-2.5 font-semibold text-ink">
                 {row.threshold}+ {row.label}
               </td>
               <td className="px-3 py-2.5 text-right">
@@ -337,12 +337,12 @@ function PropRatesTable({ rows }: { rows: MatchLogRow[] }) {
               <td className="px-3 py-2.5 text-right">
                 {row.last10.hits}/{row.last10.counts.length}
               </td>
-              <td className="px-3 py-2.5 text-right text-[#64748b]">
+              <td className="px-3 py-2.5 text-right text-muted">
                 {row.last10.avg == null ? "–" : row.last10.avg.toFixed(1)}
               </td>
               <td
                 className={`px-4 py-2.5 text-right font-bold ${
-                  row.streak >= 3 ? "text-[#2563eb]" : "text-[#64748b]"
+                  row.streak >= 3 ? "text-cobalt" : "text-muted"
                 }`}
               >
                 {row.streak > 0 ? `${row.streak}` : "–"}
@@ -374,9 +374,9 @@ function PlayerAnglePanel({
 }) {
   const carded = formHits(log, "card");
   return (
-    <section className="mt-6 rounded-2xl border border-[#e2e8f0] bg-white p-5">
+    <section className="mt-6 rounded-2xl border border-line bg-white p-5">
       <h2 className="text-lg font-semibold">Betting angle</h2>
-      <p className="mt-1 text-sm text-[#64748b]">
+      <p className="mt-1 text-sm text-muted">
         {spell?.cardsPerGame != null ? `${spell.cardsPerGame.toFixed(1)} cards/game` : "Cards/game is not stored."}
         {spell?.foulsPer90 != null ? ` · ${spell.foulsPer90.toFixed(1)} fouls/90` : ""}
       </p>
@@ -386,13 +386,13 @@ function PlayerAnglePanel({
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">Last-5 cards</p>
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">Last-5 cards</p>
           <div className="mt-2">
             <HitRateStrip values={recorded(carded)} thresholdLabel="Carded" />
           </div>
         </div>
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
             {angle ? `To be booked · ${angle.match}` : "Next book price"}
           </p>
           <div className="mt-2">
@@ -403,7 +403,7 @@ function PlayerAnglePanel({
                 edgePct={angle.edgePct}
               />
             ) : (
-              <p className="text-xs text-[#64748b]">No upcoming priced fixture stored.</p>
+              <p className="text-xs text-muted">No upcoming priced fixture stored.</p>
             )}
           </div>
         </div>
@@ -418,9 +418,9 @@ function Rates({ title, rows }: { title: string; rows: MatchLogRow[] }) {
     <div className="mt-4">
       <h3 className="text-sm font-semibold">{title}</h3>
       {rates.length === 0 ? (
-        <p className="mt-1 text-sm text-[#64748b]">Hit rate is not stored for these games.</p>
+        <p className="mt-1 text-sm text-muted">Hit rate is not stored for these games.</p>
       ) : (
-        <p className="mt-1 text-sm text-[#64748b]">
+        <p className="mt-1 text-sm text-muted">
           {rates.map((rate) => `${rate.label} ${rate.hits}/${rate.games}`).join(" · ")}
         </p>
       )}

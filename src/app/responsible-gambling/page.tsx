@@ -35,26 +35,26 @@ export default function ResponsibleGamblingPage() {
         <ul className="list-disc space-y-2 pl-5">
           <li>
             <strong>GamCare</strong> — free support and counselling, 24/7:{" "}
-            <Link href="https://www.gamcare.org.uk" className="text-[#2563eb] hover:underline">
+            <Link href="https://www.gamcare.org.uk" className="text-cobalt hover:underline">
               gamcare.org.uk
             </Link>{" "}
             · 0808 8020 133
           </li>
           <li>
             <strong>BeGambleAware</strong> — advice and tools:{" "}
-            <Link href="https://www.begambleaware.org" className="text-[#2563eb] hover:underline">
+            <Link href="https://www.begambleaware.org" className="text-cobalt hover:underline">
               begambleaware.org
             </Link>
           </li>
           <li>
             <strong>GamStop</strong> — free national self-exclusion from UK-licensed sites:{" "}
-            <Link href="https://www.gamstop.co.uk" className="text-[#2563eb] hover:underline">
+            <Link href="https://www.gamstop.co.uk" className="text-cobalt hover:underline">
               gamstop.co.uk
             </Link>
           </li>
           <li>
             <strong>Gamblers Anonymous</strong> — peer support meetings:{" "}
-            <Link href="https://www.gamblersanonymous.org.uk" className="text-[#2563eb] hover:underline">
+            <Link href="https://www.gamblersanonymous.org.uk" className="text-cobalt hover:underline">
               gamblersanonymous.org.uk
             </Link>
           </li>

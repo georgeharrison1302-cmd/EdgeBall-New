@@ -20,7 +20,7 @@ export function PortfolioShell({
   model: ModelGradingSummary;
 }) {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Portfolio</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight">Proof & bankroll</h1>
@@ -29,11 +29,11 @@ export function PortfolioShell({
         </p>
       </div>
 
-      <div className="mb-8 flex rounded-full border border-[#e2e8f0] bg-white p-1 shadow-sm w-fit">
+      <div className="mb-8 flex rounded-full border border-line bg-white p-1 shadow-sm w-fit">
         <Link
           href="/portfolio?tab=bets"
           className={`rounded-full px-4 py-2 text-sm font-bold ${
-            tab === "bets" ? "bg-[#2563eb] text-white" : "text-[#64748b] hover:text-[#0f172a]"
+            tab === "bets" ? "bg-cobalt text-white" : "text-muted hover:text-ink"
           }`}
         >
           My Bets
@@ -41,7 +41,7 @@ export function PortfolioShell({
         <Link
           href="/portfolio?tab=model"
           className={`rounded-full px-4 py-2 text-sm font-bold ${
-            tab === "model" ? "bg-[#2563eb] text-white" : "text-[#64748b] hover:text-[#0f172a]"
+            tab === "model" ? "bg-cobalt text-white" : "text-muted hover:text-ink"
           }`}
         >
           Model Accuracy

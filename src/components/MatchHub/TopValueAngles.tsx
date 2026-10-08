@@ -25,16 +25,16 @@ export function TopValueAngles({
     <section className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
             Top Value Angles
           </p>
-          <h2 className="mt-1 text-lg font-bold text-[#0f172a]">Highest +Edge% on this board</h2>
-          <p className="mt-1 text-sm text-[#64748b]">
+          <h2 className="mt-1 text-lg font-bold text-ink">Highest +Edge% on this board</h2>
+          <p className="mt-1 text-sm text-muted">
             Sorted by stored model edge vs Bet365 — the first thing you see.
           </p>
         </div>
         {top.length > 0 ? (
-          <p className="text-xs font-semibold text-[#64748b]">
+          <p className="text-xs font-semibold text-muted">
             {top.length} pick{top.length === 1 ? "" : "s"} · swipe →
           </p>
         ) : null}
@@ -53,7 +53,7 @@ export function TopValueAngles({
               className="w-[min(100%,280px)] shrink-0 snap-start"
             >
               <div className="mb-2 flex items-center gap-2">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-[#2563eb] text-[11px] font-black text-white">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-cobalt text-[11px] font-black text-white">
                   {index + 1}
                 </span>
                 <span className="rounded-full bg-[#ecfeff] px-2.5 py-0.5 text-[11px] font-extrabold text-[#0e7490]">

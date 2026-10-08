@@ -33,7 +33,7 @@ const tools = [
 ];
 
 const selectClass =
-  "rounded-full border border-[#e2e8f0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0f172a] outline-none focus:border-[#2563eb]";
+  "rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink outline-none focus:border-cobalt";
 
 export default function SiteFooter() {
   const [note, setNote] = useState("");
@@ -41,7 +41,7 @@ export default function SiteFooter() {
 
   return (
     <footer className="mt-16 border-t border-gray-200 bg-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div>
           <BrandMark className="text-sm font-semibold" />
           <p className="mt-2 text-sm text-gray-500">
@@ -138,13 +138,13 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      <div className="border-t border-gray-200 bg-[#f8fafc]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
+      <div className="border-t border-gray-200 bg-surface">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
           <p className="text-xs text-gray-500">
             18+ only. Prices are stored Bet365 numbers, not a profit record. Defaults: UK.
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748b] uppercase">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted uppercase">
               Odds
               <select
                 className={selectClass}
@@ -159,7 +159,7 @@ export default function SiteFooter() {
                 <option value="american">American</option>
               </select>
             </label>
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748b] uppercase">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted uppercase">
               Currency
               <select
                 className={selectClass}
@@ -174,7 +174,7 @@ export default function SiteFooter() {
                 <option value="USD">USD $</option>
               </select>
             </label>
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#64748b] uppercase">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted uppercase">
               Time
               <select
                 className={selectClass}

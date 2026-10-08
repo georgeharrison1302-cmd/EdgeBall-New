@@ -60,7 +60,7 @@ export function MatchGrid(props: Props) {
   return (
     <section className="space-y-5">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="h-fit rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+        <aside className="h-fit rounded-2xl border border-line bg-white p-4 shadow-sm">
           <p className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
             Top competitions
           </p>
@@ -144,7 +144,7 @@ export function MatchGrid(props: Props) {
                     className={`shrink-0 rounded-xl px-3 py-2 text-center text-sm shadow-sm transition-colors ${
                       dayKey === date
                         ? "bg-blue-600 font-semibold text-white"
-                        : "border border-[#e2e8f0] bg-white text-slate-900 hover:border-[#2563eb]"
+                        : "border border-line bg-white text-slate-900 hover:border-cobalt"
                     }`}
                   >
                     <span className="block text-[10px] font-bold uppercase">
@@ -153,8 +153,8 @@ export function MatchGrid(props: Props) {
                     <span className="block">{dayKey.slice(8)}</span>
                   </Link>
                 ))}
-                <label className="shrink-0 rounded-xl border border-[#e2e8f0] bg-white px-3 py-2 text-sm shadow-sm">
-                  <span className="block text-[10px] font-bold text-[#64748b] uppercase">Calendar</span>
+                <label className="shrink-0 rounded-xl border border-line bg-white px-3 py-2 text-sm shadow-sm">
+                  <span className="block text-[10px] font-bold text-muted uppercase">Calendar</span>
                   <input
                     type="date"
                     value={date}
@@ -193,7 +193,7 @@ export function MatchGrid(props: Props) {
                   className={`rounded-full px-3 py-1 font-semibold transition-colors ${
                     pricedOnly
                       ? "bg-blue-600 text-white"
-                      : "border border-[#e2e8f0] bg-white text-gray-600 hover:border-blue-600"
+                      : "border border-line bg-white text-gray-600 hover:border-blue-600"
                   }`}
                 >
                   Priced {props.counts.priced}
@@ -225,7 +225,7 @@ function StatusLink({ label, href, active }: { label: string; href: string; acti
       className={`rounded-full px-3 py-1 transition-colors ${
         active
           ? "bg-blue-600 font-semibold text-white"
-          : "border border-[#e2e8f0] bg-white text-gray-600 hover:border-blue-600"
+          : "border border-line bg-white text-gray-600 hover:border-blue-600"
       }`}
     >
       {label}

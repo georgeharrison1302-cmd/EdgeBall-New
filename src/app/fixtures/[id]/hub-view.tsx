@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { TeamBadge } from "@/components/assets";
+
 import { FactorBadge } from "@/components/factors/FactorBadge";
 import { HeadToHeadPanel } from "@/components/match/HeadToHeadPanel";
 import { MatchGlance } from "@/components/match/MatchGlance";
@@ -27,7 +29,13 @@ import {
 import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
-export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
+export default async function MatchHubView({
+  hub,
+  initialTab,
+}: {
+  hub: MatchHubPage;
+  initialTab?: string;
+}) {
   const [access, stats, availability, lineups] = await Promise.all([
     getSubscriptionAccess(),
     loadMatchStats({ leagueId: hub.leagueId, season: hub.season, home: hub.home, away: hub.away }).catch(
@@ -71,6 +79,8 @@ export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
       <Hero hub={hub} unlocked={access.unlocked} />
 
       <MatchTabs
+        initial={initialTab}
+        scoreboard={<ScoreStrip hub={hub} />}
         tabs={[
           {
             id: "overview",
@@ -150,17 +160,18 @@ function Hero({ hub, unlocked }: { hub: MatchHubPage; unlocked: boolean }) {
           {hub.competition}
         </p>
         <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <TeamBlock team={hub.home} align="left" />
+          <TeamBlock team={hub.home} align="left" leagueId={hub.leagueId} />
           <div className="text-center">
             <p className="text-[10px] font-bold tracking-wider text-[var(--muted)] uppercase">
-              Kick-off
+              {hub.score ? "Score" : "Kick-off"}
             </p>
-            <p className="mt-1 text-2xl font-black tracking-tight tabular-nums text-[var(--ink)]">
-              {hub.kickoff}
+            <p className="mt-1 text-3xl font-black tracking-tight tabular-nums text-[var(--ink)]">
+              {hub.score ? `${hub.score.home} – ${hub.score.away}` : hub.kickoff}
             </p>
-            {hub.status ? <p className="mt-1 text-xs text-[var(--muted)]">{hub.status}</p> : null}
+            {hub.score ? <p className="mt-1 text-xs text-[var(--muted)]">{hub.kickoff}</p> : null}
+            {hub.status ? <StatusPill status={hub.status} /> : null}
           </div>
-          <TeamBlock team={hub.away} align="right" />
+          <TeamBlock team={hub.away} align="right" leagueId={hub.leagueId} />
         </div>
         <p className="mt-5 text-center text-xs text-[var(--muted)]">
           {[hub.venue ?? "Venue TBC", hub.referee ? `Ref: ${hub.referee}` : "Ref: TBC"].join(" · ")}
@@ -213,7 +224,7 @@ function LineupsPanel({ hub, lineups }: { hub: MatchHubPage; lineups: TeamLineup
     <section className="grid gap-4 sm:grid-cols-2">
       {sides.map((side) => (
         <div key={side.name} className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-[#0f172a]">
+          <p className="text-sm font-semibold text-ink">
             {side.name}
             {side.lineup?.formation ? (
               <span className="ml-2 text-xs font-bold text-[var(--cobalt)]">{side.lineup.formation}</span>
@@ -276,7 +287,7 @@ function AvailabilityPanel({
             { name: hub.away.name, rows: availability.away },
           ].map((side) => (
             <div key={side.name}>
-              <p className="text-sm font-semibold text-[#0f172a]">{side.name}</p>
+              <p className="text-sm font-semibold text-ink">{side.name}</p>
               {side.rows.length === 0 ? (
                 <p className="mt-2 text-xs text-[var(--muted)]">No stored absences.</p>
               ) : (
@@ -344,21 +355,52 @@ function ContextStrip({ hub }: { hub: MatchHubPage }) {
 function TeamBlock({
   team,
   align,
+  leagueId,
 }: {
   team: MatchHubPage["home"];
   align: "left" | "right";
+  leagueId: number;
 }) {
   return (
-    <div className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
-      {team.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={team.logo} alt="" className="h-12 w-12 object-contain" />
-      ) : (
-        <span className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-sm font-semibold text-[var(--ink)]">
-          {team.name.slice(0, 1)}
-        </span>
-      )}
-      <p className="min-w-0 truncate text-sm font-bold text-[var(--ink)] sm:text-base">{team.name}</p>
+    <Link
+      href={`/competitions/${leagueId}/teams/${team.id}`}
+      className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}
+    >
+      <TeamBadge src={team.logo} teamId={team.id} teamName={team.name} size={48} />
+      <p className="min-w-0 truncate text-sm font-bold text-ink sm:text-base">{team.name}</p>
+    </Link>
+  );
+}
+
+const LIVE_CODES = new Set(["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"]);
+
+function StatusPill({ status }: { status: string }) {
+  const live = LIVE_CODES.has(status);
+  return (
+    <span
+      className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+        live ? "bg-red-50 text-red-600" : status === "NS" ? "bg-canvas text-muted" : "bg-slate-100 text-ink"
+      }`}
+    >
+      {live ? "LIVE" : status === "NS" ? "Not started" : status}
+    </span>
+  );
+}
+
+function ScoreStrip({ hub }: { hub: MatchHubPage }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-line px-4 py-2 text-sm">
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        <span className="truncate font-bold text-ink">{hub.home.name}</span>
+        <TeamBadge src={hub.home.logo} teamId={hub.home.id} teamName={hub.home.name} size={24} />
+      </div>
+      <span className="shrink-0 rounded-lg bg-canvas px-3 py-1 text-sm font-black tabular-nums text-ink">
+        {hub.score ? `${hub.score.home} – ${hub.score.away}` : hub.kickoff}
+      </span>
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <TeamBadge src={hub.away.logo} teamId={hub.away.id} teamName={hub.away.name} size={24} />
+        <span className="truncate font-bold text-ink">{hub.away.name}</span>
+      </div>
     </div>
   );
 }

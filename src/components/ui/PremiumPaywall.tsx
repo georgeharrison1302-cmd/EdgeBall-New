@@ -31,20 +31,20 @@ export function PremiumPaywall({
         {children}
       </div>
       <div className="absolute inset-0 flex items-center justify-center bg-white/55 p-4 backdrop-blur-md">
-        <div className="w-full max-w-sm rounded-2xl border border-[#e2e8f0] bg-white/90 px-5 py-6 text-center shadow-lg shadow-slate-200/60">
+        <div className="w-full max-w-sm rounded-2xl border border-line bg-white/90 px-5 py-6 text-center shadow-lg shadow-slate-200/60">
           <div
-            className="mx-auto grid h-11 w-11 place-items-center rounded-full border border-[#e2e8f0] bg-[#eef3f9] text-[#0f172a]"
+            className="mx-auto grid h-11 w-11 place-items-center rounded-full border border-line bg-canvas text-ink"
             aria-hidden
           >
             <LockIcon />
           </div>
-          <p className="mt-3 text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+          <p className="mt-3 text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
             EdgeBall Pro
           </p>
-          <p className="mt-2 text-sm font-semibold text-[#0f172a]">{tease}</p>
+          <p className="mt-2 text-sm font-semibold text-ink">{tease}</p>
           <Link
             href="/pricing"
-            className="mt-4 inline-flex rounded-full bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#1d4ed8]"
+            className="mt-4 inline-flex rounded-full bg-cobalt px-4 py-2.5 text-sm font-bold text-white hover:bg-cobalt-dark"
           >
             Upgrade to Pro
           </Link>
@@ -70,28 +70,28 @@ export function PremiumPageGate({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <div className="rounded-3xl border border-[#e2e8f0] bg-white px-6 py-12 text-center shadow-sm sm:px-10">
+      <div className="rounded-3xl border border-line bg-white px-6 py-12 text-center shadow-sm sm:px-10">
         <div
-          className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[#e2e8f0] bg-[#eef3f9]"
+          className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-line bg-canvas"
           aria-hidden
         >
           <LockIcon />
         </div>
-        <p className="mt-4 text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        <p className="mt-4 text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
           EdgeBall Pro
         </p>
-        <h1 className="mt-2 text-2xl font-black tracking-tight text-[#0f172a]">{title}</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-[#64748b]">{tease}</p>
+        <h1 className="mt-2 text-2xl font-black tracking-tight text-ink">{title}</h1>
+        <p className="mx-auto mt-3 max-w-md text-sm text-muted">{tease}</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/pricing"
-            className="rounded-full bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#1d4ed8]"
+            className="rounded-full bg-cobalt px-5 py-2.5 text-sm font-bold text-white hover:bg-cobalt-dark"
           >
             Upgrade to Pro
           </Link>
           <Link
             href="/auth/login?next=/pricing"
-            className="rounded-full border border-[#e2e8f0] bg-white px-5 py-2.5 text-sm font-bold text-[#0f172a]"
+            className="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-bold text-ink"
           >
             Sign in
           </Link>

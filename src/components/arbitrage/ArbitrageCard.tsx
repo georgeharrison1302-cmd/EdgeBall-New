@@ -26,10 +26,10 @@ export function ArbitrageCard({ opportunity, bankroll, unlocked }: Props) {
   const [home, away] = splitMatch(opportunity.matchName);
 
   return (
-    <article className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
+    <article className="rounded-2xl border border-line bg-white p-5 shadow-sm">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+          <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">
             {opportunity.league}
           </p>
           <div className="mt-1 flex items-center gap-2">
@@ -39,7 +39,7 @@ export function ArbitrageCard({ opportunity, bankroll, unlocked }: Props) {
                 <TeamBadge teamName={away} size={28} className="-ml-2 ring-2 ring-white" />
               ) : null}
             </div>
-            <h3 className="min-w-0 text-lg font-black tracking-tight text-[#0f172a]">
+            <h3 className="min-w-0 text-lg font-black tracking-tight text-ink">
               {opportunity.matchName}
             </h3>
           </div>
@@ -62,11 +62,11 @@ export function ArbitrageCard({ opportunity, bankroll, unlocked }: Props) {
           revealBookmaker
         />
 
-        <div className="rounded-xl border border-[#e2e8f0] bg-[#eef3f9] p-4">
-          <p className="text-[10px] font-extrabold tracking-wide text-[#64748b] uppercase">
+        <div className="rounded-xl border border-line bg-canvas p-4">
+          <p className="text-[10px] font-extrabold tracking-wide text-muted uppercase">
             Leg 2
           </p>
-          <p className="mt-1 text-sm font-bold text-[#0f172a]">
+          <p className="mt-1 text-sm font-bold text-ink">
             {formatSide(leg2.side, leg2.label)}
           </p>
           <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -84,9 +84,9 @@ export function ArbitrageCard({ opportunity, bankroll, unlocked }: Props) {
                 tease="Unlock EdgeBall Pro to reveal the hedging bookmaker and guarantee profit."
                 className="min-h-[7.5rem]"
               >
-                <div className="rounded-xl border border-[#e2e8f0] bg-white p-3">
-                  <p className="text-sm font-bold text-[#0f172a]">{leg2.bookmaker}</p>
-                  <p className="mt-2 text-xs font-semibold text-[#2563eb]">
+                <div className="rounded-xl border border-line bg-white p-3">
+                  <p className="text-sm font-bold text-ink">{leg2.bookmaker}</p>
+                  <p className="mt-2 text-xs font-semibold text-cobalt">
                     Place Bet on {leg2.bookmaker}
                   </p>
                 </div>
@@ -119,10 +119,10 @@ function LegPanel({
   revealBookmaker: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[#e2e8f0] bg-[#eef3f9] p-4">
-      <p className="text-[10px] font-extrabold tracking-wide text-[#64748b] uppercase">{title}</p>
+    <div className="rounded-xl border border-line bg-canvas p-4">
+      <p className="text-[10px] font-extrabold tracking-wide text-muted uppercase">{title}</p>
       {revealBookmaker ? (
-        <p className="mt-1 text-sm font-extrabold text-[#0f172a]">{bookmaker}</p>
+        <p className="mt-1 text-sm font-extrabold text-ink">{bookmaker}</p>
       ) : null}
       <p className="mt-0.5 text-sm font-bold text-[#475569]">{side}</p>
       <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -149,7 +149,7 @@ function BookmakerCta({
   const label = `Place Bet on ${bookmaker}`;
   if (!directLink) {
     return (
-      <p className="rounded-full border border-[#e2e8f0] bg-white px-3 py-2 text-center text-xs font-semibold text-[#94a3b8]">
+      <p className="rounded-full border border-line bg-white px-3 py-2 text-center text-xs font-semibold text-faint">
         Deep link not stored for {bookmaker}
       </p>
     );
@@ -159,7 +159,7 @@ function BookmakerCta({
       href={directLink}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex w-full items-center justify-center rounded-full bg-[#2563eb] px-3 py-2.5 text-sm font-bold text-white hover:bg-[#1d4ed8]"
+      className="inline-flex w-full items-center justify-center rounded-full bg-cobalt px-3 py-2.5 text-sm font-bold text-white hover:bg-cobalt-dark"
     >
       {label}
     </a>
@@ -169,8 +169,8 @@ function BookmakerCta({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-white px-2 py-2">
-      <dt className="text-[10px] font-bold tracking-wide text-[#94a3b8] uppercase">{label}</dt>
-      <dd className="mt-0.5 text-sm font-extrabold tabular-nums text-[#0f172a]">{value}</dd>
+      <dt className="text-[10px] font-bold tracking-wide text-faint uppercase">{label}</dt>
+      <dd className="mt-0.5 text-sm font-extrabold tabular-nums text-ink">{value}</dd>
     </div>
   );
 }

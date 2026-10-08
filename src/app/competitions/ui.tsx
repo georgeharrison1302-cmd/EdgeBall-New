@@ -10,8 +10,8 @@ export function Shell({
 }) {
   return (
     <>
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</main>
-      <footer className="mx-auto max-w-6xl px-4 pb-10 text-sm text-[#64748b] sm:px-6">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">{children}</main>
+      <footer className="mx-auto max-w-7xl px-4 pb-10 text-sm text-muted sm:px-6">
         18+ ·{" "}
         <a href="https://www.begambleaware.org" className="underline">
           BeGambleAware.org
@@ -37,7 +37,7 @@ export function SeasonLinks({
           key={year}
           href={href(year)}
           className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-            year === season ? "bg-[#2563eb] text-white" : "bg-white text-[#334155]"
+            year === season ? "bg-cobalt text-white" : "bg-white text-[#334155]"
           }`}
         >
           {year}
@@ -49,8 +49,8 @@ export function SeasonLinks({
 
 export function Stat({ label, value }: { label: string; value: number | string | null }) {
   return (
-    <div className="rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3">
-      <p className="text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">{label}</p>
+    <div className="rounded-2xl border border-line bg-white px-4 py-3">
+      <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">{label}</p>
       <p className="mt-1 min-h-7 text-xl font-semibold tracking-tight">{value ?? ""}</p>
     </div>
   );

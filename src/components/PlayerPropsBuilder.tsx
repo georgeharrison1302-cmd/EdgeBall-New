@@ -405,21 +405,21 @@ export default function PlayerPropsBuilder({
   })();
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#eef3f9]">
+    <div className="overflow-hidden rounded-2xl border border-line bg-canvas">
       <div
         className={`grid min-h-[640px] grid-cols-1 ${
           slim ? "lg:grid-cols-1" : "lg:grid-cols-[280px_minmax(0,1fr)]"
         }`}
       >
-        <aside className="space-y-4 border-b border-[#e2e8f0] bg-white p-4 lg:border-r lg:border-b-0">
+        <aside className="space-y-4 border-b border-line bg-white p-4 lg:border-r lg:border-b-0">
           {!slim ? (
             <div>
-              <h3 className="text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+              <h3 className="text-[10px] font-extrabold tracking-wide text-faint uppercase">
                 Best picks today
               </h3>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {bestPicks.length === 0 ? (
-                  <p className="text-xs font-semibold text-[#94a3b8]">No priced props stored</p>
+                  <p className="text-xs font-semibold text-faint">No priced props stored</p>
                 ) : (
                   bestPicks.map((pick) => (
                     <button
@@ -434,8 +434,8 @@ export default function PlayerPropsBuilder({
                       }}
                       className={`rounded-full border px-2.5 py-1 text-xs font-bold ${
                         stat === pick.id
-                          ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
-                          : "border-[#e2e8f0] bg-white text-[#0f172a]"
+                          ? "border-cobalt bg-[#eff6ff] text-cobalt"
+                          : "border-line bg-white text-ink"
                       }`}
                     >
                       {pick.label} · {pick.n}
@@ -448,12 +448,12 @@ export default function PlayerPropsBuilder({
 
           {!slim ? (
             <div>
-              <h3 className="text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+              <h3 className="text-[10px] font-extrabold tracking-wide text-faint uppercase">
                 Competitions & fixtures
               </h3>
               <div className="mt-2 space-y-2">
                 {competitions.length === 0 ? (
-                  <p className="text-xs font-semibold text-[#64748b]">No fixtures stored (fixtures).</p>
+                  <p className="text-xs font-semibold text-muted">No fixtures stored (fixtures).</p>
                 ) : (
                   competitions.map((comp) => {
                     const empty = comp.matches.length === 0;
@@ -462,11 +462,11 @@ export default function PlayerPropsBuilder({
                     return (
                       <div
                         key={comp.name}
-                        className={`rounded-xl border border-[#e2e8f0] bg-white px-2.5 py-2 ${
+                        className={`rounded-xl border border-line bg-white px-2.5 py-2 ${
                           empty ? "opacity-60" : ""
                         }`}
                       >
-                        <label className="flex items-center gap-2 text-sm font-bold text-[#0f172a]">
+                        <label className="flex items-center gap-2 text-sm font-bold text-ink">
                           <input
                             type="checkbox"
                             checked={!empty && enabledComps.has(comp.name)}
@@ -476,19 +476,19 @@ export default function PlayerPropsBuilder({
                             }
                           />
                           <span className="min-w-0 flex-1 truncate">{comp.name}</span>
-                          <span className="text-[11px] font-semibold text-[#94a3b8]">
+                          <span className="text-[11px] font-semibold text-faint">
                             {empty ? "0 fixtures" : `Fixtures ${onCount}/${comp.matches.length}`}
                           </span>
                         </label>
                         {empty ? (
-                          <p className="mt-1 text-xs font-semibold text-[#64748b]">
+                          <p className="mt-1 text-xs font-semibold text-muted">
                             No fixtures stored for today (fixtures).
                           </p>
                         ) : (
                           <>
                             <button
                               type="button"
-                              className="mt-1 text-[11px] font-bold text-[#2563eb]"
+                              className="mt-1 text-[11px] font-bold text-cobalt"
                               onClick={() =>
                                 setExpandedComps((current) => {
                                   const next = new Set(current);
@@ -501,11 +501,11 @@ export default function PlayerPropsBuilder({
                               Fixtures
                             </button>
                             {open ? (
-                              <div className="mt-2 space-y-1.5 border-t border-dashed border-[#e2e8f0] pt-2">
+                              <div className="mt-2 space-y-1.5 border-t border-dashed border-line pt-2">
                                 {comp.matches.map((match) => (
                                   <label
                                     key={`${comp.name}:${match}`}
-                                    className="flex items-start gap-2 text-xs font-semibold text-[#64748b]"
+                                    className="flex items-start gap-2 text-xs font-semibold text-muted"
                                   >
                                     <input
                                       type="checkbox"
@@ -534,11 +534,11 @@ export default function PlayerPropsBuilder({
               </div>
             </div>
           ) : (
-            <p className="text-sm font-semibold text-[#0f172a]">{matchFilter}</p>
+            <p className="text-sm font-semibold text-ink">{matchFilter}</p>
           )}
 
           <div>
-            <h3 className="text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+            <h3 className="text-[10px] font-extrabold tracking-wide text-faint uppercase">
               Pick a stat
             </h3>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -555,8 +555,8 @@ export default function PlayerPropsBuilder({
                   }}
                   className={`rounded-xl border px-2 py-2 text-left text-xs font-bold ${
                     stat === row.id
-                      ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
-                      : "border-[#e2e8f0] bg-white text-[#0f172a]"
+                      ? "border-cobalt bg-[#eff6ff] text-cobalt"
+                      : "border-line bg-white text-ink"
                   }`}
                 >
                   {row.label}
@@ -566,7 +566,7 @@ export default function PlayerPropsBuilder({
           </div>
 
           <div>
-            <h3 className="text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+            <h3 className="text-[10px] font-extrabold tracking-wide text-faint uppercase">
               At least · priced lines underlined
             </h3>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -583,12 +583,12 @@ export default function PlayerPropsBuilder({
                     }}
                     className={`rounded-full border px-2.5 py-1.5 text-left text-xs font-bold ${
                       threshold === line
-                        ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
-                        : "border-[#e2e8f0] bg-white text-[#0f172a]"
+                        ? "border-cobalt bg-[#eff6ff] text-cobalt"
+                        : "border-line bg-white text-ink"
                     } ${priced ? "shadow-[inset_0_-2px_0_#10b981]" : ""}`}
                   >
                     {line}+
-                    <span className="mt-0.5 block text-[10px] font-semibold text-[#94a3b8]">
+                    <span className="mt-0.5 block text-[10px] font-semibold text-faint">
                       {priced ? "Bet365 priced" : "no book line"}
                     </span>
                   </button>
@@ -597,9 +597,9 @@ export default function PlayerPropsBuilder({
             </div>
           </div>
 
-          <label className="block text-xs font-semibold text-[#64748b]">
+          <label className="block text-xs font-semibold text-muted">
             <span>
-              Min hit rate · <span className="font-extrabold text-[#0f172a]">{hitRateMin}%</span>
+              Min hit rate · <span className="font-extrabold text-ink">{hitRateMin}%</span>
             </span>
             <input
               type="range"
@@ -612,11 +612,11 @@ export default function PlayerPropsBuilder({
                 setHitRateMin(value);
                 syncUrl({ hitrate: value });
               }}
-              className="mt-2 w-full accent-[#2563eb]"
+              className="mt-2 w-full accent-cobalt"
             />
           </label>
 
-          <label className="flex items-center gap-2 text-sm font-bold text-[#0f172a]">
+          <label className="flex items-center gap-2 text-sm font-bold text-ink">
             <input
               type="checkbox"
               checked={oddsOnly}
@@ -631,12 +631,12 @@ export default function PlayerPropsBuilder({
 
         <section className="flex min-w-0 flex-col gap-2.5 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-extrabold tracking-tight text-[#0f172a]">Results</h2>
+            <h2 className="text-lg font-extrabold tracking-tight text-ink">Results</h2>
             {!slim ? (
               <button
                 type="button"
                 onClick={copyLink}
-                className="text-xs font-bold text-[#2563eb] hover:underline"
+                className="text-xs font-bold text-cobalt hover:underline"
               >
                 Copy link
               </button>
@@ -644,28 +644,28 @@ export default function PlayerPropsBuilder({
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-bold text-[#0f172a]">
+            <span className="rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold text-ink">
               {threshold}+ {statLabel(stat)}
             </span>
-            <span className="rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-bold text-[#0f172a]">
+            <span className="rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold text-ink">
               Last 5 games
             </span>
-            <span className="rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-bold text-[#0f172a]">
+            <span className="rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold text-ink">
               {hitRateMin}% Hit Rate
             </span>
             {oddsOnly ? (
-              <span className="rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-bold text-[#0f172a]">
+              <span className="rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold text-ink">
                 Odds only
               </span>
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-[#64748b]">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-muted">
             <button
               type="button"
               disabled={pricedVisible.length === 0}
               onClick={addAllPriced}
-              className="rounded-full border border-[#e2e8f0] bg-white px-3 py-1.5 text-[#0f172a] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full border border-line bg-white px-3 py-1.5 text-ink disabled:cursor-not-allowed disabled:opacity-50"
             >
               Add all to Bet Slip ({pricedVisible.length})
             </button>
@@ -685,8 +685,8 @@ export default function PlayerPropsBuilder({
                   onClick={() => setSort(id)}
                   className={`rounded-full border px-2 py-1 text-[11px] font-bold ${
                     sort === id
-                      ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
-                      : "border-[#e2e8f0] bg-white text-[#64748b]"
+                      ? "border-cobalt bg-[#eff6ff] text-cobalt"
+                      : "border-line bg-white text-muted"
                   }`}
                 >
                   {label}
@@ -695,7 +695,7 @@ export default function PlayerPropsBuilder({
             </div>
           </div>
 
-          <div className="max-h-[560px] overflow-auto rounded-2xl border border-[#e2e8f0] bg-white">
+          <div className="max-h-[560px] overflow-auto rounded-2xl border border-line bg-white">
             {deskRows.length === 0 ? (
               <EmptyReason
                 variant="center"
@@ -707,23 +707,23 @@ export default function PlayerPropsBuilder({
             ) : (
               <table className="w-full min-w-[740px] border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                  <tr className="border-b border-line bg-surface">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Player
                     </th>
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Hit Rate
                     </th>
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Total
                     </th>
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Avg
                     </th>
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Form
                     </th>
-                    <th className="sticky top-0 z-[1] bg-[#f8fafc] px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+                    <th className="sticky top-0 z-[1] bg-surface px-3 py-2.5 text-right text-[10px] font-extrabold tracking-wide text-faint uppercase">
                       Odds
                     </th>
                   </tr>
@@ -778,7 +778,7 @@ function DeskTableRow({
   return (
     <>
       <tr
-        className={`cursor-pointer border-b border-[#f1f5f9] hover:bg-[#f8fafc] ${
+        className={`cursor-pointer border-b border-[#f1f5f9] hover:bg-surface ${
           open ? "bg-[#eff6ff]" : added ? "bg-blue-50/40" : "bg-white"
         }`}
         onClick={onToggle}
@@ -787,10 +787,10 @@ function DeskTableRow({
           <div className="flex min-w-0 items-center gap-2.5">
             <PlayerHeadshot src={row.playerImg} playerName={row.player} size={36} />
             <div className="min-w-0">
-              <p className="truncate text-sm font-extrabold text-[#0f172a]">
+              <p className="truncate text-sm font-extrabold text-ink">
                 {row.player}
                 {row.position ? (
-                  <span className="ml-1.5 rounded bg-[#f1f5f9] px-1 py-0.5 text-[10px] font-extrabold text-[#64748b]">
+                  <span className="ml-1.5 rounded bg-[#f1f5f9] px-1 py-0.5 text-[10px] font-extrabold text-muted">
                     {row.position}
                   </span>
                 ) : null}
@@ -802,7 +802,7 @@ function DeskTableRow({
                   awayTeamImg={row.awayTeamImg}
                   size="sm"
                 />
-                <p className="truncate text-[11px] font-semibold text-[#64748b]">{row.match}</p>
+                <p className="truncate text-[11px] font-semibold text-muted">{row.match}</p>
               </div>
             </div>
           </div>
@@ -818,10 +818,10 @@ function DeskTableRow({
             <HitRateBar hitPct={row.form.hitPct} />
           )}
         </td>
-        <td className="px-3 py-2.5 text-right text-sm font-extrabold tabular-nums text-[#0f172a]">
+        <td className="px-3 py-2.5 text-right text-sm font-extrabold tabular-nums text-ink">
           {row.form.total ?? "—"}
         </td>
-        <td className="px-3 py-2.5 text-right text-sm font-extrabold tabular-nums text-[#0f172a]">
+        <td className="px-3 py-2.5 text-right text-sm font-extrabold tabular-nums text-ink">
           {row.form.avg == null ? "—" : row.form.avg.toFixed(1)}
         </td>
         <td className="px-3 py-2.5" onClick={(event) => event.stopPropagation()}>
@@ -829,7 +829,7 @@ function DeskTableRow({
         </td>
         <td className="px-3 py-2.5 text-right" onClick={(event) => event.stopPropagation()}>
           <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] font-bold text-[#94a3b8]">Bet365</span>
+            <span className="text-[10px] font-bold text-faint">Bet365</span>
             <AddToSlipButton
               selectionId={priced?.id ?? `unpriced-${row.key}`}
               marketName={priced ? `${priced.player} ${priced.selection}` : row.player}
@@ -844,16 +844,16 @@ function DeskTableRow({
         </td>
       </tr>
       {open ? (
-        <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <tr className="border-b border-line bg-surface">
           <td colSpan={6} className="px-3 pb-3 pl-14 pt-0">
-            <div className="flex flex-wrap items-center gap-2 pt-2 text-xs font-bold text-[#64748b]">
+            <div className="flex flex-wrap items-center gap-2 pt-2 text-xs font-bold text-muted">
               <PoissonVsBook
                 modelProb={priced?.modelProb}
                 decimalOdds={priced?.odds}
                 edgePct={edge}
               />
               {edge != null && edge > 0 ? (
-                <span className="rounded-full bg-[#2563eb] px-2.5 py-1 text-white">
+                <span className="rounded-full bg-cobalt px-2.5 py-1 text-white">
                   +{edge.toFixed(1)}% edge
                 </span>
               ) : null}
@@ -880,7 +880,7 @@ function DeskTableRow({
               <StrictRefBadgeFromProfile profile={row.sample.strictRef} />
               <MatchupClashBadgeFromClash clash={row.sample.clash} />
               {row.form.counts.length === 0 ? (
-                <span className="rounded-full border border-[#e2e8f0] bg-white px-2 py-1">
+                <span className="rounded-full border border-line bg-white px-2 py-1">
                   Form empty (fixture_player_statistics)
                 </span>
               ) : null}

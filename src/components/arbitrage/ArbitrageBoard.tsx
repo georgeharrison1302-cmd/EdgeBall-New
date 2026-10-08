@@ -23,20 +23,20 @@ export function ArbitrageBoard({ opportunities, unlocked, error = null }: Props)
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+            <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
               SureBets
             </p>
-            <h2 className="mt-0.5 text-xl font-black tracking-tight text-[#0f172a]">
+            <h2 className="mt-0.5 text-xl font-black tracking-tight text-ink">
               Bankroll
             </h2>
-            <p className="mt-1 text-sm text-[#64748b]">
+            <p className="mt-1 text-sm text-muted">
               Stakes and returns scale with your bankroll across every arb below.
             </p>
           </div>
-          <p className="text-2xl font-black tabular-nums text-[#0f172a]">£{bankroll}</p>
+          <p className="text-2xl font-black tabular-nums text-ink">£{bankroll}</p>
         </div>
         <label className="mt-4 block">
           <span className="sr-only">Bankroll from £{BANKROLL_MIN} to £{BANKROLL_MAX}</span>
@@ -47,21 +47,21 @@ export function ArbitrageBoard({ opportunities, unlocked, error = null }: Props)
             step={10}
             value={bankroll}
             onChange={(event) => setBankroll(Number(event.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[#e2e8f0] accent-[#2563eb]"
+            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-line accent-cobalt"
           />
         </label>
-        <div className="mt-1 flex justify-between text-[11px] font-semibold text-[#94a3b8]">
+        <div className="mt-1 flex justify-between text-[11px] font-semibold text-faint">
           <span>£{BANKROLL_MIN}</span>
           <span>£{BANKROLL_MAX}</span>
         </div>
       </div>
 
       {error ? (
-        <p className="rounded-2xl border border-[#e2e8f0] bg-[#eef3f9] px-4 py-6 text-sm text-[#64748b]">
+        <p className="rounded-2xl border border-line bg-canvas px-4 py-6 text-sm text-muted">
           SureBets could not be loaded ({error}).
         </p>
       ) : opportunities.length === 0 ? (
-        <p className="rounded-2xl border border-[#e2e8f0] bg-[#eef3f9] px-4 py-6 text-sm text-[#64748b]">
+        <p className="rounded-2xl border border-line bg-canvas px-4 py-6 text-sm text-muted">
           No arbitrage opportunities stored right now for your selected Odds-API bookmakers.
         </p>
       ) : (

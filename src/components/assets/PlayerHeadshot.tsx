@@ -31,7 +31,7 @@ export function PlayerHeadshot({
       fallbackText={initialsFromName(playerName)}
       fit="cover"
       className={`overflow-hidden rounded-full ${className}`.trim()}
-      fallbackClassName="rounded-full bg-[#dbeafe] text-[#1d4ed8]"
+      fallbackClassName="rounded-full bg-[#dbeafe] text-cobalt-dark"
     />
   );
 }

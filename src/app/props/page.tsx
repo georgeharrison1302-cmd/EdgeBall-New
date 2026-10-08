@@ -53,15 +53,15 @@ export default async function PlayerPropsPage({
   const active = TABS.find((tab) => tab.id === view)!;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
-        <p className="text-xs font-semibold tracking-wide text-[#2563eb] uppercase">
+        <p className="text-xs font-semibold tracking-wide text-cobalt uppercase">
           Player Props
         </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0f172a]">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink">
           {active.label}
         </h1>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <p className="mt-1 text-sm text-muted">
           {active.blurb} Data for {board.dateLabel}
           {board.matchCount > 0 ? ` · ${board.matchCount} pre-match` : ""} — hit rates
           are empirical from fixture_player_statistics, edges only from stored prices.
@@ -70,7 +70,7 @@ export default async function PlayerPropsPage({
 
       <nav
         aria-label="Player props views"
-        className="mb-6 flex flex-wrap gap-1.5 rounded-full border border-[#e2e8f0] bg-white p-1 sm:inline-flex"
+        className="mb-6 flex flex-wrap gap-1.5 rounded-full border border-line bg-white p-1 sm:inline-flex"
       >
         {TABS.map((tab) => (
           <Link
@@ -79,8 +79,8 @@ export default async function PlayerPropsPage({
             aria-current={view === tab.id ? "page" : undefined}
             className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
               view === tab.id
-                ? "bg-[#2563eb] text-white shadow-sm shadow-blue-600/20"
-                : "text-[#64748b] hover:text-[#0f172a]"
+                ? "bg-cobalt text-white shadow-sm shadow-blue-600/20"
+                : "text-muted hover:text-ink"
             }`}
           >
             {tab.label}
@@ -100,7 +100,7 @@ export default async function PlayerPropsPage({
       ) : (
         <Suspense
           fallback={
-            <div className="rounded-2xl border border-[#e2e8f0] bg-white px-4 py-10 text-sm text-[#64748b]">
+            <div className="rounded-2xl border border-line bg-white px-4 py-10 text-sm text-muted">
               Loading prop desk…
             </div>
           }

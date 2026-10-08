@@ -35,7 +35,7 @@ export function TeamBadge({
       fallbackText={code}
       fit="contain"
       className={`overflow-hidden rounded-md ${className}`.trim()}
-      fallbackClassName="rounded-md bg-[#f1f5f9] text-[#64748b]"
+      fallbackClassName="rounded-md bg-[#f1f5f9] text-muted"
     />
   );
 }

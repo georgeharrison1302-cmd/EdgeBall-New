@@ -34,13 +34,13 @@ export function MatchHubHomeDesk(props: DeskProps) {
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
       <header>
-        <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">
+        <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">
           Fixtures
         </p>
-        <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0f172a]">
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-ink">
           {surebets ? "SureBets" : "Fixture centre"}
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-[#64748b]">
+        <p className="mt-1 max-w-2xl text-sm text-muted">
           {surebets
             ? "Guaranteed-price discrepancies across your stored Odds-API bookmakers."
             : "Browse fixtures by date and competition, then open Match Hub for team stats, player props, H2H, and the bet builder."}

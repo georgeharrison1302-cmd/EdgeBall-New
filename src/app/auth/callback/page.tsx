@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default function AuthCallbackPage() {
   return (
-    <main className="flex min-h-[60vh] items-center justify-center bg-[#eef3f9] px-4 py-16">
+    <main className="flex min-h-[60vh] items-center justify-center bg-canvas px-4 py-16">
       <Suspense fallback={null}>
         <CallbackHandler />
       </Suspense>

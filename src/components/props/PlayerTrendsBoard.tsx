@@ -42,7 +42,7 @@ export function PlayerTrendsBoard({ props }: { props: PlayerProp[] }) {
             {name} · {rows.filter((row) => row.prop.market === name).length}
           </FilterChip>
         ))}
-        <span className="mx-1 hidden h-5 w-px bg-[#e2e8f0] sm:inline-block" />
+        <span className="mx-1 hidden h-5 w-px bg-line sm:inline-block" />
         {STREAK_FILTERS.map((n) => (
           <FilterChip key={n} active={minStreak === n} onClick={() => setMinStreak(n)}>
             {n}+ in a row
@@ -88,7 +88,7 @@ function TrendCard({ row }: { row: ReturnType<typeof trendRows>[number] }) {
   });
 
   return (
-    <li className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+    <li className="rounded-2xl border border-line bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <PlayerHeadshot
           src={prop.playerImg}
@@ -97,23 +97,23 @@ function TrendCard({ row }: { row: ReturnType<typeof trendRows>[number] }) {
           size={36}
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-[#0f172a]">{prop.player}</p>
-          <p className="truncate text-xs text-[#64748b]">
+          <p className="truncate text-sm font-bold text-ink">{prop.player}</p>
+          <p className="truncate text-xs text-muted">
             <Link
               href={prop.fixtureId ? `/fixtures/${prop.fixtureId}` : "/"}
-              className="hover:text-[#2563eb]"
+              className="hover:text-cobalt"
             >
               {prop.match}
             </Link>
           </p>
         </div>
-        <span className="rounded-full bg-[#2563eb] px-2.5 py-1 text-[11px] font-extrabold text-white">
+        <span className="rounded-full bg-cobalt px-2.5 py-1 text-[11px] font-extrabold text-white">
           {streak} in a row
         </span>
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-[#e2e8f0] pt-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-line pt-3">
         <div>
-          <p className="text-[10px] font-extrabold tracking-wide text-[#94a3b8] uppercase">
+          <p className="text-[10px] font-extrabold tracking-wide text-faint uppercase">
             {prop.selection} · {prop.market}
           </p>
           <div className="mt-1.5">
@@ -122,9 +122,9 @@ function TrendCard({ row }: { row: ReturnType<typeof trendRows>[number] }) {
         </div>
         <div className="flex items-center gap-3">
           {prop.formHitPct != null ? (
-            <p className="text-xs font-bold text-[#0f172a]">
+            <p className="text-xs font-bold text-ink">
               {prop.formHitPct}%{" "}
-              <span className="font-semibold text-[#94a3b8]">L{row.games}</span>
+              <span className="font-semibold text-faint">L{row.games}</span>
             </p>
           ) : null}
           <AddToSlipButton
@@ -160,8 +160,8 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
         active
-          ? "border-[#2563eb] bg-[#2563eb] text-white"
-          : "border-[#e2e8f0] bg-white text-[#0f172a] hover:border-[#2563eb]"
+          ? "border-cobalt bg-cobalt text-white"
+          : "border-line bg-white text-ink hover:border-cobalt"
       }`}
     >
       {children}

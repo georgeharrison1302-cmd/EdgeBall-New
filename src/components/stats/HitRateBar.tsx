@@ -10,7 +10,7 @@ export function HitRateBar({
 }) {
   if (hitPct == null || !Number.isFinite(hitPct)) {
     return (
-      <p className={`text-[11px] font-semibold text-[#94a3b8] ${className}`.trim()}>
+      <p className={`text-[11px] font-semibold text-faint ${className}`.trim()}>
         —
       </p>
     );
@@ -19,8 +19,8 @@ export function HitRateBar({
   const clamped = Math.max(0, Math.min(100, hitPct));
   return (
     <div className={`min-w-[92px] ${className}`.trim()}>
-      <p className="text-sm font-extrabold tabular-nums text-[#0f172a]">{clamped}%</p>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#e2e8f0]">
+      <p className="text-sm font-extrabold tabular-nums text-ink">{clamped}%</p>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-line">
         <div
           className="h-full rounded-full bg-emerald-500"
           style={{ width: `${clamped}%` }}

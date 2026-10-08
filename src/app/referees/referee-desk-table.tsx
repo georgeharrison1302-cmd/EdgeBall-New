@@ -104,7 +104,7 @@ export function RefereeDeskTable({
                   <button
                     type="button"
                     onClick={() => toggle(col.key)}
-                    className={sortKey === col.key ? "font-bold text-[#2563eb]" : "font-semibold hover:text-slate-700"}
+                    className={sortKey === col.key ? "font-bold text-cobalt" : "font-semibold hover:text-slate-700"}
                   >
                     {col.label}
                     {sortKey === col.key ? (desc ? " ↓" : " ↑") : ""}
@@ -121,7 +121,7 @@ export function RefereeDeskTable({
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.matches}</td>
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.avgYellows.toFixed(2)}</td>
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.avgReds.toFixed(2)}</td>
-                <td className="px-3 py-2.5 tabular-nums font-semibold text-[#0f172a]">{row.avgCards.toFixed(2)}</td>
+                <td className="px-3 py-2.5 tabular-nums font-semibold text-ink">{row.avgCards.toFixed(2)}</td>
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.over35Rate ?? "—"}%</td>
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.over45Rate ?? "—"}%</td>
                 <td className="px-3 py-2.5 tabular-nums text-slate-700">{row.avgFouls.toFixed(1)}</td>

@@ -139,14 +139,14 @@ export function XgSortableTable({
         <tbody>
           {sorted.map((row, index) => (
             <tr key={row.teamId} className="border-t border-[#f1f5f9]">
-              <td className="py-2 pr-2 font-semibold text-[#0f172a]">
+              <td className="py-2 pr-2 font-semibold text-ink">
                 {sortKey == null && row.rank != null && split === "overall" ? row.rank : index + 1}
               </td>
               <td className="py-2">
-                <span className="flex items-center gap-2 font-medium text-[#0f172a]">
+                <span className="flex items-center gap-2 font-medium text-ink">
                   {row.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.logo} alt="" className="h-5 w-5 object-contain" />
+                    <img loading="lazy" decoding="async" src={row.logo} alt="" className="h-5 w-5 object-contain" />
                   ) : null}
                   {row.team}
                 </span>
@@ -156,13 +156,13 @@ export function XgSortableTable({
                 <Form value={row.form} />
               </td>
               <td className="py-2 text-right">{count(row.goalsFor)}</td>
-              <td className="py-2 text-right font-semibold text-[#2563eb]">{fixed(row.xg, 1)}</td>
+              <td className="py-2 text-right font-semibold text-cobalt">{fixed(row.xg, 1)}</td>
               <td className="py-2 text-right">{signed(row.goalGap, 1)}</td>
               <td className="py-2 text-right">{count(row.goalsAgainst)}</td>
-              <td className="py-2 text-right font-semibold text-[#2563eb]">{fixed(row.xga, 1)}</td>
+              <td className="py-2 text-right font-semibold text-cobalt">{fixed(row.xga, 1)}</td>
               <td className="py-2 text-right">{signed(row.concedeGap, 1)}</td>
               <td className="py-2 text-right">{signed(row.gd, 0)}</td>
-              <td className="py-2 text-right font-semibold text-[#2563eb]">{signed(row.xgd, 1)}</td>
+              <td className="py-2 text-right font-semibold text-cobalt">{signed(row.xgd, 1)}</td>
               <td className="py-2 text-right">{signed(row.gdGap, 1)}</td>
               <td className="py-2 text-right font-semibold">{row.points ?? "–"}</td>
             </tr>

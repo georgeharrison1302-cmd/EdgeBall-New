@@ -31,7 +31,7 @@ export function LeagueLogo({
       fallbackText={initialsFromName(leagueName)}
       fit="contain"
       className={className}
-      fallbackClassName="rounded-sm bg-transparent text-[#94a3b8]"
+      fallbackClassName="rounded-sm bg-transparent text-faint"
     />
   );
 }

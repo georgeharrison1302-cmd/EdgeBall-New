@@ -86,34 +86,34 @@ export function CallbackHandler() {
   }, [params, router]);
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-[#e2e8f0] bg-white p-8 text-center shadow-sm">
+    <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 text-center shadow-sm">
       {status === "failed" ? (
         <>
-          <h1 className="text-lg font-bold text-[#0f172a]">
+          <h1 className="text-lg font-bold text-ink">
             We could not sign you in
           </h1>
-          <p className="mt-2 text-sm text-[#64748b]">
+          <p className="mt-2 text-sm text-muted">
             The confirmation link may have expired or already been used. Request
             a fresh sign-in link and try again.
           </p>
           {detail ? (
-            <p className="mt-2 text-xs text-[#94a3b8]">({detail})</p>
+            <p className="mt-2 text-xs text-faint">({detail})</p>
           ) : null}
           <button
             type="button"
             onClick={() => router.replace("/auth/login?error=auth")}
-            className="mt-5 inline-block rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1d4ed8]"
+            className="mt-5 inline-block rounded-xl bg-cobalt px-5 py-2.5 text-sm font-semibold text-white hover:bg-cobalt-dark"
           >
             Back to sign in
           </button>
         </>
       ) : (
         <>
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#e2e8f0] border-t-[#2563eb]" />
-          <h1 className="mt-4 text-lg font-bold text-[#0f172a]">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-line border-t-[#2563eb]" />
+          <h1 className="mt-4 text-lg font-bold text-ink">
             Confirming your account…
           </h1>
-          <p className="mt-2 text-sm text-[#64748b]">
+          <p className="mt-2 text-sm text-muted">
             Hold on while we finish signing you in.
           </p>
         </>

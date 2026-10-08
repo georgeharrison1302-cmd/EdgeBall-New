@@ -33,12 +33,12 @@ function TeamStreakCard({ panel, competition }: { panel: TeamPanel; competition:
     .sort((left, right) => right.length - left.length);
 
   return (
-    <article className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
+    <article className="rounded-2xl border border-line bg-white p-5 shadow-sm">
       <header className="flex items-center gap-3">
         <TeamLogo src={panel.team.logo} name={panel.team.name} size={32} />
         <div className="min-w-0">
-          <p className="text-[11px] font-extrabold tracking-wide text-[#2563eb] uppercase">Current streaks</p>
-          <h3 className="truncate text-base font-black text-[#0f172a]">{panel.team.name}</h3>
+          <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">Current streaks</p>
+          <h3 className="truncate text-base font-black text-ink">{panel.team.name}</h3>
         </div>
       </header>
 
@@ -52,15 +52,15 @@ function TeamStreakCard({ panel, competition }: { panel: TeamPanel; competition:
         <>
           <ul className="mt-4 flex flex-wrap gap-2">
             {active.length === 0 ? (
-              <li className="text-sm text-[#64748b]">No active runs — the last result broke every streak.</li>
+              <li className="text-sm text-muted">No active runs — the last result broke every streak.</li>
             ) : (
               active.map((streak) => (
                 <li
                   key={streak.key}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${
                     streak.length >= HOT
-                      ? "border-[#2563eb] bg-[#2563eb] text-white"
-                      : "border-[#e2e8f0] bg-[#eef3f9] text-[#0f172a]"
+                      ? "border-cobalt bg-cobalt text-white"
+                      : "border-line bg-canvas text-ink"
                   }`}
                 >
                   {streak.label}
@@ -72,24 +72,24 @@ function TeamStreakCard({ panel, competition }: { panel: TeamPanel; competition:
             )}
           </ul>
 
-          <p className="mt-5 text-[11px] font-extrabold tracking-wide text-[#64748b] uppercase">
+          <p className="mt-5 text-[11px] font-extrabold tracking-wide text-muted uppercase">
             Last {panel.recent.length} · {competition}
           </p>
-          <ol className="mt-2 divide-y divide-[#e2e8f0] rounded-xl border border-[#e2e8f0]">
+          <ol className="mt-2 divide-y divide-line rounded-xl border border-line">
             {panel.recent.map((match) => (
               <li key={match.fixtureId} className="flex items-center gap-3 px-3 py-2 text-sm">
                 <span className={`grid h-6 w-6 shrink-0 place-items-center rounded text-[11px] font-black ${RESULT_STYLE[match.result]}`}>
                   {match.result}
                 </span>
-                <span className="w-8 shrink-0 text-[11px] font-bold text-[#94a3b8] uppercase">
+                <span className="w-8 shrink-0 text-[11px] font-bold text-faint uppercase">
                   {match.venue === "home" ? "H" : "A"}
                 </span>
                 <TeamLogo src={match.opponent.logo} name={match.opponent.name} size={18} />
-                <span className="min-w-0 flex-1 truncate font-semibold text-[#0f172a]">{match.opponent.name}</span>
-                <span className="font-black tabular-nums text-[#0f172a]">
+                <span className="min-w-0 flex-1 truncate font-semibold text-ink">{match.opponent.name}</span>
+                <span className="font-black tabular-nums text-ink">
                   {match.goalsFor}–{match.goalsAgainst}
                 </span>
-                <span className="hidden w-24 shrink-0 text-right text-xs text-[#94a3b8] sm:inline">
+                <span className="hidden w-24 shrink-0 text-right text-xs text-faint sm:inline">
                   {formatMatchDate(match.date)}
                 </span>
               </li>
