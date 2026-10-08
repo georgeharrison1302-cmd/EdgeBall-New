@@ -1,0 +1,194 @@
+import type { Metadata } from "next";
+
+import { ProfitCurve } from "@/components/record/ProfitCurve";
+import { EmptyReason } from "@/components/stats/EmptyReason";
+import { DataFreshness } from "@/components/ui/DataFreshness";
+
+import { loadModelRecord } from "./load";
+
+export const revalidate = 600;
+
+export const metadata: Metadata = {
+  title: "Model Record · EdgeBall",
+  description:
+    "Every model tip EdgeBall has published, frozen at the price we saw and graded after full time — wins, losses, ROI and calibration, nothing hidden.",
+};
+
+const pct = (value: number | null, digits = 0) =>
+  value == null ? "—" : `${(value * 100).toFixed(digits)}%`;
+const units = (value: number) => `${value >= 0 ? "+" : ""}${value.toFixed(1)}u`;
+
+export default async function RecordPage() {
+  const record = await loadModelRecord();
+  const lowSample = record.settled < 100;
+
+  return (
+    <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
+      <header>
+        <p className="text-[11px] font-extrabold tracking-wide text-cobalt uppercase">Model record</p>
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-ink">Our tips, graded in public</h1>
+        <p className="mt-2 max-w-3xl text-sm text-muted">
+          Every tip is stored at the moment it is generated — price, model probability and edge are
+          frozen and never rewritten. Tips are settled after full time from stored results. Flat 1-unit
+          stakes. This is a record of the model, not advice to bet.
+        </p>
+        <div className="mt-3">
+          <DataFreshness jobs={["tips", "results", "odds"]} />
+        </div>
+      </header>
+
+      {record.tracked === 0 ? (
+        <EmptyReason
+          variant="panel"
+          title="No tips recorded yet"
+          detail="The ledger fills as the model publishes tips and fixtures finish"
+          source="model_tips"
+        />
+      ) : (
+        <>
+          {lowSample ? (
+            <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+              Small sample: {record.settled} settled tips. Results this early are mostly noise — treat the
+              ROI as provisional until the sample is well past 100.
+            </p>
+          ) : null}
+
+          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <Stat label="Settled tips" value={String(record.settled)} sub={`${record.pending} pending`} />
+            <Stat label="Record" value={`${record.wins}-${record.losses}`} sub={`${pct(record.hitRate)} hit rate`} />
+            <Stat
+              label="Profit"
+              value={units(record.profit)}
+              tone={record.profit >= 0 ? "good" : "bad"}
+              sub="flat 1u stakes"
+            />
+            <Stat
+              label="ROI"
+              value={record.roi == null ? "—" : `${record.roi >= 0 ? "+" : ""}${(record.roi * 100).toFixed(1)}%`}
+              tone={record.roi != null && record.roi >= 0 ? "good" : "bad"}
+              sub="profit per unit staked"
+            />
+            <Stat label="Max drawdown" value={`${record.maxDrawdown.toFixed(1)}u`} sub="peak to trough" />
+          </section>
+
+          <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">Cumulative profit</h2>
+            {record.curve.length >= 2 ? (
+              <div className="mt-3">
+                <ProfitCurve points={record.curve} />
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted">The curve appears once at least two tips are settled.</p>
+            )}
+          </section>
+
+          <section>
+            <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">By market</h2>
+            <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-white shadow-sm">
+              <table className="w-full min-w-[40rem] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-line text-muted">
+                    {["Market", "Tips", "Settled", "W-L", "Hit rate", "Avg edge", "P/L", "ROI"].map((head) => (
+                      <th key={head} className="px-3 py-2 font-medium">{head}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {record.markets.map((market) => (
+                    <tr key={market.family} className="border-b border-line/60 last:border-0">
+                      <td className="px-3 py-2 font-semibold text-ink">{market.label}</td>
+                      <td className="px-3 py-2 tabular-nums">{market.tips}</td>
+                      <td className="px-3 py-2 tabular-nums text-muted">{market.settled}</td>
+                      <td className="px-3 py-2 tabular-nums">{market.settled ? `${market.wins}-${market.losses}` : "—"}</td>
+                      <td className="px-3 py-2 tabular-nums">{pct(market.hitRate)}</td>
+                      <td className="px-3 py-2 tabular-nums text-muted">
+                        {market.avgEdge == null ? "—" : `+${market.avgEdge.toFixed(1)}%`}
+                      </td>
+                      <td className={`px-3 py-2 font-semibold tabular-nums ${market.settled === 0 ? "text-muted" : market.profit >= 0 ? "text-cobalt" : "text-red-600"}`}>
+                        {market.settled ? units(market.profit) : "—"}
+                      </td>
+                      <td className={`px-3 py-2 font-semibold tabular-nums ${market.roi == null ? "text-muted" : market.roi >= 0 ? "text-cobalt" : "text-red-600"}`}>
+                        {market.roi == null ? "—" : `${(market.roi * 100).toFixed(1)}%`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">Calibration</h2>
+            <p className="mt-1 text-sm text-muted">
+              When the model says a tip has a given chance, how often does it win? Close agreement
+              between the two columns means the probabilities can be trusted. Only published
+              (edge-flagged) tips are included, so this is not a full-market calibration.
+            </p>
+            {record.calibration.length === 0 ? (
+              <p className="mt-3 text-sm text-muted">Needs settled tips.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {record.calibration.map((bin) => (
+                  <div key={bin.label}>
+                    <div className="flex items-baseline justify-between text-xs font-semibold">
+                      <span className="text-ink">Model said {bin.label}</span>
+                      <span className="text-muted tabular-nums">
+                        predicted {pct(bin.predicted)} · won {pct(bin.actual)} · n={bin.n}
+                      </span>
+                    </div>
+                    <div className="relative mt-1.5 h-2 rounded-full bg-canvas">
+                      <span className="absolute inset-y-0 left-0 rounded-full bg-[#cbd5e1]" style={{ width: `${bin.predicted * 100}%` }} />
+                      <span className="absolute inset-y-0 left-0 rounded-full bg-cobalt/80" style={{ width: `${bin.actual * 100}%`, height: "50%", top: "25%" }} />
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[11px] text-faint">
+                  Grey bar: model probability. Blue bar: realised win rate.
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-line bg-white p-5 text-sm text-muted shadow-sm">
+            <h2 className="text-sm font-extrabold tracking-wide text-ink uppercase">How to read this</h2>
+            <ul className="mt-2 list-disc space-y-1.5 pl-5">
+              <li>
+                {record.price
+                  ? `Average bookmaker price implied a ${pct(record.price.implied, 1)} win chance; tips actually won ${pct(record.price.actual, 1)}.`
+                  : "Price versus result appears once tips settle."}
+              </li>
+              <li>
+                Closing-line value (did we beat the final price?) needs closing odds, which we do not store yet,
+                so it is not shown rather than estimated.
+              </li>
+              <li>Prices come from stored Bet365 snapshots and may have moved by the time you look.</li>
+              <li>Past performance does not predict future results. 18+. Gamble responsibly.</li>
+            </ul>
+          </section>
+        </>
+      )}
+    </main>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  tone?: "good" | "bad";
+}) {
+  return (
+    <div className="rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">{label}</p>
+      <p className={`mt-1 text-2xl font-black tabular-nums ${tone === "good" ? "text-cobalt" : tone === "bad" ? "text-red-600" : "text-ink"}`}>
+        {value}
+      </p>
+      <p className="text-[11px] font-semibold text-faint">{sub}</p>
+    </div>
+  );
+}

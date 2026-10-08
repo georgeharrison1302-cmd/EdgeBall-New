@@ -34,7 +34,11 @@ export function ModelGrading({ data }: { data: ModelGradingSummary }) {
         <Link href="/portfolio?tab=bets" className="font-semibold text-cobalt">
           My Bets
         </Link>{" "}
-        tab.
+        tab. Full public record with calibration:{" "}
+        <Link href="/record" className="font-semibold text-cobalt">
+          /record
+        </Link>
+        .
       </p>
 
       {data.markets.length > 0 ? (

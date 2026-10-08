@@ -461,7 +461,7 @@ const FAMILY_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-function marketFamily(tip: GradedTip): string {
+export function marketFamily(tip: GradedTip): string {
   const name = tip.market.toLowerCase();
   if (tip.source === "card_poisson" || /booked|player.*card/.test(name)) return "player_cards";
   if (/match winner|1x2/.test(name)) return "match_winner";
@@ -473,7 +473,7 @@ function marketFamily(tip: GradedTip): string {
   return "other";
 }
 
-function buildMarketLedgers(tips: GradedTip[]): ModelMarketLedger[] {
+export function buildMarketLedgers(tips: GradedTip[]): ModelMarketLedger[] {
   const buckets = new Map<string, GradedTip[]>();
   for (const tip of tips) {
     const family = marketFamily(tip);

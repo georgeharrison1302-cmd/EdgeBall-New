@@ -10,6 +10,7 @@ const routes = [
   "/ladder",
   "/competitions",
   "/referees",
+  "/record",
   "/pricing",
   "/terms",
   "/privacy",
