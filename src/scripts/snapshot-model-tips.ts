@@ -38,20 +38,27 @@ async function main() {
     settled_at: tip.status === "pending" ? null : new Date().toISOString(),
   }));
 
-  let inserted = 0;
-  for (let i = 0; i < rows.length; i += CHUNK) {
+  const keys = rows.map((row) => row.tip_key);
+  const existing = new Set<string>();
+  for (let i = 0; i < keys.length; i += CHUNK) {
     const { data, error } = await supabase
       .from("model_tips")
-      .upsert(rows.slice(i, i + CHUNK), {
-        onConflict: "tip_key",
-        ignoreDuplicates: true,
-      })
-      .select("tip_key");
+      .select("tip_key")
+      .in("tip_key", keys.slice(i, i + CHUNK));
     if (error) throw error;
-    inserted += data?.length ?? 0;
+    for (const row of data ?? []) existing.add(String(row.tip_key));
+  }
+  const fresh = rows.filter((row) => !existing.has(row.tip_key));
+  if (fresh.length === 0) {
+    console.log(`model tips snapshot: 0 new / ${rows.length} generated`);
+    return;
+  }
+  for (let i = 0; i < fresh.length; i += CHUNK) {
+    const { error } = await supabase.from("model_tips").insert(fresh.slice(i, i + CHUNK));
+    if (error) throw error;
   }
 
-  console.log(`model tips snapshot: ${inserted} new / ${rows.length} generated`);
+  console.log(`model tips snapshot: ${fresh.length} new / ${rows.length} generated`);
 }
 
 main().catch((error) => {
