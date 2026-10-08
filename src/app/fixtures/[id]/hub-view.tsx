@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cache, Suspense } from "react";
 
 import { TeamBadge } from "@/components/assets";
+import { FollowButton } from "@/components/watchlist/FollowButton";
 
 import { FactorBadge } from "@/components/factors/FactorBadge";
 import { HeadToHeadPanel } from "@/components/match/HeadToHeadPanel";
@@ -163,6 +164,14 @@ function Hero({ hub, unlocked }: { hub: MatchHubPage; unlocked: boolean }) {
         <p className="mt-5 text-center text-xs text-[var(--muted)]">
           {[hub.venue ?? "Venue TBC", hub.referee ? `Ref: ${hub.referee}` : "Ref: TBC"].join(" · ")}
         </p>
+        <div className="mt-3 flex justify-center">
+          <FollowButton
+            kind="fixture"
+            entityId={hub.id}
+            label={`${hub.home.name} vs ${hub.away.name}`}
+            href={`/fixtures/${hub.id}`}
+          />
+        </div>
         {triggered.length > 0 ? (
           <PremiumPaywall
             unlocked={unlocked}

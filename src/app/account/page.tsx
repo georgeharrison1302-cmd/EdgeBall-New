@@ -110,6 +110,9 @@ export default async function AccountPage() {
       <section className="mt-5 rounded-3xl border border-line bg-white p-6 shadow-sm">
         <p className="text-[11px] font-extrabold tracking-wide text-muted uppercase">Workspace</p>
         <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/watchlist" className="rounded-full border border-line px-4 py-2 text-sm font-bold text-ink hover:border-cobalt">
+            Watchlist
+          </Link>
           <Link href="/portfolio" className="rounded-full border border-line px-4 py-2 text-sm font-bold text-ink hover:border-cobalt">
             Portfolio
           </Link>

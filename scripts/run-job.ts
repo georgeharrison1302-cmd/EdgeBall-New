@@ -12,7 +12,8 @@ export const JOBS: Record<string, string[]> = {
   lineups: ["sync:lineups"],
   odds: ["sync:odds-api-io"],
   results: ["sync:results", "sync:fixture-events", "sync:fixture-stats"],
-  tips: ["calc:edges", "sync:model-tips", "grade:model-tips"],
+  tips: ["calc:edges", "sync:model-tips", "grade:model-tips", "alerts:generate"],
+  alerts: ["alerts:generate"],
   reference: ["sync:fixtures", "sync:predictions", "sync:injuries"],
 };
 

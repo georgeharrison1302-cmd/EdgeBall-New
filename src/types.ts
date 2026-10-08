@@ -1470,6 +1470,72 @@ export type Database = {
           },
         ]
       }
+      user_watchlist: {
+        Row: {
+          id: number
+          user_id: string
+          kind: string
+          entity_id: number
+          label: string
+          href: string
+          created_at: string
+        }
+        Insert: {
+          id?: never
+          user_id: string
+          kind: string
+          entity_id: number
+          label: string
+          href: string
+          created_at?: string
+        }
+        Update: {
+          id?: never
+          user_id?: string
+          kind?: string
+          entity_id?: number
+          label?: string
+          href?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_alerts: {
+        Row: {
+          id: number
+          user_id: string
+          dedupe_key: string
+          kind: string
+          title: string
+          body: string | null
+          href: string | null
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          id?: never
+          user_id: string
+          dedupe_key: string
+          kind: string
+          title: string
+          body?: string | null
+          href?: string | null
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          id?: never
+          user_id?: string
+          dedupe_key?: string
+          kind?: string
+          title?: string
+          body?: string | null
+          href?: string | null
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: []
+      }
       user_bets: {
         Row: {
           combined_odds: number

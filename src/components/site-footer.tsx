@@ -29,6 +29,7 @@ const tools = [
   { href: "/record", label: "Model Record" },
   { href: "/generator", label: "Bet Builder" },
   { href: "/ladder", label: "Ladder Challenge" },
+  { href: "/watchlist", label: "Watchlist" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/pricing", label: "Pricing" },
 ];

@@ -1,3 +1,4 @@
+import { FollowButton } from "@/components/watchlist/FollowButton";
 import { teamName } from "@/lib/seo/entities";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -78,6 +79,14 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
           <p className="mt-1 text-sm text-muted">
             {page.league} · {season}
           </p>
+          <div className="mt-2">
+            <FollowButton
+              kind="team"
+              entityId={team}
+              label={page.name}
+              href={`/competitions/${page.leagueId}/teams/${team}`}
+            />
+          </div>
           <p className="mt-1 text-sm text-muted">
             {[page.code, page.founded ? `Founded ${page.founded}` : null, page.venue].filter(Boolean).join(" · ")}
           </p>

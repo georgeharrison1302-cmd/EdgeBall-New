@@ -64,6 +64,7 @@
     "sync:football-daily": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-football-daily.ts",
     "sync:football-hourly": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/sync-football-hourly.ts",
     "grade:user-bets": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/grade-user-bets.ts",
+    "alerts:generate": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/generate-alerts.ts",
     "sync:results": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/sync-results.ts",
     "job": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json scripts/run-job.ts",
     "sync:model-tips": "npx --yes tsx --env-file=.env.local --tsconfig scripts/tsconfig.json src/scripts/snapshot-model-tips.ts",
