@@ -18,11 +18,17 @@ import { loadMatchStats } from "@/lib/stats/match-stats-load";
 import { getSubscriptionAccess } from "@/utils/subscription";
 
 import { HubCardBoard } from "./hub-card-board";
+import {
+  loadFixtureAvailability,
+  loadFixtureLineups,
+  type FixtureAvailability,
+  type TeamLineup,
+} from "./hub-availability";
 import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
 export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
-  const [access, stats] = await Promise.all([
+  const [access, stats, availability, lineups] = await Promise.all([
     getSubscriptionAccess(),
     loadMatchStats({ leagueId: hub.leagueId, season: hub.season, home: hub.home, away: hub.away }).catch(
       (cause: unknown) => {
@@ -30,6 +36,14 @@ export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
         return null;
       },
     ),
+    loadFixtureAvailability(hub.home.id, hub.away.id, hub.kickoffAt).catch((cause: unknown) => {
+      console.error(`[availability] fixture ${hub.id}:`, cause);
+      return null;
+    }),
+    loadFixtureLineups(hub.id).catch((cause: unknown) => {
+      console.error(`[lineups] fixture ${hub.id}:`, cause);
+      return [] as TeamLineup[];
+    }),
   ]);
   const statsMissing = (
     <EmptyReason
@@ -65,6 +79,7 @@ export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
               <>
                 {stats ? <MatchGlance home={stats.home} away={stats.away} competition={hub.competition} /> : statsMissing}
                 <ContextStrip hub={hub} />
+                <AvailabilityPanel hub={hub} availability={availability} />
                 <DisciplineGauge hub={hub} />
               </>
             ),
@@ -80,6 +95,11 @@ export default async function MatchHubView({ hub }: { hub: MatchHubPage }) {
             ) : (
               statsMissing
             ),
+          },
+          {
+            id: "lineups",
+            label: "Lineups",
+            content: <LineupsPanel hub={hub} lineups={lineups} />,
           },
           {
             id: "h2h",
@@ -170,6 +190,124 @@ function Hero({ hub, unlocked }: { hub: MatchHubPage; unlocked: boolean }) {
           fixtureId={hub.id}
         />
       </div>
+    </section>
+  );
+}
+
+function LineupsPanel({ hub, lineups }: { hub: MatchHubPage; lineups: TeamLineup[] }) {
+  const sides = [
+    { name: hub.home.name, lineup: lineups.find((row) => row.teamId === hub.home.id) },
+    { name: hub.away.name, lineup: lineups.find((row) => row.teamId === hub.away.id) },
+  ];
+  if (sides.every((side) => !side.lineup || side.lineup.startXi.length === 0)) {
+    return (
+      <EmptyReason
+        variant="panel"
+        title="Lineups not confirmed yet"
+        detail="Starting XIs are published about 90 minutes before kickoff"
+        source="fixture_lineups"
+      />
+    );
+  }
+  return (
+    <section className="grid gap-4 sm:grid-cols-2">
+      {sides.map((side) => (
+        <div key={side.name} className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+          <p className="text-sm font-semibold text-[#0f172a]">
+            {side.name}
+            {side.lineup?.formation ? (
+              <span className="ml-2 text-xs font-bold text-[var(--cobalt)]">{side.lineup.formation}</span>
+            ) : null}
+          </p>
+          {!side.lineup || side.lineup.startXi.length === 0 ? (
+            <p className="mt-2 text-xs text-[var(--muted)]">No lineup stored for this side.</p>
+          ) : (
+            <>
+              <ul className="mt-3 space-y-1.5">
+                {side.lineup.startXi.map((player) => (
+                  <li key={`${player.id}-${player.name}`} className="flex items-center gap-2 text-sm">
+                    <span className="w-6 text-right text-xs font-bold text-[var(--muted)] tabular-nums">
+                      {player.number ?? ""}
+                    </span>
+                    <span className="font-semibold text-slate-900">{player.name}</span>
+                    {player.pos ? (
+                      <span className="text-[11px] font-medium text-[var(--muted)]">{player.pos}</span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {side.lineup.substitutes.length > 0 ? (
+                <p className="mt-3 border-t border-[var(--line)] pt-3 text-xs text-[var(--muted)]">
+                  <span className="font-bold uppercase tracking-wide">Bench: </span>
+                  {side.lineup.substitutes.map((player) => player.name).join(", ")}
+                </p>
+              ) : null}
+            </>
+          )}
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function AvailabilityPanel({
+  hub,
+  availability,
+}: {
+  hub: MatchHubPage;
+  availability: FixtureAvailability | null;
+}) {
+  const total = availability ? availability.home.length + availability.away.length : 0;
+  return (
+    <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-extrabold tracking-wide text-[var(--muted)] uppercase">
+        Team news · absences
+      </p>
+      {!availability || total === 0 ? (
+        <EmptyReason
+          className="mt-3"
+          detail="No current injury or suspension spells stored for either squad"
+          source="player_sidelined"
+        />
+      ) : (
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {[
+            { name: hub.home.name, rows: availability.home },
+            { name: hub.away.name, rows: availability.away },
+          ].map((side) => (
+            <div key={side.name}>
+              <p className="text-sm font-semibold text-[#0f172a]">{side.name}</p>
+              {side.rows.length === 0 ? (
+                <p className="mt-2 text-xs text-[var(--muted)]">No stored absences.</p>
+              ) : (
+                <ul className="mt-2 space-y-2">
+                  {side.rows.map((row) => (
+                    <li key={`${row.playerId}-${row.type}`} className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-50 text-[10px] font-bold text-red-600">
+                        ×
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">
+                          {row.player}
+                          {row.position ? (
+                            <span className="ml-1.5 text-[11px] font-medium text-[var(--muted)]">
+                              {row.position}
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="text-xs text-[var(--muted)]">
+                          {row.type} · since {row.since ?? "unknown"} ·{" "}
+                          {row.until ? `until ${row.until}` : "return date unknown"}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
