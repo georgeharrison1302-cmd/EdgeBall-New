@@ -17,6 +17,7 @@ export function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const container = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
   const trimmed = query.trim();
 
   useEffect(() => {
@@ -43,6 +44,20 @@ export function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
   }, [trimmed]);
 
   useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const typing = /^(input|textarea|select)$/i.test((event.target as HTMLElement | null)?.tagName ?? "");
+      if (((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") || (event.key === "/" && !typing)) {
+        event.preventDefault();
+        input.current?.focus();
+        input.current?.select();
+        setOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     const close = (event: MouseEvent) => {
       if (container.current && !container.current.contains(event.target as Node)) setOpen(false);
@@ -56,6 +71,7 @@ export function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div ref={container} className="relative w-full md:w-44 lg:w-72">
       <input
+        ref={input}
         type="search"
         value={query}
         onChange={(event) => {
@@ -66,7 +82,7 @@ export function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
-        placeholder="Search teams, players, leagues"
+        placeholder="Search teams, players, leagues  ( / )"
         aria-label="Search teams, players and competitions"
         className="h-9 w-full rounded-full border border-line bg-canvas px-4 text-sm text-ink placeholder:text-faint focus:border-cobalt focus:bg-white focus:outline-none"
       />
