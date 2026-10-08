@@ -152,7 +152,7 @@ async function assembleBoard(date: string, fixtures: FixtureRow[]): Promise<Buil
     );
   }
 
-  const [{ data: oddsRows, error: oddsError }, { data: models, error: modelError }, { data: standingRows, error: standingError }] = await Promise.all([
+  const [{ data: oddsRows, error: oddsError }, { data: models, error: modelError }, { data: customModels, error: customError }, { data: standingRows, error: standingError }] = await Promise.all([
     supabase
       .from("prematch_odds")
       .select("fixture_id, bookmaker_id, odds_data, updated_at, model_prob, edge_pct")
@@ -160,16 +160,33 @@ async function assembleBoard(date: string, fixtures: FixtureRow[]): Promise<Buil
       .in("bookmaker_id", [BET365_BOOKMAKER_ID, PADDY_POWER_BOOKMAKER_ID])
       .order("updated_at", { ascending: false }),
     supabase.from("predictions").select("fixture_id, percent, under_over").in("fixture_id", fixtureIds),
+    supabase
+      .from("custom_predictions")
+      .select("fixture_id, percent_home, percent_draw, percent_away")
+      .in("fixture_id", fixtureIds),
     supabase.from("standings").select("team_id, league_id, season, all_stats, home_stats, away_stats").in("team_id", teamIds),
   ]);
   if (oddsError) throw oddsError;
   if (modelError) throw modelError;
+  if (customError) throw customError;
   if (standingError) throw standingError;
 
   const oddsList = latestOddsSnapshots((oddsRows ?? []) as OddsRow[]);
   const oddsPayload = buildOddsPayload(oddsList);
   const oddsByFixture = pickBookmaker(oddsList);
+  // API-Football percents first; the in-house xG model overrides when present.
   const modelByFixture = new Map((models ?? []).map((row) => [Number(row.fixture_id), row]));
+  for (const row of customModels ?? []) {
+    modelByFixture.set(Number(row.fixture_id), {
+      fixture_id: row.fixture_id,
+      percent: {
+        home: `${row.percent_home}%`,
+        draw: `${row.percent_draw}%`,
+        away: `${row.percent_away}%`,
+      },
+      under_over: null,
+    });
+  }
   const standings = (standingRows ?? []) as StandingRow[];
 
   const matchProps: MatchProp[] = [];

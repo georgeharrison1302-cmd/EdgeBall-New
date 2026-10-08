@@ -10,6 +10,14 @@ export const MODEL_WEIGHT = 0.05;
 export const EDGE_CAP_PCT = 40;
 /** Tips generated before this instant used raw (unshrunk) model probabilities. */
 export const MODEL_V2_CUTOFF = "2026-10-08T21:00:00Z";
+/**
+ * Tips generated after this instant use the in-house xG model
+ * (custom_predictions: attack/defence ratings, form, H2H) as the raw
+ * probability source instead of API-Football's prediction percents.
+ * Backtest on 47 finished fixtures, Oct 2026: ours Brier 0.612 vs
+ * API-Football 0.638 vs de-vigged market 0.520.
+ */
+export const MODEL_V3_CUTOFF = "2026-10-09T00:00:00Z";
 
 export type Confidence = "high" | "medium" | "low";
 

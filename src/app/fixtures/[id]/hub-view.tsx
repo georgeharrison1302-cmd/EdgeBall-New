@@ -28,7 +28,14 @@ import {
   type FixtureAvailability,
   type TeamLineup,
 } from "./hub-availability";
-import { loadFixtureEvents, loadFixtureXg, type FixtureEvent, type FixtureXg } from "./hub-events";
+import {
+  loadFixtureEvents,
+  loadFixtureProjection,
+  loadFixtureXg,
+  type FixtureEvent,
+  type FixtureProjection,
+  type FixtureXg,
+} from "./hub-events";
 import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
@@ -69,6 +76,9 @@ export default async function MatchHubView({
               <>
                 <Suspense fallback={<PanelSkeleton />}>
                   <StatsPanel hub={hub} view="glance" />
+                </Suspense>
+                <Suspense fallback={<PanelSkeleton />}>
+                  <ProjectionLoader hub={hub} />
                 </Suspense>
                 <ContextStrip hub={hub} />
                 <Suspense fallback={<PanelSkeleton />}>
@@ -502,6 +512,58 @@ function TimelinePanel({
         <span>{hub.home.name}</span>
         <span>{hub.away.name}</span>
       </div>
+    </section>
+  );
+}
+
+async function ProjectionLoader({ hub }: { hub: MatchHubPage }) {
+  const projection = await loadFixtureProjection(hub.id).catch(() => null);
+  if (!projection) return null;
+  return <ProjectionPanel hub={hub} projection={projection} />;
+}
+
+function ProjectionPanel({ hub, projection }: { hub: MatchHubPage; projection: FixtureProjection }) {
+  const rows = [
+    { label: hub.home.name, value: projection.home, tone: "bg-cobalt" },
+    { label: "Draw", value: projection.draw, tone: "bg-slate-300" },
+    { label: hub.away.name, value: projection.away, tone: "bg-cobalt/60" },
+  ];
+  return (
+    <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-extrabold tracking-wide text-ink uppercase">
+          EdgeBall model projection
+        </p>
+        {projection.xgHome != null && projection.xgAway != null ? (
+          <p className="text-xs font-bold tabular-nums text-cobalt">
+            projected xG {projection.xgHome.toFixed(2)} – {projection.xgAway.toFixed(2)}
+          </p>
+        ) : null}
+      </div>
+      <div className="mt-3 space-y-2">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center gap-3">
+            <span className="w-28 truncate text-xs font-semibold text-slate-700">{row.label}</span>
+            <div className="h-2.5 flex-1 rounded-full bg-canvas">
+              <div
+                className={`h-2.5 rounded-full ${row.tone}`}
+                style={{ width: `${Math.max(2, Math.min(100, row.value))}%` }}
+              />
+            </div>
+            <span className="w-10 text-right text-xs font-black tabular-nums text-ink">
+              {row.value.toFixed(0)}%
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] text-[var(--muted)]">
+        Our in-house model (attack/defence ratings, form, H2H). Compare with bookmaker prices
+        above —{" "}
+        <Link href="/record" className="font-semibold text-cobalt">
+          see the public record
+        </Link>
+        .
+      </p>
     </section>
   );
 }

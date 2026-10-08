@@ -14,7 +14,7 @@ export const JOBS: Record<string, string[]> = {
   results: ["sync:results", "sync:fixture-events", "sync:fixture-stats"],
   tips: ["calc:edges", "sync:model-tips", "grade:model-tips", "alerts:generate"],
   alerts: ["alerts:generate"],
-  reference: ["sync:fixtures", "sync:predictions", "sync:injuries"],
+  reference: ["sync:fixtures", "sync:predictions", "generate:predictions", "sync:injuries"],
 };
 
 async function heartbeat(job: string, status: string) {

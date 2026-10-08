@@ -16,7 +16,7 @@ import {
   type CurvePoint,
   type SettledTip,
 } from "@/lib/record/metrics";
-import { MODEL_V2_CUTOFF } from "@/lib/model/probability";
+import { MODEL_V2_CUTOFF, MODEL_V3_CUTOFF } from "@/lib/model/probability";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export type ModelRecord = {
@@ -110,10 +110,16 @@ export async function loadModelRecord(): Promise<ModelRecord> {
     profit: row.profit == null ? null : Number(row.profit),
   }));
 
-  const versionOf = (row: Row) => (Date.parse(row.generated_at) < Date.parse(MODEL_V2_CUTOFF) ? "v1" : "v2");
+  const versionOf = (row: Row) => {
+    const at = Date.parse(row.generated_at);
+    if (at < Date.parse(MODEL_V2_CUTOFF)) return "v1";
+    if (at < Date.parse(MODEL_V3_CUTOFF)) return "v2";
+    return "v3";
+  };
   const versions: ModelVersionRecord[] = [
     { label: "v1", note: "Raw third-party win probabilities compared directly to Bet365 prices" },
     { label: "v2", note: "Probabilities shrunk toward the de-vigged market, implausible edges rejected" },
+    { label: "v3", note: "In-house xG model (attack/defence, form, H2H) shrunk toward the market" },
   ].map((meta) => {
     const mine = rows.filter((row) => versionOf(row) === meta.label);
     const done = mine.filter((row) => row.status === "won" || row.status === "lost");

@@ -15,6 +15,35 @@ export type FixtureEvent = {
   assistName: string | null;
 };
 
+export type FixtureProjection = {
+  home: number;
+  draw: number;
+  away: number;
+  xgHome: number | null;
+  xgAway: number | null;
+  advice: string | null;
+};
+
+/** In-house model projection (custom_predictions) for this fixture. */
+export async function loadFixtureProjection(fixtureId: number): Promise<FixtureProjection | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("custom_predictions")
+    .select("percent_home, percent_draw, percent_away, xg_home, xg_away, advice")
+    .eq("fixture_id", fixtureId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return {
+    home: Number(data.percent_home),
+    draw: Number(data.percent_draw),
+    away: Number(data.percent_away),
+    xgHome: data.xg_home == null ? null : Number(data.xg_home),
+    xgAway: data.xg_away == null ? null : Number(data.xg_away),
+    advice: data.advice ?? null,
+  };
+}
+
 export type FixtureXg = { teamId: number; xg: number };
 
 /** Per-team expected goals from fixture_statistics for this fixture. */

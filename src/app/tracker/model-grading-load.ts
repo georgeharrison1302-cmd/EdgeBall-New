@@ -121,12 +121,16 @@ export async function collectLiveTips(
 
   for (let i = 0; i < fixtureIds.length; i += 200) {
     const chunk = fixtureIds.slice(i, i + 200);
-    const [{ data: fix }, { data: pred }, { data: events }] = await Promise.all([
+    const [{ data: fix }, { data: pred }, { data: custom }, { data: events }] = await Promise.all([
       supabase
         .from("fixtures")
         .select("id, date, status_short, home_goals, away_goals, home_team_id, away_team_id")
         .in("id", chunk),
       supabase.from("predictions").select("fixture_id, percent").in("fixture_id", chunk),
+      supabase
+        .from("custom_predictions")
+        .select("fixture_id, percent_home, percent_draw, percent_away")
+        .in("fixture_id", chunk),
       supabase
         .from("fixture_events")
         .select("fixture_id, player_id, player_name, type, detail")
@@ -135,6 +139,8 @@ export async function collectLiveTips(
     for (const row of fix ?? []) {
       fixtures.set(Number(row.id), row as FixtureRow);
     }
+    // API-Football percents first; the in-house xG model overrides when present
+    // (it beat API-Football on the settled backtest).
     for (const row of pred ?? []) {
       const perc = predictionPercents(row.percent);
       predictions.set(Number(row.fixture_id), {
@@ -142,6 +148,13 @@ export async function collectLiveTips(
         draw: percentToUnit(perc.draw),
         away: percentToUnit(perc.away),
       });
+    }
+    for (const row of custom ?? []) {
+      const home = Number(row.percent_home) / 100;
+      const draw = Number(row.percent_draw) / 100;
+      const away = Number(row.percent_away) / 100;
+      if ([home, draw, away].some((p) => !Number.isFinite(p) || p <= 0)) continue;
+      predictions.set(Number(row.fixture_id), { home, draw, away });
     }
     for (const row of events ?? []) {
       const fixtureId = Number(row.fixture_id);
