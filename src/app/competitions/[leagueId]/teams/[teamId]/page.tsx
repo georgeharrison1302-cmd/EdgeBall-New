@@ -1,3 +1,4 @@
+import { teamName } from "@/lib/seo/entities";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,11 +15,18 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { leagueId } = await params;
+  const { leagueId, teamId } = await params;
   const league = Number(leagueId);
-  if (!Number.isInteger(league)) return { title: "Team · EdgeBall" };
-  const name = await leagueTitle(league);
-  return { title: name ? `Club · ${name} · EdgeBall` : "Team · EdgeBall" };
+  const team = Number(teamId);
+  if (!Number.isInteger(league) || !Number.isInteger(team)) return { title: "Team · EdgeBall" };
+  const [clubName, competition] = await Promise.all([teamName(team), leagueTitle(league)]);
+  if (!clubName) return { title: "Team · EdgeBall" };
+  const title = `${clubName} — stats, form & fixtures${competition ? ` · ${competition}` : ""}`;
+  return {
+    title,
+    description: `${clubName} season stats, recent form, home and away splits, fixtures, squad, injuries and head-to-head context${competition ? ` in the ${competition}` : ""}.`,
+    alternates: { canonical: `/competitions/${league}/teams/${team}` },
+  };
 }
 
 export default async function TeamPage({ params, searchParams }: PageProps) {

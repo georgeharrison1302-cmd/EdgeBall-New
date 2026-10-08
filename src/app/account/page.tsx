@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Account · EdgeBall",
   description: "Manage your EdgeBall account and billing.",
+  robots: { index: false, follow: false },
 };
 
 export default async function AccountPage() {

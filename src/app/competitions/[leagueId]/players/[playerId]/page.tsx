@@ -1,3 +1,4 @@
+import { playerName } from "@/lib/seo/entities";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,11 +31,18 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { leagueId } = await params;
+  const { leagueId, playerId } = await params;
   const league = Number(leagueId);
-  if (!Number.isInteger(league)) return { title: "Player · EdgeBall" };
-  const name = await leagueTitle(league);
-  return { title: name ? `Player · ${name} · EdgeBall` : "Player · EdgeBall" };
+  const player = Number(playerId);
+  if (!Number.isInteger(league) || !Number.isInteger(player)) return { title: "Player · EdgeBall" };
+  const [name, competition] = await Promise.all([playerName(player), leagueTitle(league)]);
+  if (!name) return { title: "Player · EdgeBall" };
+  const title = `${name} — stats, prop hit rates & match log${competition ? ` · ${competition}` : ""}`;
+  return {
+    title,
+    description: `${name} per-90 stats, shots, cards and fouls hit rates, recent match log, injury history and transfers.`,
+    alternates: { canonical: `/competitions/${league}/players/${player}` },
+  };
 }
 
 export default async function PlayerPage({ params, searchParams }: PageProps) {

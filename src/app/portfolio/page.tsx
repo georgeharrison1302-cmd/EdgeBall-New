@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Portfolio · EdgeBall",
   description: "Personal bankroll and EdgeBall verified model accuracy.",
+  robots: { index: false, follow: false },
 };
 
 export default async function PortfolioPage({

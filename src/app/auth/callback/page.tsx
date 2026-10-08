@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { CallbackHandler } from "./callback-handler";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { title: "Signing you in · EdgeBall", robots: { index: false, follow: false } };
 
 export default function AuthCallbackPage() {
   return (

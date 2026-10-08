@@ -5,6 +5,7 @@ import { AuthPanel } from "@/components/auth/AuthPanel";
 export const metadata = {
   title: "Sign in · EdgeBall",
   description: "Sign in to EdgeBall with email, magic link, or Google.",
+  robots: { index: false, follow: false },
 };
 
 export default async function LoginPage({
