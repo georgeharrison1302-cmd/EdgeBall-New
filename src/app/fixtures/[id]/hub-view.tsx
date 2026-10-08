@@ -28,6 +28,7 @@ import {
   type FixtureAvailability,
   type TeamLineup,
 } from "./hub-availability";
+import { loadFixtureEvents, type FixtureEvent } from "./hub-events";
 import type { MatchHubPage } from "./hub-load";
 import { MatchOddsPills } from "./match-odds-pills";
 
@@ -95,6 +96,19 @@ export default async function MatchHubView({
               </Suspense>
             ),
           },
+          ...(matchStarted(hub.status)
+            ? [
+                {
+                  id: "timeline",
+                  label: "Timeline",
+                  content: (
+                    <Suspense fallback={<PanelSkeleton />}>
+                      <TimelineLoader hub={hub} />
+                    </Suspense>
+                  ),
+                },
+              ]
+            : []),
           {
             id: "h2h",
             label: "H2H",
@@ -420,6 +434,121 @@ function TeamBlock({
       <p className="min-w-0 truncate text-sm font-bold text-ink sm:text-base">{team.name}</p>
     </Link>
   );
+}
+
+const NOT_STARTED = new Set(["NS", "TBD", "PST", "CANC", "ABD", "AWD", "WO"]);
+
+function matchStarted(status: string | null) {
+  return status != null && !NOT_STARTED.has(status);
+}
+
+async function TimelineLoader({ hub }: { hub: MatchHubPage }) {
+  const events = await loadFixtureEvents(hub.id).catch((cause: unknown) => {
+    console.error(`[timeline] fixture ${hub.id}:`, cause);
+    return [] as FixtureEvent[];
+  });
+  return <TimelinePanel hub={hub} events={events} />;
+}
+
+function TimelinePanel({ hub, events }: { hub: MatchHubPage; events: FixtureEvent[] }) {
+  if (events.length === 0) {
+    return (
+      <EmptyReason
+        variant="panel"
+        title="No match events stored yet"
+        detail="Goals, cards and substitutions appear here once the results sync has covered this fixture"
+        source="fixture_events"
+      />
+    );
+  }
+  return (
+    <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <ol className="space-y-3">
+        {events.map((event) => {
+          const home = event.teamId === hub.home.id;
+          return (
+            <li key={event.id} className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+              {home ? <TimelineEntry event={event} align="right" /> : <span />}
+              <span className="mt-0.5 rounded-full bg-canvas px-2.5 py-1 text-[11px] font-black tabular-nums text-ink">
+                {event.minute}
+              </span>
+              {!home ? <TimelineEntry event={event} align="left" /> : <span />}
+            </li>
+          );
+        })}
+      </ol>
+      <div className="mt-4 flex justify-between border-t border-[var(--line)] pt-3 text-xs font-semibold text-[var(--muted)]">
+        <span>{hub.home.name}</span>
+        <span>{hub.away.name}</span>
+      </div>
+    </section>
+  );
+}
+
+function TimelineEntry({ event, align }: { event: FixtureEvent; align: "left" | "right" }) {
+  const label = eventLabel(event);
+  const sub = eventSubtitle(event);
+  return (
+    <div className={align === "right" ? "text-right" : "text-left"}>
+      <p
+        className={`flex items-center gap-2 text-sm font-semibold text-slate-900 ${
+          align === "right" ? "flex-row-reverse" : ""
+        }`}
+      >
+        <EventMarker event={event} />
+        <span className="min-w-0 truncate">{event.playerName ?? label}</span>
+      </p>
+      <p className={`mt-0.5 text-xs text-[var(--muted)] ${align === "right" ? "pr-4.5" : "pl-4.5"}`}>
+        {event.playerName ? label : ""}
+        {sub ? (event.playerName ? ` · ${sub}` : sub) : ""}
+      </p>
+    </div>
+  );
+}
+
+function eventLabel(event: FixtureEvent) {
+  if (event.type === "Goal") return event.detail || "Goal";
+  if (event.type === "Card") return event.detail || "Card";
+  if (event.type.toLowerCase() === "subst") return "Substitution";
+  if (event.type.toLowerCase() === "var") return event.detail || "VAR check";
+  return event.detail || event.type;
+}
+
+function eventSubtitle(event: FixtureEvent) {
+  if (event.type.toLowerCase() === "subst" && event.assistName) {
+    return `on for ${event.assistName}`;
+  }
+  if (event.type === "Goal" && event.assistName && event.detail !== "Missed Penalty") {
+    return `assist ${event.assistName}`;
+  }
+  return null;
+}
+
+function EventMarker({ event }: { event: FixtureEvent }) {
+  const type = event.type.toLowerCase();
+  const detail = event.detail.toLowerCase();
+  if (type === "goal") {
+    const missed = detail.includes("missed");
+    return (
+      <span
+        className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
+          missed ? "border-2 border-red-400 bg-white" : "bg-cobalt"
+        }`}
+      />
+    );
+  }
+  if (type === "card") {
+    const red = detail.includes("red") || detail.includes("second yellow");
+    return (
+      <span
+        className={`inline-block h-3 w-2 shrink-0 rounded-[2px] ${red ? "bg-red-500" : "bg-amber-400"}`}
+      />
+    );
+  }
+  if (type === "subst") {
+    return <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-slate-300 bg-white" />;
+  }
+  return <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm bg-slate-300" />;
 }
 
 const LIVE_CODES = new Set(["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"]);

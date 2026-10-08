@@ -28,6 +28,7 @@ type DeskProps = {
   arbitrageError: string | null;
   unlocked: boolean;
   freshness?: ReactNode;
+  modelWatch?: ReactNode;
 };
 
 /** Fixture-first home desk — fixtures board + SureBets tab. */
@@ -50,6 +51,8 @@ export function MatchHubHomeDesk(props: DeskProps) {
         </p>
         {props.freshness ? <div className="mt-3">{props.freshness}</div> : null}
       </header>
+
+      {surebets ? null : props.modelWatch}
 
       <MatchGrid {...props} />
     </main>

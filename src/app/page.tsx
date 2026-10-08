@@ -6,6 +6,7 @@ import { fixtureDateOptions, hasFixtureOdds } from "@/app/fixtures/board-utils";
 import { loadFixtureDay } from "@/app/fixtures/load";
 import type { FixtureMatch } from "@/app/fixtures/types";
 import { DataFreshness } from "@/components/ui/DataFreshness";
+import { ModelWatch } from "@/components/home/ModelWatch";
 import { MatchHubHomeDesk } from "@/app/match-hub/home-desk";
 import { fetchArbitrageBets, type ArbitrageOpportunity } from "@/lib/odds/arbitrage";
 import { isTargetLeagueId } from "@/utils/api-football/competitions";
@@ -46,7 +47,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     loadFixtureDay(date, leagueId),
     featuredCompetitions(),
     getSubscriptionAccess(),
-    loadArbitrage(),
+    view === "surebets"
+      ? loadArbitrage()
+      : Promise.resolve({ opportunities: [] as ArbitrageOpportunity[], error: null }),
   ]);
 
   const counts = countBuckets(day.matches);
@@ -74,6 +77,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
       arbitrageError={arbResult.error}
       unlocked={access.unlocked}
       freshness={<DataFreshness jobs={["odds", "results", "lineups"]} />}
+      modelWatch={<ModelWatch />}
     />
   );
 }

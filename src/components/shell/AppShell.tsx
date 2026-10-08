@@ -25,6 +25,7 @@ function sectionFromPath(pathname: string | null): HeaderSection {
     return "builder";
   }
   if (pathname.startsWith("/ladder")) return "ladder";
+  if (pathname.startsWith("/record")) return "record";
   if (pathname.startsWith("/competitions")) return "competitions";
   if (pathname.startsWith("/portfolio") || pathname.startsWith("/tracker")) return "portfolio";
   if (pathname.startsWith("/pricing")) return "pricing";

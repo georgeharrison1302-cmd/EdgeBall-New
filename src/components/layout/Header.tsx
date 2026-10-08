@@ -26,6 +26,7 @@ export type HeaderSection =
   | "portfolio"
   | "builder"
   | "ladder"
+  | "record"
   | "pricing"
   | null;
 
@@ -162,8 +163,12 @@ function NavItems({
       >
         Bet Builder
       </Link>
-      <Link href="/ladder" onClick={onNavigate} className={itemClass(current === "ladder")}>
-        Ladder
+      <Link
+        href="/record"
+        onClick={onNavigate}
+        className={itemClass(current === "record")}
+      >
+        Record
       </Link>
       <CompetitionsMenu current={current} onNavigate={onNavigate} />
       <Link
